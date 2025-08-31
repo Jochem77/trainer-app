@@ -16,14 +16,23 @@ function LoginGate({ children }: { children: React.ReactNode }) {
 
   if (session) return <>{children}</>
 
-  async function magicLogin(e: React.FormEvent) {
-    e.preventDefault()
-    await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin }
-    })
+async function magicLogin(e: React.FormEvent) {
+  e.preventDefault()
+  const redirectTo = import.meta.env.PROD
+    ? 'https://jochem77.github.io/trainer-app/'
+    : 'http://localhost:5173/'
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: redirectTo }
+  })
+  if (error) {
+    alert('Login mislukt: ' + error.message)
+  } else {
     alert('Check je e-mail voor de login-link.')
   }
+}
+
 
   return (
     <div style={{ maxWidth: 420, margin: '4rem auto', fontFamily: 'system-ui' }}>
