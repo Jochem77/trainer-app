@@ -1,37 +1,27 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App'
-import { ErrorBoundary } from './ErrorBoundary'
 import './index.css'
 
-// basename moet overeenkomen met Vite base
-const router = createBrowserRouter(
-  [
-    {
-      path: '/',
-      element: <App />,
-      errorElement: <ErrorBoundary message="Er ging iets mis met laden van de pagina." />
-    },
-    {
-      path: '*',
-      element: <NotFound />
-    }
-  ],
-  { basename: '/trainer-app/' }   // <— repo-naam
-)
-
 function NotFound() {
+  // Als iemand op een subroute landt, toon gewoon de app of link naar home
   return (
-    <div style={{ padding: 24, fontFamily: 'system-ui' }}>
+    <div style={{padding:24,fontFamily:'system-ui'}}>
       <h3>Pagina niet gevonden</h3>
-      <p>Ga terug naar de <a href="/trainer-app/">homepagina</a>.</p>
+      <p>Ga terug naar de <a href="/trainer-app/">home</a>.</p>
     </div>
   )
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <BrowserRouter basename="/trainer-app/">
+      <Routes>
+        <Route path="/" element={<App />} />
+        {/* Fallback: elk onbekend pad -> App (of <NotFound /> als je wilt) */}
+        <Route path="*" element={<App />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 )
