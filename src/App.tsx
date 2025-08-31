@@ -154,17 +154,17 @@ const TrainingProgramDay: React.FC = () => {
 	const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 	const stepsContainerRef = React.useRef<HTMLDivElement>(null);
 
-	// Bepaal huidige stap
-	let currentIdx = 0;
-	for (let i = 0; i < (program ? flattenSteps(program.steps).length : 0); i++) {
-		if (timer / 60 >= flattenSteps(program.steps)[i].start_min) currentIdx = i;
-		else break;
-	}
-	const flatSteps = program ? flattenSteps(program.steps) : [];
-	const currentStep = flatSteps[currentIdx];
-	const stepStartSec = Math.round(currentStep?.start_min * 60 || 0);
-	const stepEndSec = currentStep?.duration_min > 0 ? stepStartSec + Math.round(currentStep.duration_min * 60) : stepStartSec;
-	const stepTimeLeft = Math.max(0, stepEndSec - timer);
+		// Bepaal huidige stap
+		const flatSteps = program ? flattenSteps(program.steps) : [];
+		let currentIdx = 0;
+		for (let i = 0; i < flatSteps.length; i++) {
+			if (timer / 60 >= flatSteps[i].start_min) currentIdx = i;
+			else break;
+		}
+		const currentStep = flatSteps[currentIdx] ?? { start_min: 0, duration_min: 0, speed_kmh: null, label: '', type: '' };
+		const stepStartSec = Math.round(currentStep.start_min * 60);
+		const stepEndSec = currentStep.duration_min > 0 ? stepStartSec + Math.round(currentStep.duration_min * 60) : stepStartSec;
+		const stepTimeLeft = Math.max(0, stepEndSec - timer);
 
 		// Piepjes in laatste 3 seconden
 		useEffect(() => {
