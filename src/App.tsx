@@ -146,7 +146,17 @@ function flattenSteps(steps: Step[]) {
 
 const TrainingProgramDay: React.FC = () => {
 	const todayStr = new Date().toISOString().slice(0, 10);
-	const [date, setDate] = useState(todayStr);
+	// Zoek eerst programma van vandaag, anders eerstvolgende na vandaag
+	const getInitialDate = () => {
+		const exact = allPrograms.find((p) => p.date === todayStr);
+		if (exact) return exact.date;
+		const future = allPrograms.find((p) => p.date > todayStr);
+		if (future) return future.date;
+		// fallback: laatste programma vóór vandaag
+		if (allPrograms.length > 0) return allPrograms[allPrograms.length - 1].date;
+		return todayStr;
+	};
+	const [date, setDate] = useState(getInitialDate());
 	const program = allPrograms.find((p) => p.date === date);
 	const { prev, next } = getAdjacentDates(date);
 	const [timer, setTimer] = useState(0); // seconden
@@ -256,7 +266,7 @@ const TrainingProgramDay: React.FC = () => {
 	return (
 		<div style={{ maxWidth: 700, margin: "40px auto", padding: 32, borderRadius: 16, background: "linear-gradient(135deg,#e0eafc,#cfdef3)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative' }}>
 			{/* Timer, resterende tijd en knoppen sticky bovenaan */}
-			<div style={{
+			<div className="timerbar-btns" style={{
 				position: 'sticky',
 				top: 0,
 				zIndex: 10,
@@ -267,7 +277,21 @@ const TrainingProgramDay: React.FC = () => {
 				alignItems: 'center',
 				gap: 24,
 				borderBottom: '1px solid #e0e0e0',
+				flexWrap: 'wrap',
 			}}>
+				<style>{`
+					@media (max-width: 500px) {
+						.timerbar-btns {
+							flex-direction: column !important;
+							align-items: stretch !important;
+							gap: 12px !important;
+						}
+						.timerbar-btns button {
+							width: 100% !important;
+							font-size: 20px !important;
+						}
+					}
+				`}</style>
 				<div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: 2, minWidth: 120 }}>
 					{String(timerMin).padStart(2, '0')}:{String(timerSec).padStart(2, '0')}
 				</div>
