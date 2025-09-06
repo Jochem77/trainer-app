@@ -380,6 +380,7 @@ const TrainingProgramDay: React.FC = () => {
 					}
 			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: calc(4px + env(safe-area-inset-top, 0px)) 0 6px; box-shadow: 0 2px 8px #0001; }
 			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:6px auto 4px; max-width:560px; --statSize: 48px; }
+			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:8px 10px; margin:6px auto; max-width:560px; }
 			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
 			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
 			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
@@ -480,6 +481,13 @@ const TrainingProgramDay: React.FC = () => {
 																	Reset
 																</button>
 															</div>
+
+																{/* Program graph: speed (y) over time (x) with live cursor */}
+																{flatSteps.length > 1 && (
+																	<div className="graph-card">
+																		<ProgramGraph steps={flatSteps} currentSec={timer} />
+																	</div>
+																)}
 						</div>
 
 				{/* Navigatie verplaatst naar topbar */}
@@ -514,6 +522,80 @@ const TrainingProgramDay: React.FC = () => {
 
 						{/* Bottom sticky actions removed; buttons placed under status card */}
 		</div>
+	);
+};
+
+// Small SVG graph showing speed vs time as a step function with a moving cursor
+type FlattenedStep = ReturnType<typeof flattenSteps>[number];
+
+const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = ({ steps, currentSec }) => {
+	// Determine total seconds and max speed
+	const totalSec = Math.max(
+		0,
+		...steps.map(s => (s.duration_sec && s.duration_sec > 0 ? (s.start_sec + s.duration_sec) : s.start_sec))
+	);
+	const speeds = steps.map(s => s.speed_kmh ?? 0);
+	const maxSpeedRaw = Math.max(0, ...speeds);
+	const maxSpeed = maxSpeedRaw > 0 ? Math.ceil(maxSpeedRaw + 0.5) : 10; // nice headroom
+	if (totalSec <= 0) return null;
+
+	// Build step-function points: for each step with speed and duration, add (start, speed) and (end, speed)
+	const segments: Array<{ t: number; v: number }> = [];
+	for (const s of steps) {
+		if (s.speed_kmh == null || !s.duration_sec || s.duration_sec <= 0) continue;
+		const start = s.start_sec;
+		const end = s.start_sec + s.duration_sec;
+		segments.push({ t: start, v: s.speed_kmh });
+		segments.push({ t: end, v: s.speed_kmh });
+	}
+	if (segments.length === 0) return null;
+
+	// SVG coordinate system
+	const vbW = 1000;
+	const vbH = 180;
+	const padL = 60;
+	const padR = 16;
+	const padT = 10;
+	const padB = 28;
+	const plotW = vbW - padL - padR;
+	const plotH = vbH - padT - padB;
+
+	const x = (t: number) => padL + (t / totalSec) * plotW;
+	const y = (v: number) => padT + (1 - Math.max(0, Math.min(v, maxSpeed)) / maxSpeed) * plotH;
+
+	const pointsAttr = segments.map(p => `${x(p.t).toFixed(2)},${y(p.v).toFixed(2)}`).join(' ');
+	const cursorT = Math.max(0, Math.min(currentSec, totalSec));
+	const cursorX = x(cursorT);
+
+	const fmtTime = (s: number) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+
+	// Choose a few y ticks
+	const yTicks = [0, Math.ceil(maxSpeed/2), maxSpeed];
+
+	return (
+		<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="160" role="img" aria-label="Programma snelheid grafiek">
+			{/* axes */}
+			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={2} />
+			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={2} />
+
+			{/* y grid and labels */}
+			{yTicks.map((v, i) => (
+				<g key={i}>
+					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#e5e7eb" strokeWidth={1} />
+					<text x={padL - 8} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={12} fill="#374151" fontWeight={700}>{v}</text>
+				</g>
+			))}
+
+			{/* x labels: start and end */}
+			<text x={padL} y={padT + plotH + 18} textAnchor="start" fontSize={12} fill="#374151" fontWeight={700}>{fmtTime(0)}</text>
+			<text x={padL + plotW} y={padT + plotH + 18} textAnchor="end" fontSize={12} fill="#374151" fontWeight={700}>{fmtTime(totalSec)}</text>
+
+			{/* program curve */}
+			<polyline fill="none" stroke="#2563eb" strokeWidth={3} points={pointsAttr} />
+
+			{/* current time cursor */}
+			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ef4444" strokeWidth={2} strokeDasharray="4 3" />
+		</svg>
 	);
 };
 
