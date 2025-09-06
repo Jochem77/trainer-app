@@ -133,19 +133,19 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 5,
+        "duration_min": 0.2,
         "speed_kmh": 5,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
-          "duration_min": 1,
+          "duration_min": 0.3,
           "speed_kmh": 10,
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 0.3,
           "speed_kmh": 6,
           "label": "Interval rust"
         },

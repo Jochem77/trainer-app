@@ -119,46 +119,58 @@ function flattenSteps(steps: Step[]) {
 	const result: Array<{
 		label: string;
 		duration_min: number;
+		duration_sec: number;
 		speed_kmh: number | null;
-		start_min: number;
+		start_min: number; // behoud voor UI weergave
+		start_sec: number; // exacte start in seconden
 		type: string;
 		repIndex?: number; // 1-based nummer van herhaling voor interval stappen
 	}> = [];
-	let currentMin = 0;
+	let currentSec = 0;
+	const toSec = (min: number) => Math.round(min * 60);
 	for (const step of steps) {
 		if (step.type === "steady") {
 			for (let i = 0; i < step.repeats; i++) {
+				const durSec = toSec(step.duration_min);
 				result.push({
 					label: step.label,
 					duration_min: step.duration_min,
+					duration_sec: durSec,
 					speed_kmh: step.speed_kmh,
-					start_min: currentMin,
+					start_min: currentSec / 60,
+					start_sec: currentSec,
 					type: "steady",
 				});
-				currentMin += step.duration_min;
+				currentSec += durSec;
 			}
 		} else if (step.type === "interval_pair") {
 			const showRep = step.repeats > 1;
 			for (let i = 0; i < step.repeats; i++) {
 				const repIndex = showRep ? i + 1 : undefined;
+				const hardSec = toSec(step.hard.duration_min);
 				result.push({
 					label: step.hard.label,
 					duration_min: step.hard.duration_min,
+					duration_sec: hardSec,
 					speed_kmh: step.hard.speed_kmh,
-					start_min: currentMin,
+					start_min: currentSec / 60,
+					start_sec: currentSec,
 					type: "interval_hard",
 					repIndex,
 				});
-				currentMin += step.hard.duration_min;
+				currentSec += hardSec;
+				const restSec = toSec(step.rest.duration_min);
 				result.push({
 					label: step.rest.label,
 					duration_min: step.rest.duration_min,
+					duration_sec: restSec,
 					speed_kmh: step.rest.speed_kmh,
-					start_min: currentMin,
+					start_min: currentSec / 60,
+					start_sec: currentSec,
 					type: "interval_rest",
 					repIndex,
 				});
-				currentMin += step.rest.duration_min;
+				currentSec += restSec;
 			}
 		}
 	}
@@ -166,8 +178,10 @@ function flattenSteps(steps: Step[]) {
 	result.push({
 		label: "Einde",
 		duration_min: 0,
+		duration_sec: 0,
 		speed_kmh: null,
-		start_min: currentMin,
+		start_min: currentSec / 60,
+		start_sec: currentSec,
 		type: "end"
 	});
 	return result;
@@ -188,10 +202,15 @@ const TrainingProgramDay: React.FC = () => {
 	const [date, setDate] = useState(getInitialDate());
 	const program = allPrograms.find((p) => p.date === date);
 	const { prev, next } = getAdjacentDates(date);
-	const [timer, setTimer] = useState(0); // seconden
+	const [timer, setTimer] = useState(0); // seconden (integer)
 	const [running, setRunning] = useState(false);
 	const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+	const baseTimeRef = React.useRef<number>(Date.now());
+	const timerValRef = React.useRef<number>(0);
 	const stepsContainerRef = React.useRef<HTMLDivElement>(null);
+	const lastBeepKeyRef = React.useRef<string | null>(null);
+	const prevLeftRef = React.useRef<{ idx: number; left: number }>({ idx: -1, left: Number.POSITIVE_INFINITY });
+    
 
 		// Bepaal huidige stap
 		const flatSteps = program ? flattenSteps(program.steps) : [];
@@ -201,31 +220,49 @@ const TrainingProgramDay: React.FC = () => {
 			else break;
 		}
 		const currentStep = flatSteps[currentIdx] ?? { start_min: 0, duration_min: 0, speed_kmh: null, label: '', type: '' };
-		const stepStartSec = Math.round(currentStep.start_min * 60);
-		const stepEndSec = currentStep.duration_min > 0 ? stepStartSec + Math.round(currentStep.duration_min * 60) : stepStartSec;
+	const stepStartSec = currentStep.start_sec ?? Math.round(currentStep.start_min * 60);
+	const stepEndSec = currentStep.duration_sec && currentStep.duration_sec > 0 ? stepStartSec + currentStep.duration_sec : stepStartSec;
 		const stepTimeLeft = Math.max(0, stepEndSec - timer);
 
-		// Piepjes in laatste 3 seconden
+		// Piepjes exact bij 5, 4, 3, 2 en 1 seconden resterend; triggert op thresholds om drift te opvangen
 		useEffect(() => {
-			if (running && stepTimeLeft > 0 && stepTimeLeft <= 3) {
-				const beep = () => {
-					const AudioCtxCtor = (window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext);
-					if (!AudioCtxCtor) return;
-					const ctx = new AudioCtxCtor();
-					const o = ctx.createOscillator();
-					const g = ctx.createGain();
-					o.type = 'sine';
-					o.frequency.value = 1200;
-					g.gain.value = 0.2;
-					o.connect(g);
-					g.connect(ctx.destination);
-					o.start();
-					o.stop(ctx.currentTime + 0.15);
-					o.onended = () => ctx.close();
-				};
-				beep();
+			if (!running) return;
+			// Reset guards bij stapwissel
+			if (prevLeftRef.current.idx !== currentIdx) {
+				prevLeftRef.current = { idx: currentIdx, left: Number.POSITIVE_INFINITY };
+				lastBeepKeyRef.current = null;
 			}
-		}, [stepTimeLeft, running]);
+			const prevLeft = prevLeftRef.current.left;
+			let beepSec: 5 | 4 | 3 | 2 | 1 | null = null;
+			if (prevLeft > 5 && stepTimeLeft <= 5 && stepTimeLeft > 0) beepSec = 5;
+			else if (prevLeft > 4 && stepTimeLeft <= 4 && stepTimeLeft > 0) beepSec = 4;
+			else if (prevLeft > 3 && stepTimeLeft <= 3 && stepTimeLeft > 0) beepSec = 3;
+			else if (prevLeft > 2 && stepTimeLeft <= 2 && stepTimeLeft > 0) beepSec = 2;
+			else if (prevLeft > 1 && stepTimeLeft <= 1 && stepTimeLeft > 0) beepSec = 1;
+
+			if (beepSec !== null) {
+				const key = `${currentIdx}:${beepSec}`;
+				if (lastBeepKeyRef.current !== key) {
+					lastBeepKeyRef.current = key;
+					const AudioCtxCtor = (window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext);
+					if (AudioCtxCtor) {
+						const ctx = new AudioCtxCtor();
+						const o = ctx.createOscillator();
+						const g = ctx.createGain();
+						o.type = 'sine';
+						o.frequency.value = 1200;
+						// Maak 5s en 4s beeps stil (maar wel afgevuurd); 3/2/1 hoorbaar
+						g.gain.value = (beepSec === 5 || beepSec === 4) ? 0 : 0.2;
+						o.connect(g);
+						g.connect(ctx.destination);
+						o.start();
+						o.stop(ctx.currentTime + 0.15);
+						o.onended = () => ctx.close();
+					}
+				}
+			}
+			prevLeftRef.current = { idx: currentIdx, left: stepTimeLeft };
+		}, [stepTimeLeft, running, currentIdx]);
 
 		// Wake Lock API: scherm actief houden (her-acquire bij terugkeren naar app)
 		useEffect(() => {
@@ -281,9 +318,11 @@ const TrainingProgramDay: React.FC = () => {
 
 	useEffect(() => {
 		if (running) {
+			baseTimeRef.current = Date.now() - timerValRef.current * 1000;
 			timerRef.current = setInterval(() => {
-				setTimer((t) => t + 1);
-			}, 1000);
+				const elapsed = Math.floor((Date.now() - baseTimeRef.current) / 1000);
+				setTimer(elapsed);
+			}, 200);
 		} else if (timerRef.current) {
 			clearInterval(timerRef.current);
 			timerRef.current = null;
@@ -292,6 +331,11 @@ const TrainingProgramDay: React.FC = () => {
 			if (timerRef.current) clearInterval(timerRef.current);
 		};
 	}, [running]);
+
+	// Sync state timer into ref to avoid adding it as a dependency
+	useEffect(() => {
+		timerValRef.current = timer;
+	}, [timer]);
 
 	useEffect(() => {
 		setTimer(0);
@@ -304,7 +348,7 @@ const TrainingProgramDay: React.FC = () => {
 				`[data-step-idx="${currentIdx}"]`
 			) as HTMLDivElement | null;
 			if (el) {
-				el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
 		}
 	}, [currentIdx]);
@@ -337,7 +381,7 @@ const TrainingProgramDay: React.FC = () => {
 			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:6px auto 4px; max-width:560px; --statSize: 48px; }
 			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
 			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
-			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:8px; background:#eee; color:#111; font-size:20px; cursor:pointer; }
+			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
 			.nav-arrow:disabled { opacity: .4; cursor: default; }
 			.status-top { display:flex; justify-content:space-between; gap:8px; align-items:center; }
 					.status-col { flex:1; text-align:center; }
@@ -349,9 +393,11 @@ const TrainingProgramDay: React.FC = () => {
 			.speed { text-align:center; margin:6px 0 0; }
 			.speed small { display:block; font-size:11px; color:#777; margin-bottom:0; }
 			.speed .value { font-size:var(--statSize); font-weight:900; letter-spacing:1px; }
+			.speed .value .next-speed { color:#2e7d32; font-weight:800; font-size: calc(var(--statSize) * 0.6); }
 			.current-label { text-align:center; margin-top:4px; font-weight:800; font-size:18px; }
 					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:8px 4px 12px; }
 					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; }
+					.card { scroll-margin-top: 16px; }
 					.done { opacity:.55; filter:grayscale(.2); }
 					.cur { animation: blink-border 1s infinite; outline:6px solid #43a047; outline-offset:0; z-index:1; }
 				.k-time { width:68px; font-variant-numeric:tabular-nums; font-weight:800; font-size:20px; }
@@ -396,6 +442,8 @@ const TrainingProgramDay: React.FC = () => {
 					const totalTimeLeft = Math.max(0, totalDurationSec - timer);
 					const fmt = (s:number)=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 								const speedText = currentStep.speed_kmh != null ? `${currentStep.speed_kmh} km/u` : '-';
+								const nextStep = flatSteps[currentIdx + 1];
+								const nextSpeed = nextStep && nextStep.speed_kmh != null ? `${nextStep.speed_kmh} km/u` : null;
 								const currentLabel = currentStep.label + (currentStep.repIndex ? ` ${currentStep.repIndex}` : '');
 								return (
 									<div className="status-card">
@@ -410,7 +458,7 @@ const TrainingProgramDay: React.FC = () => {
 															</div>
 														</div>
 														<div className="speed">
-															<div className="value">{speedText}</div>
+															<div className="value">{speedText}{nextSpeed ? <span className="next-speed"> (→ {nextSpeed})</span> : null}</div>
 														</div>
 																		<div className="current-label">{currentLabel}</div>
 									</div>
@@ -449,7 +497,7 @@ const TrainingProgramDay: React.FC = () => {
 					return (
 									<div key={idx} data-step-idx={idx} className={classNames}>
 										<div className="k-time">
-											{String(Math.floor(step.start_min)).padStart(2, '0')}:{String(Math.round((step.start_min % 1) * 60)).padStart(2, '0')}
+											{String(Math.floor((step.start_sec ?? Math.round(step.start_min * 60)) / 60)).padStart(2, '0')}:{String(((step.start_sec ?? Math.round(step.start_min * 60)) % 60)).padStart(2, '0')}
 										</div>
 										<div className="k-speed">
 											{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
