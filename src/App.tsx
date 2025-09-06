@@ -552,11 +552,11 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 
 	// SVG coordinate system
 	const vbW = 1000;
-	const vbH = 200;
-	const padL = 60;
+	const vbH = 260;
+	const padL = 72;
 	const padR = 16;
-	const padT = 4;
-	const padB = 16;
+	const padT = 2;
+	const padB = 20;
 	const plotW = vbW - padL - padR;
 	const plotH = vbH - padT - padB;
 
@@ -573,28 +573,28 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	const yTicks = [0, Math.ceil(maxSpeed/2), maxSpeed];
 
 	return (
-	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="150" role="img" aria-label="Programma snelheid grafiek">
+	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="200" role="img" aria-label="Programma snelheid grafiek">
 			{/* axes */}
-			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={2} />
-			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={2} />
+			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={3} />
+			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={3} />
 
 			{/* y grid and labels */}
 			{yTicks.map((v, i) => (
 				<g key={i}>
-					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#e5e7eb" strokeWidth={1} />
-					<text x={padL - 8} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={12} fill="#374151" fontWeight={700}>{v}</text>
+		    <line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#e5e7eb" strokeWidth={1.5} />
+		    <text x={padL - 10} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={16} fill="#111827" fontWeight={800}>{v}</text>
 				</g>
 			))}
 
 			{/* x labels: start and end */}
-			<text x={padL} y={padT + plotH + 18} textAnchor="start" fontSize={12} fill="#374151" fontWeight={700}>{fmtTime(0)}</text>
-			<text x={padL + plotW} y={padT + plotH + 18} textAnchor="end" fontSize={12} fill="#374151" fontWeight={700}>{fmtTime(totalSec)}</text>
+	    <text x={padL} y={padT + plotH + 20} textAnchor="start" fontSize={14} fill="#111827" fontWeight={800}>{fmtTime(0)}</text>
+	    <text x={padL + plotW} y={padT + plotH + 20} textAnchor="end" fontSize={14} fill="#111827" fontWeight={800}>{fmtTime(totalSec)}</text>
 
 			{/* program curve */}
-			<polyline fill="none" stroke="#2563eb" strokeWidth={3} points={pointsAttr} />
+			<polyline fill="none" stroke="#2563eb" strokeWidth={4} points={pointsAttr} />
 
 			{/* current time cursor */}
-			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ef4444" strokeWidth={2} strokeDasharray="4 3" />
+			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ef4444" strokeWidth={3} strokeDasharray="5 4" />
 		</svg>
 	);
 };
