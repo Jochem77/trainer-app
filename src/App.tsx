@@ -369,15 +369,16 @@ const TrainingProgramDay: React.FC = () => {
 	}
 
 		return (
-			<div style={{ maxWidth: 720, height: '100vh', margin: "0 auto", padding: 16, borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+			<div className="app-root" style={{ maxWidth: 720, height: '100vh', margin: "0 auto", padding: 16, paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
+				@supports(height: 100dvh){ .app-root{ height: 100dvh; } }
 					@keyframes blink-border {
 						0% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 						50% { box-shadow: 0 0 0 10px #43a04733, 0 2px 8px #0001; }
 						100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 					}
-			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: 4px 0 6px; box-shadow: 0 2px 8px #0001; }
+			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: calc(4px + env(safe-area-inset-top, 0px)) 0 6px; box-shadow: 0 2px 8px #0001; }
 			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:6px auto 4px; max-width:560px; --statSize: 48px; }
 			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
 			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
@@ -619,7 +620,7 @@ const App: React.FC = () => {
 		<>
 			{/* Hamburger menu button */}
 			<style>{`
-				.hambtn { position: fixed; top: 10px; left: 10px; z-index: 50; background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
+				.hambtn { position: fixed; top: calc(10px + env(safe-area-inset-top, 0px)); left: 10px; z-index: 50; background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
 				.drawer-backdrop { position: fixed; inset: 0; background: #0006; z-index: 49; }
 				.drawer { position: fixed; top: 0; right: 0; height: 100%; width: 340px; max-width: 90vw; background: #fff; z-index: 50; box-shadow: -4px 0 16px #0004; display: flex; flex-direction: column; }
 				.drawer-header { padding: 14px 16px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between; }

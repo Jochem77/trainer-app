@@ -1,3 +1,10 @@
+/* Use dynamic viewport units and safe-area insets for mobile */
+:root {
+	--vh: 1vh;
+	--safe-top: env(safe-area-inset-top, 0px);
+	--safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 html, body, #root {
 	height: 100%;
 }
@@ -6,4 +13,8 @@ html, body {
 	padding: 0;
 	overflow: hidden; /* prevent page scrollbar; internal containers handle scrolling */
 	background: #eaf2ff;
+}
+
+@supports (height: 100dvh) {
+	html, body, #root { height: 100dvh; }
 }
