@@ -7,9 +7,10 @@ type Program = {
 
 type ProgramSelectorProps = {
 	userId: string;
+	compact?: boolean;
 };
 
-const ProgramSelector: React.FC<ProgramSelectorProps> = ({ userId }) => {
+const ProgramSelector: React.FC<ProgramSelectorProps> = ({ userId, compact }) => {
 	const [programs, setPrograms] = useState<Program[]>([]);
 	const [selectedId, setSelectedId] = useState<number | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -44,8 +45,11 @@ const ProgramSelector: React.FC<ProgramSelectorProps> = ({ userId }) => {
 		else setMessage("Keuze opgeslagen!");
 	};
 
+	const boxStyle: React.CSSProperties = compact
+		? { padding: 12 }
+		: { maxWidth: 400, margin: "40px auto", padding: 24, border: "1px solid #ddd", borderRadius: 8 } as React.CSSProperties;
 	return (
-		<div style={{ maxWidth: 400, margin: "40px auto", padding: 24, border: "1px solid #ddd", borderRadius: 8 }}>
+		<div style={boxStyle}>
 			<h2>Kies een programma</h2>
 			{loading && <div>Laden...</div>}
 			{error && <div style={{ color: "red" }}>{error}</div>}
@@ -82,13 +86,33 @@ type DayProgram = {
 	steps: Step[];
 };
 
-const allPrograms: DayProgram[] = schema as any;
+const allPrograms: DayProgram[] = schema as DayProgram[];
 
 function getAdjacentDates(date: string) {
 	const idx = allPrograms.findIndex(p => p.date === date);
 	const prev = idx > 0 ? allPrograms[idx - 1].date : null;
 	const next = idx >= 0 && idx < allPrograms.length - 1 ? allPrograms[idx + 1].date : null;
 	return { prev, next };
+}
+
+function formatDateNL(isoDate: string): string {
+	try {
+		const d = new Date(`${isoDate}T00:00:00`);
+		const parts = new Intl.DateTimeFormat('nl-NL', {
+			weekday: 'long',
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric',
+		}).formatToParts(d);
+		const weekday = parts.find(p => p.type === 'weekday')?.value ?? '';
+		const day = parts.find(p => p.type === 'day')?.value ?? '';
+		let month = parts.find(p => p.type === 'month')?.value ?? '';
+		const year = parts.find(p => p.type === 'year')?.value ?? '';
+		month = month.replace('.', '').toLowerCase();
+		return `${weekday} ${day} ${month} ${year}`;
+	} catch {
+		return isoDate;
+	}
 }
 
 function flattenSteps(steps: Step[]) {
@@ -98,6 +122,7 @@ function flattenSteps(steps: Step[]) {
 		speed_kmh: number | null;
 		start_min: number;
 		type: string;
+		repIndex?: number; // 1-based nummer van herhaling voor interval stappen
 	}> = [];
 	let currentMin = 0;
 	for (const step of steps) {
@@ -113,13 +138,16 @@ function flattenSteps(steps: Step[]) {
 				currentMin += step.duration_min;
 			}
 		} else if (step.type === "interval_pair") {
+			const showRep = step.repeats > 1;
 			for (let i = 0; i < step.repeats; i++) {
+				const repIndex = showRep ? i + 1 : undefined;
 				result.push({
 					label: step.hard.label,
 					duration_min: step.hard.duration_min,
 					speed_kmh: step.hard.speed_kmh,
 					start_min: currentMin,
 					type: "interval_hard",
+					repIndex,
 				});
 				currentMin += step.hard.duration_min;
 				result.push({
@@ -128,6 +156,7 @@ function flattenSteps(steps: Step[]) {
 					speed_kmh: step.rest.speed_kmh,
 					start_min: currentMin,
 					type: "interval_rest",
+					repIndex,
 				});
 				currentMin += step.rest.duration_min;
 			}
@@ -180,7 +209,9 @@ const TrainingProgramDay: React.FC = () => {
 		useEffect(() => {
 			if (running && stepTimeLeft > 0 && stepTimeLeft <= 3) {
 				const beep = () => {
-					const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+					const AudioCtxCtor = (window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext);
+					if (!AudioCtxCtor) return;
+					const ctx = new AudioCtxCtor();
 					const o = ctx.createOscillator();
 					const g = ctx.createGain();
 					o.type = 'sine';
@@ -196,23 +227,55 @@ const TrainingProgramDay: React.FC = () => {
 			}
 		}, [stepTimeLeft, running]);
 
-		// Wake Lock API: scherm actief houden
+		// Wake Lock API: scherm actief houden (her-acquire bij terugkeren naar app)
 		useEffect(() => {
-			let wakeLock: any;
+			let isMounted = true;
+			let wakeLockRef: WakeLockSentinel | null = null;
+			type NavigatorWakeLock = Navigator & { wakeLock?: { request: (type: 'screen') => Promise<WakeLockSentinel> } };
+			const hasWakeLock = (nav: Navigator): nav is NavigatorWakeLock =>
+				'wakeLock' in nav && typeof (nav as NavigatorWakeLock).wakeLock?.request === 'function';
 			const requestWakeLock = async () => {
 				try {
-					// @ts-ignore
-					if ('wakeLock' in navigator) {
-						// @ts-ignore
-						wakeLock = await navigator.wakeLock.request('screen');
+					if (!isMounted) return;
+					// Controleer ondersteuning en voorkom dubbele locks
+					if (hasWakeLock(navigator) && !wakeLockRef) {
+						const wl = await navigator.wakeLock!.request('screen');
+						wakeLockRef = wl;
+						wl.addEventListener('release', () => {
+							// Bij release opnieuw proberen als we zichtbaar zijn
+							wakeLockRef = null;
+							if (document.visibilityState === 'visible') {
+								requestWakeLock();
+							}
+						});
 					}
-				} catch (err) {
-					// Foutafhandeling optioneel
+				} catch {
+					// Stil falen als Wake Lock niet beschikbaar is of geweigerd wordt
 				}
 			};
+
+			const onVisibilityChange = () => {
+				if (document.visibilityState === 'visible') {
+					requestWakeLock();
+				}
+			};
+
+			document.addEventListener('visibilitychange', onVisibilityChange);
+			const onPageShow = () => onVisibilityChange();
+			const onFocus = () => onVisibilityChange();
+			window.addEventListener('pageshow', onPageShow);
+			window.addEventListener('focus', onFocus);
+			// Eerste aanvraag bij laden
 			requestWakeLock();
+
 			return () => {
-				if (wakeLock && wakeLock.release) wakeLock.release();
+				isMounted = false;
+				document.removeEventListener('visibilitychange', onVisibilityChange);
+				window.removeEventListener('pageshow', onPageShow);
+				window.removeEventListener('focus', onFocus);
+				if (wakeLockRef && 'release' in wakeLockRef) {
+					wakeLockRef.release();
+				}
 			};
 		}, []);
 
@@ -246,9 +309,7 @@ const TrainingProgramDay: React.FC = () => {
 		}
 	}, [currentIdx]);
 
-	// Timer display
-	const timerMin = Math.floor(timer / 60);
-	const timerSec = timer % 60;
+	// Timer display removed in favor of status card
 
 	if (!program) {
 		return (
@@ -263,125 +324,147 @@ const TrainingProgramDay: React.FC = () => {
 		);
 	}
 
-	return (
-		<div style={{ maxWidth: 700, margin: "40px auto", padding: 32, borderRadius: 16, background: "linear-gradient(135deg,#e0eafc,#cfdef3)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative' }}>
-			{/* Timer, resterende tijd en knoppen sticky bovenaan */}
-			<div className="timerbar-btns" style={{
-				position: 'sticky',
-				top: 0,
-				zIndex: 10,
-				background: 'rgba(255,255,255,0.95)',
-				padding: '16px 0 12px 0',
-				marginBottom: 16,
-				display: 'flex',
-				alignItems: 'center',
-				gap: 24,
-				borderBottom: '1px solid #e0e0e0',
-				flexWrap: 'wrap',
-			}}>
+		return (
+			<div style={{ maxWidth: 720, height: '100vh', margin: "0 auto", padding: 16, borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 				<style>{`
-					@media (max-width: 500px) {
-						.timerbar-btns {
-							flex-direction: column !important;
-							align-items: stretch !important;
-							gap: 12px !important;
-						}
-						.timerbar-btns button {
-							width: 100% !important;
-							font-size: 20px !important;
-						}
+				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
+					@keyframes blink-border {
+						0% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
+						50% { box-shadow: 0 0 0 10px #43a04733, 0 2px 8px #0001; }
+						100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 					}
+			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: 4px 0 6px; box-shadow: 0 2px 8px #0001; }
+			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:6px auto 4px; max-width:560px; --statSize: 48px; }
+			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
+			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
+			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:8px; background:#eee; color:#111; font-size:20px; cursor:pointer; }
+			.nav-arrow:disabled { opacity: .4; cursor: default; }
+			.status-top { display:flex; justify-content:space-between; gap:8px; align-items:center; }
+					.status-col { flex:1; text-align:center; }
+			.status-col h4 { margin:0 0 2px; font-size:14px; font-weight:800; color:#111; }
+			.status-col small { display:none; }
+			.status-col .time { font-variant-numeric:tabular-nums; font-weight:900; font-size:var(--statSize); line-height:1; }
+					.time-step { color:#2e7d32; }
+					.time-total { color:#1565c0; }
+			.speed { text-align:center; margin:6px 0 0; }
+			.speed small { display:block; font-size:11px; color:#777; margin-bottom:0; }
+			.speed .value { font-size:var(--statSize); font-weight:900; letter-spacing:1px; }
+			.current-label { text-align:center; margin-top:4px; font-weight:800; font-size:18px; }
+					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:8px 4px 160px; }
+					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; }
+					.done { opacity:.55; filter:grayscale(.2); }
+					.cur { animation: blink-border 1s infinite; outline:6px solid #43a047; outline-offset:0; z-index:1; }
+				.k-time { width:68px; font-variant-numeric:tabular-nums; font-weight:800; font-size:20px; }
+				.k-speed { width:80px; text-align:right; margin-right:8px; color:#0d47a1; font-weight:600; }
+				.k-dur { width:72px; text-align:right; margin-right:8px; color:#0d47a1; font-weight:600; }
+				.k-label { flex:1; font-weight:700; min-width:0; }
+					.b-steady { background:#e8f8ea; border-left-color:#2e7d32; }
+					.b-hard { background:#fdecec; border-left-color:#c62828; }
+					.b-rest { background:#e8f1ff; border-left-color:#1976d2; }
+				.bottom-actions { position:sticky; bottom:0; left:0; right:0; padding:10px 0 calc(16px + var(--safe-bottom)); background:linear-gradient(180deg, #ffffff00, #eaf2ff 60%, #eaf2ff); display:flex; flex-direction:column; gap:10px; max-width:720px; margin:0 auto; }
+				.actions-row { display:flex; gap:10px; }
+				.actions-row .btn { flex:1; }
+					.btn { width:100%; font-size:22px; padding:12px 20px; border:none; border-radius:12px; color:#fff; font-weight:800; box-shadow:0 3px 10px #0002; cursor:pointer; }
+					.btn-start { background:#2e7d32; }
+					.btn-stop { background:#c62828; }
+					.btn-reset { background:#1976d2; }
+			@media (max-width:520px){ .status-card{--statSize:36px} .k-time{width:60px} .k-speed{width:70px} .k-dur{width:64px} }
 				`}</style>
-				<div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: 2, minWidth: 120 }}>
-					{String(timerMin).padStart(2, '0')}:{String(timerSec).padStart(2, '0')}
-				</div>
-				<div style={{ fontSize: 24, fontWeight: 600, color: stepTimeLeft <= 3 && running ? '#f44336' : '#1976d2', minWidth: 110 }}>
-					{stepTimeLeft > 0 ? `Nog ${Math.floor(stepTimeLeft/60)}:${String(stepTimeLeft%60).padStart(2,'0')}` : 'Stap klaar'}
-				</div>
-				<button
-					onClick={() => setRunning((r) => !r)}
-					style={{ fontSize: 22, padding: '10px 32px', borderRadius: 8, border: 'none', background: running ? '#f44336' : '#4caf50', color: '#fff', fontWeight: 600, cursor: 'pointer', boxShadow: running ? '0 2px 8px #f4433622' : '0 2px 8px #4caf5022' }}
-				>
-					{running ? 'Stop' : 'Start'}
-				</button>
-				<button
-					onClick={() => { setTimer(0); setRunning(false); }}
-					style={{ fontSize: 22, padding: '10px 24px', borderRadius: 8, border: 'none', background: '#1976d2', color: '#fff', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px #1976d222' }}
-				>
-					Reset
-				</button>
-			</div>
-			<h2 style={{ textAlign: "center", marginBottom: 8, fontFamily: 'inherit' }}>Programma voor {program.dayName} {program.date}</h2>
-			<div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 24 }}>
-				{prev && <button onClick={() => setDate(prev)} style={{ padding: '8px 18px', fontSize: 18, borderRadius: 8, border: 'none', background: '#eee', cursor: 'pointer' }}>← Vorige</button>}
-				{next && <button onClick={() => setDate(next)} style={{ padding: '8px 18px', fontSize: 18, borderRadius: 8, border: 'none', background: '#eee', cursor: 'pointer' }}>Volgende →</button>}
-			</div>
-			<style>{`
-				@keyframes blink-border {
-					0% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
-					50% { box-shadow: 0 0 0 10px #43a04733, 0 2px 8px #0001; }
-					100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
-				}
-			`}</style>
-			<div ref={stepsContainerRef} style={{ display: "flex", flexDirection: "column", gap: 16, maxHeight: 500, overflowY: 'auto', scrollBehavior: 'smooth' }}>
+								<div className="top-sticky">
+									<div className="topbar">
+										<button
+											className="nav-arrow"
+											title="Vorige dag"
+											disabled={!prev}
+											onClick={() => prev && setDate(prev)}
+										>
+											←
+										</button>
+										<h2 className="date-title">{formatDateNL(program.date)}</h2>
+										<button
+											className="nav-arrow"
+											title="Volgende dag"
+											disabled={!next}
+											onClick={() => next && setDate(next)}
+										>
+											→
+										</button>
+									</div>
+							{/* Status card */}
+							{(() => {
+					const totalDurationSec = flatSteps.length ? Math.round(flatSteps[flatSteps.length - 1].start_min * 60) : 0;
+					const totalTimeLeft = Math.max(0, totalDurationSec - timer);
+					const fmt = (s:number)=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+								const speedText = currentStep.speed_kmh != null ? `${currentStep.speed_kmh} km/u` : '-';
+								const currentLabel = currentStep.label + (currentStep.repIndex ? ` ${currentStep.repIndex}` : '');
+								return (
+									<div className="status-card">
+														<div className="status-top">
+															<div className="status-col">
+																<h4>stap</h4>
+																<div className="time time-step">{fmt(stepTimeLeft)}</div>
+															</div>
+															<div className="status-col">
+																<h4>totaal</h4>
+																<div className="time time-total">{fmt(totalTimeLeft)}</div>
+															</div>
+														</div>
+														<div className="speed">
+															<div className="value">{speedText}</div>
+														</div>
+										<div className="current-label">{currentLabel}</div>
+									</div>
+								);
+							})()}
+						</div>
+
+				{/* Navigatie verplaatst naar topbar */}
+
+				<div ref={stepsContainerRef} className="steps">
 				{flatSteps.map((step, idx) => {
 					// Voltooid, huidig, toekomst
 					const isDone = idx < currentIdx;
 					const isCurrent = idx === currentIdx;
-					let background = '#f5f5f5';
-					let borderLeft = '8px solid #888';
-					let color = '#222';
-					let styleExtra: React.CSSProperties = {};
-					if (isDone) {
-						background = '#e0e0e0';
-						color = '#aaa';
-					} else if (isCurrent) {
-						background = step.type === 'steady' ? '#d0ffd0' : step.type === 'interval_hard' ? '#ffd0d0' : step.type === 'interval_rest' ? '#d0e6ff' : '#fffbe0';
-						borderLeft = `12px solid #43a047`;
-						styleExtra = {
-							outline: '7px solid #43a047',
-							outlineOffset: 0,
-							animation: 'blink-border 1s infinite',
-							zIndex: 2,
-							color: '#111',
-						};
-					} else {
-						background = step.type === 'steady' ? '#f0fff0' : step.type === 'interval_hard' ? '#ffe0e0' : step.type === 'interval_rest' ? '#e0f0ff' : '#f5f5f5';
-						borderLeft = `8px solid ${step.type === 'steady' ? '#4caf50' : step.type === 'interval_hard' ? '#f44336' : step.type === 'interval_rest' ? '#2196f3' : '#888'}`;
-					}
+								let classNames = 'card';
+								if (isDone) classNames += ' done';
+								if (isCurrent) classNames += ' cur';
+								if (step.type === 'steady') classNames += ' b-steady';
+								else if (step.type === 'interval_hard') classNames += ' b-hard';
+								else if (step.type === 'interval_rest') classNames += ' b-rest';
 					return (
-						<div
-							key={idx}
-							data-step-idx={idx}
-							style={{
-								display: "flex",
-								alignItems: "center",
-								background,
-								borderLeft,
-								borderRadius: 10,
-								padding: 20,
-								fontFamily: 'inherit',
-								fontSize: 20,
-								fontWeight: 500,
-								transition: 'outline 0.2s, background 0.3s',
-								color,
-								...styleExtra,
-							}}
-						>
-							<div style={{ width: 90, fontVariantNumeric: 'tabular-nums', fontWeight: 600, fontSize: 22 }}>
-								{String(Math.floor(step.start_min)).padStart(2, '0')}:{String(Math.round((step.start_min % 1) * 60)).padStart(2, '0')}
-							</div>
-							<div style={{ width: 90, textAlign: 'right', marginRight: 16 }}>
-								{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
-							</div>
-							<div style={{ width: 90, textAlign: 'right', marginRight: 16 }}>
-								{step.duration_min > 0 ? `${step.duration_min} min` : ''}
-							</div>
-							<div style={{ flex: 1, fontWeight: 600 }}>{step.label}</div>
-						</div>
+									<div key={idx} data-step-idx={idx} className={classNames}>
+										<div className="k-time">
+											{String(Math.floor(step.start_min)).padStart(2, '0')}:{String(Math.round((step.start_min % 1) * 60)).padStart(2, '0')}
+										</div>
+										<div className="k-speed">
+											{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
+										</div>
+										<div className="k-dur">
+											{step.duration_min > 0 ? `${step.duration_min} min` : ''}
+										</div>
+										  <div className="k-label">{step.label}{step.repIndex ? ` ${step.repIndex}` : ''}</div>
+									</div>
 					);
 				})}
-			</div>
+						</div>
+
+						{/* Bottom sticky actions */}
+						<div className="bottom-actions">
+							<div className="actions-row">
+								<button
+									onClick={() => setRunning((r) => !r)}
+									className={`btn ${running ? 'btn-stop' : 'btn-start'}`}
+								>
+									{running ? 'Stop' : 'Start'}
+								</button>
+								<button
+									onClick={() => { setTimer(0); setRunning(false); }}
+									className="btn btn-reset"
+								>
+									Reset
+								</button>
+							</div>
+						</div>
 		</div>
 	);
 };
@@ -392,9 +475,10 @@ import { supabase } from "./lib/supabase";
 type LoginFormProps = {
 	user: SupabaseUser | null;
 	setUser: React.Dispatch<React.SetStateAction<SupabaseUser | null>>;
+	compact?: boolean;
 };
 
-const LoginForm: React.FC<LoginFormProps> = ({ user, setUser }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ user, setUser, compact }) => {
 	const [email, setEmail] = useState("");
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
@@ -422,9 +506,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, setUser }) => {
 		setError("");
 	};
 
+	const boxStyle: React.CSSProperties = compact
+		? { padding: 12 }
+		: { maxWidth: 400, margin: "40px auto", padding: 24, border: "1px solid #ddd", borderRadius: 8 } as React.CSSProperties;
+
 	if (user) {
 		return (
-			<div style={{ maxWidth: 400, margin: "40px auto", padding: 24, border: "1px solid #ddd", borderRadius: 8 }}>
+			<div style={boxStyle}>
 				<h2>Ingelogd als {user.email}</h2>
 				<button onClick={handleLogout} style={{ width: "100%", padding: 10 }}>Uitloggen</button>
 			</div>
@@ -432,7 +520,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, setUser }) => {
 	}
 
 	return (
-		<div style={{ maxWidth: 400, margin: "40px auto", padding: 24, border: "1px solid #ddd", borderRadius: 8 }}>
+		<div style={boxStyle}>
 			<h2>Magic Link Login</h2>
 			<form onSubmit={handleLogin}>
 				<div style={{ marginBottom: 16 }}>
@@ -462,6 +550,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user, setUser }) => {
 
 const App: React.FC = () => {
 	const [user, setUser] = useState<SupabaseUser | null>(null);
+	const [menuOpen, setMenuOpen] = useState(false);
 
 	useEffect(() => {
 		const getUser = async () => {
@@ -481,8 +570,33 @@ const App: React.FC = () => {
 
 	return (
 		<>
-			<LoginForm user={user} setUser={setUser} />
-			{user && <ProgramSelector userId={user.id} />}
+			{/* Hamburger menu button */}
+			<style>{`
+				.hambtn { position: fixed; top: 10px; left: 10px; z-index: 50; background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
+				.drawer-backdrop { position: fixed; inset: 0; background: #0006; z-index: 49; }
+				.drawer { position: fixed; top: 0; right: 0; height: 100%; width: 340px; max-width: 90vw; background: #fff; z-index: 50; box-shadow: -4px 0 16px #0004; display: flex; flex-direction: column; }
+				.drawer-header { padding: 14px 16px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between; }
+				.drawer-content { padding: 8px 16px 16px; overflow: auto; }
+				.closebtn { background: #e0e0e0; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+			`}</style>
+			<button className="hambtn" aria-label="Menu" onClick={() => setMenuOpen(true)}>☰</button>
+
+			{menuOpen && (
+				<>
+					<div className="drawer-backdrop" onClick={() => setMenuOpen(false)} />
+					<aside className="drawer" role="dialog" aria-label="Menu">
+						<div className="drawer-header">
+							<strong>Menu</strong>
+							<button className="closebtn" onClick={() => setMenuOpen(false)}>Sluiten</button>
+						</div>
+						<div className="drawer-content">
+							<LoginForm user={user} setUser={setUser} compact />
+							{user && <ProgramSelector userId={user.id} compact />}
+						</div>
+					</aside>
+				</>
+			)}
+
 			<TrainingProgramDay />
 		</>
 	);
