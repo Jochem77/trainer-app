@@ -369,7 +369,7 @@ const TrainingProgramDay: React.FC = () => {
 	}
 
 		return (
-			<div className="app-root" style={{ maxWidth: 720, height: '100vh', margin: "0 auto", padding: 16, paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+			<div className="app-root" style={{ maxWidth: 720, height: '100dvh', margin: "0 auto", padding: 16, paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
 				@supports(height: 100dvh){ .app-root{ height: 100dvh; } }
@@ -380,7 +380,7 @@ const TrainingProgramDay: React.FC = () => {
 					}
 			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: calc(4px + env(safe-area-inset-top, 0px)) 0 6px; box-shadow: 0 2px 8px #0001; }
 			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:6px auto 4px; max-width:560px; --statSize: 48px; }
-			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:4px 10px; margin:4px auto; max-width:560px; }
+			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:2px 8px; margin:2px auto; max-width:560px; }
 			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
 			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
 			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
@@ -552,11 +552,11 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 
 	// SVG coordinate system
 	const vbW = 1000;
-	const vbH = 160;
+	const vbH = 200;
 	const padL = 60;
 	const padR = 16;
-	const padT = 6;
-	const padB = 20;
+	const padT = 4;
+	const padB = 16;
 	const plotW = vbW - padL - padR;
 	const plotH = vbH - padT - padB;
 
@@ -573,7 +573,7 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	const yTicks = [0, Math.ceil(maxSpeed/2), maxSpeed];
 
 	return (
-	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="120" role="img" aria-label="Programma snelheid grafiek">
+	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="150" role="img" aria-label="Programma snelheid grafiek">
 			{/* axes */}
 			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={2} />
 			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={2} />
