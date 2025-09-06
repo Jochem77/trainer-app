@@ -350,7 +350,7 @@ const TrainingProgramDay: React.FC = () => {
 			.speed small { display:block; font-size:11px; color:#777; margin-bottom:0; }
 			.speed .value { font-size:var(--statSize); font-weight:900; letter-spacing:1px; }
 			.current-label { text-align:center; margin-top:4px; font-weight:800; font-size:18px; }
-					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:8px 4px 160px; }
+					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:8px 4px 12px; }
 					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; }
 					.done { opacity:.55; filter:grayscale(.2); }
 					.cur { animation: blink-border 1s infinite; outline:6px solid #43a047; outline-offset:0; z-index:1; }
@@ -361,8 +361,8 @@ const TrainingProgramDay: React.FC = () => {
 					.b-steady { background:#e8f8ea; border-left-color:#2e7d32; }
 					.b-hard { background:#fdecec; border-left-color:#c62828; }
 					.b-rest { background:#e8f1ff; border-left-color:#1976d2; }
-				.bottom-actions { position:sticky; bottom:0; left:0; right:0; padding:10px 0 calc(16px + var(--safe-bottom)); background:linear-gradient(180deg, #ffffff00, #eaf2ff 60%, #eaf2ff); display:flex; flex-direction:column; gap:10px; max-width:720px; margin:0 auto; }
-				.actions-row { display:flex; gap:10px; }
+				/* bottom-actions removed (buttons moved under status card) */
+				.actions-row { display:flex; gap:10px; margin:8px auto 6px; max-width:560px; }
 				.actions-row .btn { flex:1; }
 					.btn { width:100%; font-size:22px; padding:12px 20px; border:none; border-radius:12px; color:#fff; font-weight:800; box-shadow:0 3px 10px #0002; cursor:pointer; }
 					.btn-start { background:#2e7d32; }
@@ -412,10 +412,25 @@ const TrainingProgramDay: React.FC = () => {
 														<div className="speed">
 															<div className="value">{speedText}</div>
 														</div>
-										<div className="current-label">{currentLabel}</div>
+																		<div className="current-label">{currentLabel}</div>
 									</div>
-								);
+																);
 							})()}
+															{/* Actions directly under status card */}
+															<div className="actions-row actions-under-card">
+																<button
+																	onClick={() => setRunning((r) => !r)}
+																	className={`btn ${running ? 'btn-stop' : 'btn-start'}`}
+																>
+																	{running ? 'Stop' : 'Start'}
+																</button>
+																<button
+																	onClick={() => { setTimer(0); setRunning(false); }}
+																	className="btn btn-reset"
+																>
+																	Reset
+																</button>
+															</div>
 						</div>
 
 				{/* Navigatie verplaatst naar topbar */}
@@ -448,23 +463,7 @@ const TrainingProgramDay: React.FC = () => {
 				})}
 						</div>
 
-						{/* Bottom sticky actions */}
-						<div className="bottom-actions">
-							<div className="actions-row">
-								<button
-									onClick={() => setRunning((r) => !r)}
-									className={`btn ${running ? 'btn-stop' : 'btn-start'}`}
-								>
-									{running ? 'Stop' : 'Start'}
-								</button>
-								<button
-									onClick={() => { setTimer(0); setRunning(false); }}
-									className="btn btn-reset"
-								>
-									Reset
-								</button>
-							</div>
-						</div>
+						{/* Bottom sticky actions removed; buttons placed under status card */}
 		</div>
 	);
 };
