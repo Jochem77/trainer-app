@@ -379,8 +379,8 @@ const TrainingProgramDay: React.FC = () => {
 						100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 					}
 			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: calc(4px + env(safe-area-inset-top, 0px)) 0 6px; box-shadow: 0 2px 8px #0001; }
-			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:6px auto 4px; max-width:560px; --statSize: 48px; }
-			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:0 6px; margin:0 auto; max-width:560px; }
+			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:4px auto 2px; max-width:560px; --statSize: 48px; }
+			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:2px 8px; margin:2px auto; max-width:560px; }
 			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
 			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
 			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
@@ -397,7 +397,7 @@ const TrainingProgramDay: React.FC = () => {
 			.speed .value { font-size:var(--statSize); font-weight:900; letter-spacing:1px; }
 			.speed .value .next-speed { color:#2e7d32; font-weight:800; font-size: calc(var(--statSize) * 0.6); }
 			.current-label { text-align:center; margin-top:4px; font-weight:800; font-size:18px; }
-					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:8px 4px 12px; }
+					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:6px 4px 8px; }
 					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; }
 					.card { scroll-margin-top: 16px; }
 					.done { opacity:.55; filter:grayscale(.2); }
@@ -409,8 +409,8 @@ const TrainingProgramDay: React.FC = () => {
 					.b-steady { background:#e8f8ea; border-left-color:#2e7d32; }
 					.b-hard { background:#fdecec; border-left-color:#c62828; }
 					.b-rest { background:#e8f1ff; border-left-color:#1976d2; }
-				/* bottom-actions removed (buttons moved under status card) */
-				.actions-row { display:flex; gap:10px; margin:8px auto 6px; max-width:560px; }
+					/* bottom-actions removed (buttons moved under status card) */
+					.actions-row { display:flex; gap:10px; margin:2px auto 2px; max-width:560px; }
 				.actions-row .btn { flex:1; }
 					.btn { width:100%; font-size:22px; padding:12px 20px; border:none; border-radius:12px; color:#fff; font-weight:800; box-shadow:0 3px 10px #0002; cursor:pointer; }
 					.btn-start { background:#2e7d32; }
@@ -552,10 +552,10 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 
 	// SVG coordinate system
 	const vbW = 1000;
-	const vbH = 260;
-	const padL = 78;
-	const padR = 16;
-	const padT = 0;
+	const vbH = 200;
+	const padL = 80;
+	const padR = 12;
+	const padT = 2;
 	const padB = 8;
 	const plotW = vbW - padL - padR;
 	const plotH = vbH - padT - padB;
@@ -569,32 +569,34 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 
 	const fmtTime = (s: number) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 
-	// Choose a few y ticks
-	const yTicks = [0, Math.ceil(maxSpeed/2), maxSpeed];
+	// y gridlines are computed inline below
 
 	return (
-	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="200" role="img" aria-label="Programma snelheid grafiek">
+	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="140" role="img" aria-label="Programma snelheid grafiek">
 			{/* axes */}
-			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={3} />
-			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#c7d2fe" strokeWidth={3} />
+			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
+			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
 
 			{/* y grid and labels */}
-			{yTicks.map((v, i) => (
+			{/* gridlines: 0, mid, max; labels only for 0 and max */}
+			{([0, Math.ceil(maxSpeed/2), maxSpeed] as number[]).map((v, i) => (
 				<g key={i}>
-					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#e5e7eb" strokeWidth={1.5} />
-					<text x={padL - 12} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={18} fill="#111827" fontWeight={900}>{v}</text>
+					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
+					{(v === 0 || v === maxSpeed) && (
+						<text x={padL - 8} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={14} fill="#111827" fontWeight={800}>{v}</text>
+					)}
 				</g>
 			))}
 
-			{/* x labels: start and end */}
-			<text x={padL} y={padT + plotH + 16} textAnchor="start" fontSize={16} fill="#111827" fontWeight={900}>{fmtTime(0)}</text>
-			<text x={padL + plotW} y={padT + plotH + 16} textAnchor="end" fontSize={16} fill="#111827" fontWeight={900}>{fmtTime(totalSec)}</text>
+			{/* x label (left only) */}
+			<text x={padL} y={padT + plotH + 12} textAnchor="start" fontSize={12} fill="#111827" fontWeight={800}>{fmtTime(0)}</text>
 
 			{/* program curve */}
-			<polyline fill="none" stroke="#2563eb" strokeWidth={4} points={pointsAttr} />
+			<polyline fill="none" stroke="#2563eb" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} />
 
-			{/* current time cursor */}
-			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ef4444" strokeWidth={3} strokeDasharray="5 4" />
+			{/* red origin marker and current time cursor */}
+			<circle cx={padL} cy={padT + plotH} r={4} fill="#ef4444" />
+			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ef4444" strokeWidth={2} strokeDasharray="2 4" strokeLinecap="round" />
 		</svg>
 	);
 };
