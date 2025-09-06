@@ -380,7 +380,7 @@ const TrainingProgramDay: React.FC = () => {
 					}
 			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: calc(4px + env(safe-area-inset-top, 0px)) 0 6px; box-shadow: 0 2px 8px #0001; }
 			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:6px auto 4px; max-width:560px; --statSize: 48px; }
-			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:2px 8px; margin:2px auto; max-width:560px; }
+			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:0 6px; margin:0 auto; max-width:560px; }
 			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
 			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
 			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
@@ -553,10 +553,10 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	// SVG coordinate system
 	const vbW = 1000;
 	const vbH = 260;
-	const padL = 72;
+	const padL = 78;
 	const padR = 16;
-	const padT = 2;
-	const padB = 20;
+	const padT = 0;
+	const padB = 8;
 	const plotW = vbW - padL - padR;
 	const plotH = vbH - padT - padB;
 
@@ -581,14 +581,14 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 			{/* y grid and labels */}
 			{yTicks.map((v, i) => (
 				<g key={i}>
-		    <line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#e5e7eb" strokeWidth={1.5} />
-		    <text x={padL - 10} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={16} fill="#111827" fontWeight={800}>{v}</text>
+					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#e5e7eb" strokeWidth={1.5} />
+					<text x={padL - 12} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={18} fill="#111827" fontWeight={900}>{v}</text>
 				</g>
 			))}
 
 			{/* x labels: start and end */}
-	    <text x={padL} y={padT + plotH + 20} textAnchor="start" fontSize={14} fill="#111827" fontWeight={800}>{fmtTime(0)}</text>
-	    <text x={padL + plotW} y={padT + plotH + 20} textAnchor="end" fontSize={14} fill="#111827" fontWeight={800}>{fmtTime(totalSec)}</text>
+			<text x={padL} y={padT + plotH + 16} textAnchor="start" fontSize={16} fill="#111827" fontWeight={900}>{fmtTime(0)}</text>
+			<text x={padL + plotW} y={padT + plotH + 16} textAnchor="end" fontSize={16} fill="#111827" fontWeight={900}>{fmtTime(totalSec)}</text>
 
 			{/* program curve */}
 			<polyline fill="none" stroke="#2563eb" strokeWidth={4} points={pointsAttr} />
