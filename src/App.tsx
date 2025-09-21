@@ -548,7 +548,8 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	);
 	const speeds = steps.map(s => s.speed_kmh ?? 0);
 	const maxSpeedRaw = Math.max(0, ...speeds);
-	const maxSpeed = maxSpeedRaw > 0 ? Math.ceil(maxSpeedRaw + 0.5) : 10; // nice headroom
+	const minSpeed = 4; // Minimum y-axis value set to 4 km/u
+	const maxSpeed = Math.max(minSpeed + 2, Math.ceil(maxSpeedRaw + 0.5)); // Ensure at least 2 km/u above minimum
 	if (totalSec <= 0) return null;
 
 	// Build step-function points: for each step with speed and duration, add (start, speed) and (end, speed)
@@ -573,7 +574,7 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	const plotH = vbH - padT - padB;
 
 	const x = (t: number) => padL + (t / totalSec) * plotW;
-	const y = (v: number) => padT + (1 - Math.max(0, Math.min(v, maxSpeed)) / maxSpeed) * plotH;
+	const y = (v: number) => padT + (1 - (Math.max(minSpeed, Math.min(v, maxSpeed)) - minSpeed) / (maxSpeed - minSpeed)) * plotH;
 
 	const pointsAttr = segments.map(p => `${x(p.t).toFixed(2)},${y(p.v).toFixed(2)}`).join(' ');
 	const cursorT = Math.max(0, Math.min(currentSec, totalSec));
@@ -590,11 +591,11 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
 
 			{/* y grid and labels */}
-			{/* gridlines: 0, mid, max; labels only for 0 and max */}
-			{([0, Math.ceil(maxSpeed/2), maxSpeed] as number[]).map((v, i) => (
+			{/* gridlines: min, mid, max; labels for min and max */}
+			{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
 				<g key={i}>
 					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
-					{(v === 0 || v === maxSpeed) && (
+					{(v === minSpeed || v === maxSpeed) && (
 						<text x={padL - 8} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={14} fill="#111827" fontWeight={800}>{v}</text>
 					)}
 				</g>
