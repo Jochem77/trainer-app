@@ -96,7 +96,7 @@ function getAdjacentDates(date: string) {
 	return { prev, next };
 }
 
-function formatDateNL(isoDate: string, calValue?: number): string {
+function formatDateNL(isoDate: string, calValue?: number): { date: string; calories?: string } {
 	try {
 		const d = new Date(`${isoDate}T00:00:00`);
 		const parts = new Intl.DateTimeFormat('nl-NL', {
@@ -113,17 +113,17 @@ function formatDateNL(isoDate: string, calValue?: number): string {
 		
 		const formattedDate = `${weekday} ${day} ${month} ${year}`;
 		
-		// Add calorie information if available
+		// Return date and calories separately
 		if (calValue !== undefined) {
-			return `${formattedDate} (cal ±${calValue})`;
+			return { date: formattedDate, calories: `cal ±${calValue}` };
 		}
 		
-		return formattedDate;
+		return { date: formattedDate };
 	} catch {
 		if (calValue !== undefined) {
-			return `${isoDate} (cal ±${calValue})`;
+			return { date: isoDate, calories: `cal ±${calValue}` };
 		}
-		return isoDate;
+		return { date: isoDate };
 	}
 }
 
@@ -199,7 +199,7 @@ function flattenSteps(steps: Step[]) {
 	return result;
 }
 
-const TrainingProgramDay: React.FC = () => {
+const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = ({ setMenuOpen }) => {
 	const todayStr = new Date().toISOString().slice(0, 10);
 	// Zoek eerst programma van vandaag, anders eerstvolgende na vandaag
 	const getInitialDate = () => {
@@ -381,7 +381,7 @@ const TrainingProgramDay: React.FC = () => {
 	}
 
 		return (
-			<div className="app-root" style={{ maxWidth: 720, height: '100dvh', margin: "0 auto", padding: 16, paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+			<div className="app-root" style={{ maxWidth: 720, height: '100dvh', margin: "0 auto", padding: 16, paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
 				@supports(height: 100dvh){ .app-root{ height: 100dvh; } }
@@ -390,11 +390,25 @@ const TrainingProgramDay: React.FC = () => {
 						50% { box-shadow: 0 0 0 10px #43a04733, 0 2px 8px #0001; }
 						100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 					}
-			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: calc(4px + env(safe-area-inset-top, 0px)) 0 6px; box-shadow: 0 2px 8px #0001; }
-			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:4px auto 2px; max-width:560px; --statSize: 48px; }
-			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:2px 8px; margin:2px auto; max-width:560px; }
-			.topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px 0 56px; }
-			.date-title { margin:0; flex:1; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; font-size: 18px; font-weight: 800; }
+			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: 4px 0 2px; box-shadow: 0 2px 8px #0001; }
+			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:1px auto 1px; max-width:560px; --statSize: 48px; }
+			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:1px 4px 1px; margin:1px auto; max-width:560px; }
+			.graph-card-mobile { margin: 0 auto 0; padding: 0 1px 0; }
+			@media (max-width: 768px) {
+				.app-root { padding: 12px !important; paddingTop: calc(16px + env(safe-area-inset-top, 0px)) !important; paddingBottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
+				.graph-card-mobile { margin: 0 auto 0; padding: 0 0 0; border-radius: 8px; }
+			}
+			}
+			.hambtn-grid { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
+			.hambtn-inline { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
+			.topbar { display: grid; grid-template-columns: 60px 50px 1fr 50px; align-items: center; gap: 8px; padding: 4px 10px 0 10px; }
+			.hamburger-col { justify-self: start; }
+			.prev-col { justify-self: center; }
+			.date-col { justify-self: center; }
+			.next-col { justify-self: center; }
+			.date-title { margin:0; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; }
+			.date-line { font-size: 18px; font-weight: 800; line-height: 1.1; }
+			.calories-line { font-size: 14px; font-weight: 600; color: #666; margin-top: 1px; }
 			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
 			.nav-arrow:disabled { opacity: .4; cursor: default; }
 			.status-top { display:flex; justify-content:space-between; gap:8px; align-items:center; }
@@ -422,33 +436,58 @@ const TrainingProgramDay: React.FC = () => {
 					.b-hard { background:#fdecec; border-left-color:#c62828; }
 					.b-rest { background:#e8f1ff; border-left-color:#1976d2; }
 					/* bottom-actions removed (buttons moved under status card) */
-					.actions-row { display:flex; gap:10px; margin:2px auto 2px; max-width:560px; }
+					.actions-row { display:flex; gap:10px; margin:1px auto 1px; max-width:560px; }
 				.actions-row .btn { flex:1; }
 					.btn { width:100%; font-size:22px; padding:12px 20px; border:none; border-radius:12px; color:#fff; font-weight:800; box-shadow:0 3px 10px #0002; cursor:pointer; }
 					.btn-start { background:#2e7d32; }
 					.btn-stop { background:#c62828; }
 					.btn-reset { background:#1976d2; }
 			@media (max-width:520px){ .status-card{--statSize:36px} .k-time{width:60px} .k-speed{width:70px} .k-dur{width:64px} }
+			@media (max-width: 768px) {
+				.graph-svg { height: 100px !important; }
+			}
+			@media (max-width: 480px) {
+				.graph-svg { height: 90px !important; }
+			}
 				`}</style>
 								<div className="top-sticky">
 									<div className="topbar">
-										<button
-											className="nav-arrow"
-											title="Vorige dag"
-											disabled={!prev}
-											onClick={() => prev && setDate(prev)}
-										>
-											←
-										</button>
-										<h2 className="date-title">{formatDateNL(program.date, program.cal)}</h2>
-										<button
-											className="nav-arrow"
-											title="Volgende dag"
-											disabled={!next}
-											onClick={() => next && setDate(next)}
-										>
-											→
-										</button>
+										<div className="hamburger-col">
+											<button className="hambtn-grid" aria-label="Menu" onClick={() => setMenuOpen(true)}>☰</button>
+										</div>
+										<div className="prev-col">
+											<button
+												className="nav-arrow"
+												title="Vorige dag"
+												disabled={!prev}
+												onClick={() => prev && setDate(prev)}
+											>
+												←
+											</button>
+										</div>
+										<div className="date-col">
+											<div className="date-title">
+												{(() => {
+													const dateInfo = formatDateNL(program.date, program.cal);
+													return (
+														<>
+															<div className="date-line">{dateInfo.date}</div>
+															{dateInfo.calories && <div className="calories-line">({dateInfo.calories})</div>}
+														</>
+													);
+												})()}
+											</div>
+										</div>
+										<div className="next-col">
+											<button
+												className="nav-arrow"
+												title="Volgende dag"
+												disabled={!next}
+												onClick={() => next && setDate(next)}
+											>
+												→
+											</button>
+										</div>
 									</div>
 							{/* Status card */}
 							{(() => {
@@ -496,7 +535,7 @@ const TrainingProgramDay: React.FC = () => {
 
 																{/* Program graph: speed (y) over time (x) with live cursor */}
 																{flatSteps.length > 1 && (
-																	<div className="graph-card">
+																	<div className="graph-card graph-card-mobile">
 																		<ProgramGraph steps={flatSteps} currentSec={timer} />
 																	</div>
 																)}
@@ -585,7 +624,7 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	// y gridlines are computed inline below
 
 	return (
-	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="140" role="img" aria-label="Programma snelheid grafiek">
+	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="120" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
 			{/* axes */}
 			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
 			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
@@ -717,7 +756,7 @@ const App: React.FC = () => {
 		<>
 			{/* Hamburger menu button */}
 			<style>{`
-				.hambtn { position: fixed; top: calc(10px + env(safe-area-inset-top, 0px)); left: 10px; z-index: 50; background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
+				.hambtn { display: none; /* Verbergen omdat we hambtn-grid gebruiken */ }
 				.drawer-backdrop { position: fixed; inset: 0; background: #0006; z-index: 49; }
 				.drawer { position: fixed; top: 0; right: 0; height: 100%; width: 340px; max-width: 90vw; background: #fff; z-index: 50; box-shadow: -4px 0 16px #0004; display: flex; flex-direction: column; }
 				.drawer-header { padding: 14px 16px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content:space-between; }
@@ -742,7 +781,7 @@ const App: React.FC = () => {
 				</>
 			)}
 
-			<TrainingProgramDay />
+			<TrainingProgramDay setMenuOpen={setMenuOpen} />
 		</>
 	);
 };
