@@ -84,6 +84,7 @@ type DayProgram = {
 	week: number;
 	dayName: string;
 	steps: Step[];
+	cal?: number;
 };
 
 const allPrograms: DayProgram[] = schema as DayProgram[];
@@ -95,7 +96,7 @@ function getAdjacentDates(date: string) {
 	return { prev, next };
 }
 
-function formatDateNL(isoDate: string): string {
+function formatDateNL(isoDate: string, calValue?: number): string {
 	try {
 		const d = new Date(`${isoDate}T00:00:00`);
 		const parts = new Intl.DateTimeFormat('nl-NL', {
@@ -109,8 +110,19 @@ function formatDateNL(isoDate: string): string {
 		let month = parts.find(p => p.type === 'month')?.value ?? '';
 		const year = parts.find(p => p.type === 'year')?.value ?? '';
 		month = month.replace('.', '').toLowerCase();
-		return `${weekday} ${day} ${month} ${year}`;
+		
+		const formattedDate = `${weekday} ${day} ${month} ${year}`;
+		
+		// Add calorie information if available
+		if (calValue !== undefined) {
+			return `${formattedDate} (cal ±${calValue})`;
+		}
+		
+		return formattedDate;
 	} catch {
+		if (calValue !== undefined) {
+			return `${isoDate} (cal ±${calValue})`;
+		}
 		return isoDate;
 	}
 }
@@ -428,7 +440,7 @@ const TrainingProgramDay: React.FC = () => {
 										>
 											←
 										</button>
-										<h2 className="date-title">{formatDateNL(program.date)}</h2>
+										<h2 className="date-title">{formatDateNL(program.date, program.cal)}</h2>
 										<button
 											className="nav-arrow"
 											title="Volgende dag"
