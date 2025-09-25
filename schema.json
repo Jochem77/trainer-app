@@ -15,7 +15,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 0.1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -58,7 +58,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -101,7 +101,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -144,7 +144,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 0.3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -187,7 +187,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -230,7 +230,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -273,7 +273,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -316,7 +316,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -359,7 +359,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -402,7 +402,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -445,7 +445,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -473,7 +473,7 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7,
+        "speed_kmh": 7.0,
         "repeats": 1
       },
       {
@@ -502,7 +502,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -530,7 +530,7 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7,
+        "speed_kmh": 7.0,
         "repeats": 1
       },
       {
@@ -559,7 +559,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -587,7 +587,7 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7,
+        "speed_kmh": 7.0,
         "repeats": 1
       },
       {
@@ -616,7 +616,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -644,7 +644,7 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7,
+        "speed_kmh": 7.0,
         "repeats": 1
       },
       {
@@ -673,7 +673,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -701,7 +701,7 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7,
+        "speed_kmh": 7.0,
         "repeats": 1
       },
       {
@@ -1085,7 +1085,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1135,7 +1135,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1185,7 +1185,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1235,7 +1235,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1285,7 +1285,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1335,7 +1335,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1349,7 +1349,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1363,7 +1363,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1377,7 +1377,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 4,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1391,7 +1391,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1405,7 +1405,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1419,7 +1419,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1469,7 +1469,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1483,7 +1483,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1497,7 +1497,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1511,7 +1511,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 4,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1525,7 +1525,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1539,7 +1539,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1553,7 +1553,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1603,7 +1603,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1617,7 +1617,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1631,7 +1631,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1645,7 +1645,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 4,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1659,7 +1659,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1673,7 +1673,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1687,7 +1687,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1737,7 +1737,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1751,7 +1751,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1765,7 +1765,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1779,7 +1779,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 4,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1793,7 +1793,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1807,7 +1807,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1821,7 +1821,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1871,7 +1871,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1885,7 +1885,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1899,7 +1899,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1913,7 +1913,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 4,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1927,7 +1927,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1941,7 +1941,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -1955,7 +1955,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2005,7 +2005,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2062,7 +2062,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2119,7 +2119,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2176,7 +2176,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2233,7 +2233,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2304,7 +2304,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2318,12 +2318,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 9.7,
+          "speed_kmh": 9.5,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2396,7 +2396,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2410,12 +2410,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 9.7,
+          "speed_kmh": 9.5,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2488,7 +2488,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2502,12 +2502,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 9.7,
+          "speed_kmh": 9.5,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2580,7 +2580,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2594,12 +2594,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 9.7,
+          "speed_kmh": 9.5,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2672,7 +2672,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -2686,12 +2686,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 9.7,
+          "speed_kmh": 9.5,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2750,7 +2750,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -2764,12 +2764,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.2,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2778,14 +2778,14 @@
         "type": "steady",
         "label": "Stevig wandelen",
         "duration_min": 1.0,
-        "speed_kmh": 6.1,
+        "speed_kmh": 6.0,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -2799,7 +2799,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -2835,7 +2835,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -2849,12 +2849,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.2,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2863,14 +2863,14 @@
         "type": "steady",
         "label": "Stevig wandelen",
         "duration_min": 1.0,
-        "speed_kmh": 6.1,
+        "speed_kmh": 6.0,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -2884,7 +2884,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -2920,7 +2920,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -2934,12 +2934,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.2,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -2948,14 +2948,14 @@
         "type": "steady",
         "label": "Stevig wandelen",
         "duration_min": 1.0,
-        "speed_kmh": 6.1,
+        "speed_kmh": 6.0,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -2969,7 +2969,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3005,7 +3005,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3019,12 +3019,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.2,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -3033,14 +3033,14 @@
         "type": "steady",
         "label": "Stevig wandelen",
         "duration_min": 1.0,
-        "speed_kmh": 6.1,
+        "speed_kmh": 6.0,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3054,7 +3054,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3090,7 +3090,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2.5,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3104,12 +3104,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.2,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 4
@@ -3118,14 +3118,14 @@
         "type": "steady",
         "label": "Stevig wandelen",
         "duration_min": 1.0,
-        "speed_kmh": 6.1,
+        "speed_kmh": 6.0,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3139,7 +3139,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3175,7 +3175,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3189,7 +3189,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 0.5,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3203,14 +3203,14 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7.4,
+        "speed_kmh": 7.5,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3224,7 +3224,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3260,7 +3260,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3274,7 +3274,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 0.5,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3288,14 +3288,14 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7.4,
+        "speed_kmh": 7.5,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3309,7 +3309,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3345,7 +3345,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3359,7 +3359,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 0.5,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3373,14 +3373,14 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7.4,
+        "speed_kmh": 7.5,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3394,7 +3394,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3430,7 +3430,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3444,7 +3444,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 0.5,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3458,14 +3458,14 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7.4,
+        "speed_kmh": 7.5,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3479,7 +3479,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3515,7 +3515,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3529,7 +3529,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 0.5,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3543,14 +3543,14 @@
         "type": "steady",
         "label": "Extra blok",
         "duration_min": 6,
-        "speed_kmh": 7.4,
+        "speed_kmh": 7.5,
         "repeats": 1
       },
       {
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3564,7 +3564,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10,
+          "speed_kmh": 10.5,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3600,7 +3600,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -3614,12 +3614,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.7,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 6
@@ -3628,7 +3628,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3664,7 +3664,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -3678,12 +3678,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.7,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 6
@@ -3692,7 +3692,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3728,7 +3728,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -3742,12 +3742,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.7,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 6
@@ -3756,7 +3756,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3792,7 +3792,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -3806,12 +3806,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.7,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 6
@@ -3820,7 +3820,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3856,7 +3856,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 2,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -3870,12 +3870,12 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.7,
+          "speed_kmh": 11.0,
           "label": "Interval hard"
         },
         "rest": {
           "duration_min": 1.0,
-          "speed_kmh": 6.1,
+          "speed_kmh": 6.0,
           "label": "Interval rust"
         },
         "repeats": 6
@@ -3884,7 +3884,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1.0,
-          "speed_kmh": 10.5,
+          "speed_kmh": 11.0,
           "label": "Extra interval hard"
         },
         "rest": {
@@ -3920,7 +3920,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 9.5,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -3934,7 +3934,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -3977,7 +3977,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 9.5,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -3991,7 +3991,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -4034,7 +4034,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 9.5,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -4048,7 +4048,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -4091,7 +4091,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 9.5,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -4105,7 +4105,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
@@ -4148,7 +4148,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 3,
-          "speed_kmh": 9.5,
+          "speed_kmh": 10.0,
           "label": "Interval hard"
         },
         "rest": {
@@ -4162,7 +4162,7 @@
         "type": "interval_pair",
         "hard": {
           "duration_min": 1,
-          "speed_kmh": 11,
+          "speed_kmh": 11.5,
           "label": "Interval hard"
         },
         "rest": {
