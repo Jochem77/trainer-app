@@ -441,8 +441,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 				.actions-row .btn { flex:1; }
 					.btn { width:100%; font-size:22px; padding:12px 20px; border:none; border-radius:12px; color:#fff; font-weight:800; box-shadow:0 3px 10px #0002; cursor:pointer; }
 					.btn-start { background:#2e7d32; }
-					.btn-stop { background:#c62828; }
-					.btn-reset { background:#1976d2; }
+					.btn-pause { background:#ff9800; }
 			@media (max-width:520px){ .status-card{--statSize:36px} .k-time{width:60px} .k-speed{width:70px} .k-dur{width:64px} }
 			@media (max-width: 768px) {
 				.graph-svg { height: 100px !important; }
@@ -522,15 +521,9 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 															<div className="actions-row actions-under-card">
 																<button
 																	onClick={() => setRunning((r) => !r)}
-																	className={`btn ${running ? 'btn-stop' : 'btn-start'}`}
+																	className={`btn ${running ? 'btn-pause' : 'btn-start'}`}
 																>
-																	{running ? 'Stop' : 'Start'}
-																</button>
-																<button
-																	onClick={() => { setTimer(0); setRunning(false); }}
-																	className="btn btn-reset"
-																>
-																	Reset
+																	{running ? 'Pauze' : 'Start'}
 																</button>
 															</div>
 
