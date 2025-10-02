@@ -424,7 +424,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 			.speed .value .next-speed { color:#2e7d32; font-weight:800; font-size: calc(var(--statSize) * 0.6); }
 			.current-label { text-align:center; margin-top:4px; font-weight:800; font-size:18px; }
 					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:6px 4px 8px; }
-					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; }
+					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; transition: all 0.2s ease; }
+					.card:hover { background:#e8f0ff; box-shadow:0 4px 16px #0002; transform: translateY(-1px); }
 					.card { scroll-margin-top: 16px; }
 					.done { opacity:.55; filter:grayscale(.2); }
 					.cur { animation: blink-border 1s infinite; outline:6px solid #43a047; outline-offset:0; z-index:1; }
@@ -554,8 +555,27 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 								if (step.type === 'steady') classNames += ' b-steady';
 								else if (step.type === 'interval_hard') classNames += ' b-hard';
 								else if (step.type === 'interval_rest') classNames += ' b-rest';
+					
+					const handleDoubleClick = () => {
+						// Spring naar het begin van dit blok
+						const targetTime = step.start_sec ?? Math.round(step.start_min * 60);
+						setTimer(targetTime);
+						// Update de timer referentie voor accurate tracking
+						timerValRef.current = targetTime;
+						if (running) {
+							// Als de timer loopt, herstart de basis tijd
+							baseTimeRef.current = Date.now() - targetTime * 1000;
+						}
+					};
+
 					return (
-									<div key={idx} data-step-idx={idx} className={classNames}>
+									<div 
+										key={idx} 
+										data-step-idx={idx} 
+										className={classNames}
+										onDoubleClick={handleDoubleClick}
+										style={{ cursor: 'pointer' }}
+									>
 										<div className="k-time">
 											{String(Math.floor((step.start_sec ?? Math.round(step.start_min * 60)) / 60)).padStart(2, '0')}:{String(((step.start_sec ?? Math.round(step.start_min * 60)) % 60)).padStart(2, '0')}
 										</div>
