@@ -79,52 +79,62 @@ type Step =
 			repeats: number;
 		};
 
-type DayProgram = {
-	date: string;
+type WeekProgram = {
 	week: number;
-	dayName: string;
 	steps: Step[];
 	cal?: number;
 };
 
-const allPrograms: DayProgram[] = schema as DayProgram[];
+const weekPrograms: WeekProgram[] = schema as WeekProgram[];
 
-function getAdjacentDates(date: string) {
-	const idx = allPrograms.findIndex(p => p.date === date);
-	const prev = idx > 0 ? allPrograms[idx - 1].date : null;
-	const next = idx >= 0 && idx < allPrograms.length - 1 ? allPrograms[idx + 1].date : null;
+// Startdatum: 30 augustus 2025 is week 1
+const PROGRAM_START_DATE = new Date('2025-08-30'); // Friday, start of week 1
+
+function getCurrentWeek(): number {
+	const today = new Date();
+	const diffTime = today.getTime() - PROGRAM_START_DATE.getTime();
+	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+	const currentWeek = Math.floor(diffDays / 7) + 1;
+	return Math.max(1, Math.min(currentWeek, 12)); // Begrensd tussen week 1-12
+}
+
+function getWeekDateRange(week: number): { start: Date; end: Date; } {
+	const startDate = new Date(PROGRAM_START_DATE);
+	startDate.setDate(startDate.getDate() + (week - 1) * 7);
+	const endDate = new Date(startDate);
+	endDate.setDate(endDate.getDate() + 6);
+	return { start: startDate, end: endDate };
+}
+
+function getAdjacentWeeks(week: number) {
+	const prev = week > 1 ? week - 1 : null;
+	const next = week < 12 ? week + 1 : null;
 	return { prev, next };
 }
 
-function formatDateNL(isoDate: string, calValue?: number): { date: string; calories?: string } {
-	try {
-		const d = new Date(`${isoDate}T00:00:00`);
+function formatWeekNL(week: number, calValue?: number): { date: string; calories?: string } {
+	const { start, end } = getWeekDateRange(week);
+	
+	const formatDate = (date: Date) => {
 		const parts = new Intl.DateTimeFormat('nl-NL', {
-			weekday: 'long',
 			day: 'numeric',
 			month: 'short',
-			year: 'numeric',
-		}).formatToParts(d);
-		const weekday = parts.find(p => p.type === 'weekday')?.value ?? '';
+		}).formatToParts(date);
 		const day = parts.find(p => p.type === 'day')?.value ?? '';
 		let month = parts.find(p => p.type === 'month')?.value ?? '';
-		const year = parts.find(p => p.type === 'year')?.value ?? '';
 		month = month.replace('.', '').toLowerCase();
-		
-		const formattedDate = `${weekday} ${day} ${month} ${year}`;
-		
-		// Return date and calories separately
-		if (calValue !== undefined) {
-			return { date: formattedDate, calories: `cal ±${calValue}` };
-		}
-		
-		return { date: formattedDate };
-	} catch {
-		if (calValue !== undefined) {
-			return { date: isoDate, calories: `cal ±${calValue}` };
-		}
-		return { date: isoDate };
+		return `${day} ${month}`;
+	};
+	
+	const startFormatted = formatDate(start);
+	const endFormatted = formatDate(end);
+	const formattedDate = `Week ${week}: ${startFormatted} - ${endFormatted}`;
+	
+	if (calValue !== undefined) {
+		return { date: formattedDate, calories: `cal ±${calValue}` };
 	}
+	
+	return { date: formattedDate };
 }
 
 function flattenSteps(steps: Step[]) {
@@ -200,20 +210,13 @@ function flattenSteps(steps: Step[]) {
 }
 
 const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = ({ setMenuOpen }) => {
-	const todayStr = new Date().toISOString().slice(0, 10);
-	// Zoek eerst programma van vandaag, anders eerstvolgende na vandaag
-	const getInitialDate = () => {
-		const exact = allPrograms.find((p) => p.date === todayStr);
-		if (exact) return exact.date;
-		const future = allPrograms.find((p) => p.date > todayStr);
-		if (future) return future.date;
-		// fallback: laatste programma vóór vandaag
-		if (allPrograms.length > 0) return allPrograms[allPrograms.length - 1].date;
-		return todayStr;
+	// Start met de huidige week
+	const getInitialWeek = () => {
+		return getCurrentWeek();
 	};
-	const [date, setDate] = useState(getInitialDate());
-	const program = allPrograms.find((p) => p.date === date);
-	const { prev, next } = getAdjacentDates(date);
+	const [week, setWeek] = useState(getInitialWeek());
+	const program = weekPrograms.find((p) => p.week === week);
+	const { prev, next } = getAdjacentWeeks(week);
 	const [timer, setTimer] = useState(0); // seconden (integer)
 	const [running, setRunning] = useState(false);
 	const timerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -352,7 +355,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 	useEffect(() => {
 		setTimer(0);
 		setRunning(false);
-	}, [date]);
+	}, [week]);
 
 	useEffect(() => {
 		if (stepsContainerRef.current) {
@@ -370,11 +373,11 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 	if (!program) {
 		return (
 			<div style={{ maxWidth: 700, margin: "40px auto", padding: 32, borderRadius: 16, background: "#fff3f3", textAlign: "center" }}>
-				<h2>Geen programma voor deze dag</h2>
-				<p>Er is geen trainingsprogramma gevonden voor deze dag.</p>
+				<h2>Geen programma voor deze week</h2>
+				<p>Er is geen trainingsprogramma gevonden voor week {week}.</p>
 				<div style={{ marginTop: 24 }}>
-					{prev && <button onClick={() => setDate(prev)} style={{ marginRight: 12, padding: '8px 18px', fontSize: 18, borderRadius: 8, border: 'none', background: '#eee', cursor: 'pointer' }}>← Vorige</button>}
-					{next && <button onClick={() => setDate(next)} style={{ padding: '8px 18px', fontSize: 18, borderRadius: 8, border: 'none', background: '#eee', cursor: 'pointer' }}>Volgende →</button>}
+					{prev && <button onClick={() => setWeek(prev)} style={{ marginRight: 12, padding: '8px 18px', fontSize: 18, borderRadius: 8, border: 'none', background: '#eee', cursor: 'pointer' }}>← Vorige week</button>}
+					{next && <button onClick={() => setWeek(next)} style={{ padding: '8px 18px', fontSize: 18, borderRadius: 8, border: 'none', background: '#eee', cursor: 'pointer' }}>Volgende week →</button>}
 				</div>
 			</div>
 		);
@@ -458,9 +461,9 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 										<div className="prev-col">
 											<button
 												className="nav-arrow"
-												title="Vorige dag"
+												title="Vorige week"
 												disabled={!prev}
-												onClick={() => prev && setDate(prev)}
+												onClick={() => prev && setWeek(prev)}
 											>
 												←
 											</button>
@@ -468,11 +471,11 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 										<div className="date-col">
 											<div className="date-title">
 												{(() => {
-													const dateInfo = formatDateNL(program.date, program.cal);
+													const weekInfo = formatWeekNL(program.week, program.cal);
 													return (
 														<>
-															<div className="date-line">{dateInfo.date}</div>
-															{dateInfo.calories && <div className="calories-line">({dateInfo.calories})</div>}
+															<div className="date-line">{weekInfo.date}</div>
+															{weekInfo.calories && <div className="calories-line">({weekInfo.calories})</div>}
 														</>
 													);
 												})()}
@@ -481,9 +484,9 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 										<div className="next-col">
 											<button
 												className="nav-arrow"
-												title="Volgende dag"
+												title="Volgende week"
 												disabled={!next}
-												onClick={() => next && setDate(next)}
+												onClick={() => next && setWeek(next)}
 											>
 												→
 											</button>
