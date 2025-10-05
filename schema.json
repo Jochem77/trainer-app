@@ -1327,7 +1327,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -1339,7 +1339,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1353,7 +1353,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1423,7 +1423,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1445,12 +1445,18 @@
       },
       {
         "type": "steady",
+        "label": "Steady run",
+        "duration_min": 4,
+        "speed_kmh": 7.0,
+        "repeats": 1
+      },
+      {
+        "type": "steady",
         "label": "Cooling down",
         "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
-      }
-    ],
+      }    ],
     "cal": 750
   },
   {
@@ -1461,7 +1467,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -1473,7 +1479,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1487,7 +1493,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1557,7 +1563,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1576,6 +1582,13 @@
           "label": "Interval rust"
         },
         "repeats": 3
+      },
+      {
+        "type": "steady",
+        "label": "Steady run",
+        "duration_min": 4,
+        "speed_kmh": 7.0,
+        "repeats": 1
       },
       {
         "type": "steady",
@@ -1595,7 +1608,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -1607,7 +1620,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1621,7 +1634,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1691,7 +1704,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1710,6 +1723,13 @@
           "label": "Interval rust"
         },
         "repeats": 3
+      },
+      {
+        "type": "steady",
+        "label": "Steady run",
+        "duration_min": 4,
+        "speed_kmh": 7.0,
+        "repeats": 1
       },
       {
         "type": "steady",
@@ -1729,7 +1749,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -1741,7 +1761,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1755,7 +1775,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1825,7 +1845,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1844,6 +1864,13 @@
           "label": "Interval rust"
         },
         "repeats": 3
+      },
+      {
+        "type": "steady",
+        "label": "Steady run",
+        "duration_min": 4,
+        "speed_kmh": 7.0,
+        "repeats": 1
       },
       {
         "type": "steady",
@@ -1863,7 +1890,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -1875,7 +1902,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1889,7 +1916,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1959,7 +1986,7 @@
           "label": "Interval hard"
         },
         "rest": {
-          "duration_min": 2,
+          "duration_min": 1,
           "speed_kmh": 6.0,
           "label": "Interval rust"
         },
@@ -1978,6 +2005,13 @@
           "label": "Interval rust"
         },
         "repeats": 3
+      },
+      {
+        "type": "steady",
+        "label": "Steady run",
+        "duration_min": 4,
+        "speed_kmh": 7.0,
+        "repeats": 1
       },
       {
         "type": "steady",
