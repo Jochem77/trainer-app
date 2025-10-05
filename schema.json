@@ -398,7 +398,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -453,7 +453,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -543,7 +543,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -626,7 +626,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -709,7 +709,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 6,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
@@ -771,7 +771,7 @@
       {
         "type": "steady",
         "label": "Warming-up",
-        "duration_min": 8,
+        "duration_min": 4,
         "speed_kmh": 6.0,
         "repeats": 1
       },
