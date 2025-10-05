@@ -393,7 +393,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 						50% { box-shadow: 0 0 0 10px #43a04733, 0 2px 8px #0001; }
 						100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 					}
-			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: 4px 0 2px; box-shadow: 0 2px 8px #0001; }
+			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: 12px 0 2px; box-shadow: 0 2px 8px #0001; }
 			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:1px auto 1px; max-width:560px; --statSize: 48px; }
 			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:1px 4px 1px; margin:1px auto; max-width:560px; }
 			.graph-card-mobile { margin: 0 auto 0; padding: 0 1px 0; }
@@ -404,7 +404,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 			}
 			.hambtn-grid { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
 			.hambtn-inline { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
-			.topbar { display: grid; grid-template-columns: 60px 50px 1fr 50px; align-items: center; gap: 8px; padding: 4px 10px 0 10px; }
+			.topbar { display: grid; grid-template-columns: 60px 50px 1fr 50px; align-items: center; gap: 8px; padding: 8px 10px 0 10px; }
 			.hamburger-col { justify-self: start; }
 			.prev-col { justify-self: center; }
 			.date-col { justify-self: center; }
