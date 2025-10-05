@@ -412,7 +412,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void }> = (
 			.date-title { margin:0; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; }
 			.date-line { font-size: 18px; font-weight: 800; line-height: 1.1; }
 			.calories-line { font-size: 14px; font-weight: 600; color: #666; margin-top: 1px; }
-			.nav-arrow { width:44px; height:36px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
+			.nav-arrow { width:44px; height:48px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
 			.nav-arrow:disabled { opacity: .4; cursor: default; }
 			.status-top { display:flex; justify-content:space-between; gap:8px; align-items:center; }
 					.status-col { flex:1; text-align:center; }
