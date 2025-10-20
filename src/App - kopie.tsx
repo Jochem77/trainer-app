@@ -3,269 +3,66 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import schema from "../schema.json";
 import SchemaEditor from './SchemaEditor';
 import { supabase } from './lib/supabase';
-
-type UserSchema = {
+type Program = {
 	id: number;
-	schema_name: string;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
+	name: string;
 };
 
-type SchemaSelectorProps = {
+type ProgramSelectorProps = {
 	userId: string;
+	compact?: boolean;
 };
 
-const SchemaSelector: React.FC<SchemaSelectorProps> = ({ userId }) => {
-	const [schemas, setSchemas] = useState<UserSchema[]>([]);
-	const [selectedSchemaId, setSelectedSchemaId] = useState<number | null>(null);
+const ProgramSelector: React.FC<ProgramSelectorProps> = ({ userId, compact }) => {
+	const [programs, setPrograms] = useState<Program[]>([]);
+	const [selectedId, setSelectedId] = useState<number | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState("");
 	const [message, setMessage] = useState("");
+	const [error, setError] = useState("");
 
 	useEffect(() => {
-		const fetchSchemas = async () => {
+		const fetchPrograms = async () => {
 			setLoading(true);
 			setError("");
-			
-			// Try new format first (with is_active and schema_name)
-			let { data, error } = await supabase
-				.from("user_schemas")
-				.select("id, schema_name, is_active, created_at, updated_at")
-				.eq("user_id", userId)
-				.order("updated_at", { ascending: false });
-			
-			// If new columns don't exist, fall back to legacy format
-			if (error && (error.message.includes('is_active') || error.message.includes('schema_name') || error.message.includes('column') || error.code === '42703')) {
-				console.warn('New columns not available, using legacy format for schema list');
-				const legacyResult = await supabase
-					.from("user_schemas")
-					.select("id, schema_data, created_at, updated_at")
-					.eq("user_id", userId)
-					.order("updated_at", { ascending: false });
-				
-				if (legacyResult.data) {
-					// Convert legacy format to new format for UI compatibility
-					data = legacyResult.data.map((schema: { id: number; schema_data: unknown; schema_name?: string; created_at: string; updated_at: string; }) => ({
-						...schema,
-						schema_name: schema.schema_name || 'Mijn Trainingsschema',
-						is_active: true // In legacy mode, assume single active schema
-					}));
-				}
-				error = legacyResult.error;
-			}
-			
-			if (error) {
-				setError(error.message);
-				console.error("Error fetching user schemas:", error);
-			} else {
-				setSchemas(data || []);
-				// Set active schema as selected
-				const activeSchema = data?.find(s => s.is_active) || data?.[0];
-				if (activeSchema) {
-					setSelectedSchemaId(activeSchema.id);
-				}
-			}
+			const { data, error } = await supabase.from("programs").select("id, name");
+			if (error) setError(error.message);
+			else setPrograms(data || []);
 			setLoading(false);
 		};
-		fetchSchemas();
-	}, [userId]);
+		fetchPrograms();
+	}, []);
 
-	const handleSchemaSelect = async (schemaId: number) => {
-		setSelectedSchemaId(schemaId);
+	const handleSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+		const id = Number(e.target.value);
+		setSelectedId(id);
 		setMessage("");
 		setError("");
 		setLoading(true);
-
-		try {
-			// Try new format first (with is_active column)
-			const deactivateResult = await supabase
-				.from("user_schemas")
-				.update({ is_active: false })
-				.eq("user_id", userId);
-
-			// If is_active column doesn't exist, skip this step (legacy mode)
-			if (deactivateResult.error && (deactivateResult.error.message.includes('is_active') || deactivateResult.error.message.includes('column') || deactivateResult.error.code === '42703')) {
-				console.warn('is_active column not available, skipping deactivation in legacy mode');
-			} else if (deactivateResult.error) {
-				throw deactivateResult.error;
-			}
-
-			// Try to activate selected schema (only if is_active column exists)
-			const { error } = await supabase
-				.from("user_schemas")
-				.update({ is_active: true })
-				.eq("id", schemaId);
-
-			if (error && (error.message.includes('is_active') || error.message.includes('column') || error.code === '42703')) {
-				console.warn('is_active column not available for activation, using legacy mode');
-				setMessage("Schema geselecteerd! (legacy mode)");
-			} else if (error) {
-				setError(error.message);
-			} else {
-				setMessage("Schema geselecteerd!");
-				// Refresh schemas to update UI
-				const { data } = await supabase
-					.from("user_schemas")
-					.select("id, schema_name, is_active, created_at, updated_at")
-					.eq("user_id", userId)
-					.order("updated_at", { ascending: false });
-				setSchemas(data || []);
-			}
-		} catch {
-			setError("Fout bij selecteren van schema");
-		}
+		// Sla keuze op in user_program_state
+		const { error } = await supabase.from("user_program_state").upsert({
+			user_id: userId,
+			program_id: id,
+		});
 		setLoading(false);
+		if (error) setError(error.message);
+		else setMessage("Keuze opgeslagen!");
 	};
 
-	const createNewSchema = async () => {
-		const schemaName = prompt("Naam voor het nieuwe schema:", `Schema ${schemas.length + 1}`);
-		if (!schemaName) return;
-
-		setLoading(true);
-		try {
-			// Try new format first (with schema_name and is_active)
-			let { error } = await supabase
-				.from("user_schemas")
-				.insert({
-					user_id: userId,
-					schema_name: schemaName,
-					schema_data: schema, // Use default schema from schema.json
-					is_active: false
-				})
-				.select()
-				.single();
-
-			// If new columns don't exist, fall back to legacy format with embedded name
-			if (error && (error.message.includes('schema_name') || error.message.includes('is_active') || error.message.includes('column') || error.code === '42703')) {
-				console.warn('New columns not available, using legacy insert format with embedded name');
-				
-				// Store schema name inside the schema_data as metadata
-				const dataWithName = {
-					schema_name: schemaName,
-					weeks: schema
-				};
-				
-				const legacyResult = await supabase
-					.from("user_schemas")
-					.insert({
-						user_id: userId,
-						schema_data: dataWithName
-					})
-					.select()
-					.single();
-				error = legacyResult.error;
-			}
-
-			if (error) {
-				setError(error.message);
-			} else {
-				setMessage(`Schema "${schemaName}" aangemaakt!`);
-				// Refresh schemas with proper fallback
-				const refreshResult = await supabase
-					.from("user_schemas")
-					.select("id, schema_name, is_active, created_at, updated_at")
-					.eq("user_id", userId)
-					.order("updated_at", { ascending: false });
-				
-				if (refreshResult.error && (refreshResult.error.message.includes('schema_name') || refreshResult.error.message.includes('is_active'))) {
-					console.warn('Using legacy refresh after create');
-					const legacyRefresh = await supabase
-						.from("user_schemas")
-						.select("id, schema_data, created_at, updated_at")
-						.eq("user_id", userId)
-						.order("updated_at", { ascending: false });
-					
-					if (legacyRefresh.data) {
-						const convertedData = legacyRefresh.data.map((schema: { id: number; schema_data: unknown; schema_name?: string; created_at: string; updated_at: string; }) => ({
-							...schema,
-							schema_name: schema.schema_name || 'Mijn Trainingsschema',
-							is_active: true
-						}));
-						setSchemas(convertedData);
-					}
-				} else if (refreshResult.data) {
-					setSchemas(refreshResult.data);
-				}
-			}
-		} catch {
-			setError("Fout bij aanmaken van schema");
-		}
-		setLoading(false);
-	};
-
+	const boxStyle: React.CSSProperties = compact
+		? { padding: 12 }
+		: { maxWidth: 400, margin: "40px auto", padding: 24, border: "1px solid #ddd", borderRadius: 8 } as React.CSSProperties;
 	return (
-		<div>
-			{loading && <div style={{ color: '#6c757d', marginBottom: '8px' }}>Laden...</div>}
-			{error && <div style={{ color: '#dc3545', marginBottom: '8px', fontSize: '14px' }}>{error}</div>}
-			{message && <div style={{ color: '#28a745', marginBottom: '8px', fontSize: '14px' }}>{message}</div>}
-			
-			{schemas.length > 0 ? (
-				<>
-					<select 
-						value={selectedSchemaId || ""} 
-						onChange={(e) => handleSchemaSelect(Number(e.target.value))}
-						style={{ 
-							width: "100%", 
-							padding: '10px 12px', 
-							border: '1px solid #dee2e6',
-							borderRadius: '6px',
-							marginBottom: '12px',
-							fontSize: '14px'
-						}}
-						disabled={loading}
-					>
-						<option value="" disabled>Kies een schema</option>
-						{schemas.map(s => (
-							<option key={s.id} value={s.id}>
-								{s.schema_name} {s.is_active ? '(actief)' : ''}
-							</option>
-						))}
-					</select>
-					
-					<button 
-						onClick={createNewSchema}
-						disabled={loading}
-						style={{
-							width: '100%',
-							padding: '8px 12px',
-							background: '#28a745',
-							color: 'white',
-							border: 'none',
-							borderRadius: '6px',
-							fontSize: '14px',
-							cursor: 'pointer'
-						}}
-					>
-						➕ Nieuw Schema
-					</button>
-				</>
-			) : (
-				<div style={{ 
-					padding: '16px', 
-					background: '#f8f9fa', 
-					borderRadius: '8px', 
-					textAlign: 'center',
-					marginBottom: '12px'
-				}}>
-					<div style={{ marginBottom: '12px', color: '#6c757d' }}>Nog geen schema's</div>
-					<button 
-						onClick={createNewSchema}
-						disabled={loading}
-						style={{
-							padding: '10px 16px',
-							background: '#007bff',
-							color: 'white',
-							border: 'none',
-							borderRadius: '6px',
-							fontSize: '14px',
-							cursor: 'pointer'
-						}}
-					>
-						🎯 Eerste Schema Aanmaken
-					</button>
-				</div>
-			)}
+		<div style={boxStyle}>
+			<h2>Kies een programma</h2>
+			{loading && <div>Laden...</div>}
+			{error && <div style={{ color: "red" }}>{error}</div>}
+			<select value={selectedId ?? ""} onChange={handleSelect} style={{ width: "100%", padding: 8 }}>
+				<option value="" disabled>Kies een programma</option>
+				{programs.map(p => (
+					<option key={p.id} value={p.id}>{p.name}</option>
+				))}
+			</select>
+			{message && <div style={{ color: "green", marginTop: 8 }}>{message}</div>}
 		</div>
 	);
 };
@@ -436,18 +233,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 				if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
 					console.error('Error loading schema in main app:', error);
 				} else if (data?.schema_data) {
-					// Check if this is the new embedded format with schema_name
-					let weekData = data.schema_data;
-					
-					// If schema_data has schema_name and weeks properties, it's the embedded format
-					if (data.schema_data.schema_name && data.schema_data.weeks) {
-						weekData = data.schema_data.weeks;
-						console.log('Loaded user schema in main app (embedded format)');
-					} else {
-						console.log('Loaded user schema in main app (direct format)');
-					}
-					
-					setWeekPrograms(weekData);
+					setWeekPrograms(data.schema_data);
+					console.log('Loaded user schema in main app');
 				}
 			} catch (err) {
 				console.error('Error loading schema in main app:', err);
@@ -1077,8 +864,8 @@ const App: React.FC = () => {
 							{/* Trainingsschema Selectie & Beheer - Bovenaan */}
 							{user && (
 								<div className="menu-section">
-									<h3>🎯 Trainingsschema's</h3>
-									<SchemaSelector userId={user.id} />
+									<h3>🎯 Kies Trainingsschema</h3>
+									<ProgramSelector userId={user.id} />
 									
 									{/* Schema Beheer knoppen direct onder selectie */}
 									<div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f0f2f5' }}>
