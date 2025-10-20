@@ -67,7 +67,7 @@ interface LoadedWeekProgram {
 }
 
 interface SchemaEditorProps {
-	userId: string | null;
+	userId: string | null | undefined;
 	onBack: () => void;
 }
 
