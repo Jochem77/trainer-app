@@ -944,8 +944,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
 		setMessage("");
 		setLoading(true);
 		
-		// Gebruik de huidige URL als redirect
-		const redirectTo = window.location.origin + window.location.pathname;
+		// Gebruik de correcte redirect URL voor GitHub Pages
+		const redirectTo = window.location.hostname === 'localhost' 
+			? window.location.origin 
+			: 'https://jochem77.github.io/trainer-app/';
 		
 		const { error } = await supabase.auth.signInWithOtp({ 
 			email,
