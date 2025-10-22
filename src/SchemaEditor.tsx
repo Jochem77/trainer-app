@@ -1199,35 +1199,46 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							onDragOver={(e) => {
 								e.preventDefault();
 								e.dataTransfer.dropEffect = 'move';
-								e.currentTarget.style.transform = 'scale(1.05)';
+								// Voeg een border-left toe om te tonen waar de week wordt ingevoegd
+								e.currentTarget.style.borderLeft = '4px solid #007bff';
+								e.currentTarget.style.transform = 'translateX(4px)';
 								e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
 							}}
 							onDragLeave={(e) => {
-								e.currentTarget.style.transform = 'scale(1)';
+								e.currentTarget.style.borderLeft = 'none';
+								e.currentTarget.style.transform = 'translateX(0)';
 								e.currentTarget.style.boxShadow = 'none';
 							}}
 							onDrop={(e) => {
 								e.preventDefault();
-								e.currentTarget.style.transform = 'scale(1)';
+								e.currentTarget.style.borderLeft = 'none';
+								e.currentTarget.style.transform = 'translateX(0)';
 								e.currentTarget.style.boxShadow = 'none';
 								
 								const draggedWeekNumber = parseInt(e.dataTransfer.getData('text/plain'));
 								const targetWeekNumber = program.week;
 								
 								if (draggedWeekNumber !== targetWeekNumber) {
-									// Vind de indices van beide weken
-									const draggedIndex = weekPrograms.findIndex(p => p.week === draggedWeekNumber);
+									const draggedProgram = weekPrograms.find(p => p.week === draggedWeekNumber);
 									const targetIndex = weekPrograms.findIndex(p => p.week === targetWeekNumber);
 									
-									if (draggedIndex !== -1 && targetIndex !== -1) {
-										const newPrograms = [...weekPrograms];
-										// Swap de week nummers
-										const temp = newPrograms[draggedIndex].week;
-										newPrograms[draggedIndex].week = newPrograms[targetIndex].week;
-										newPrograms[targetIndex].week = temp;
+									if (draggedProgram && targetIndex !== -1) {
+										// Verwijder de gesleepte week uit de lijst
+										const otherPrograms = weekPrograms.filter(p => p.week !== draggedWeekNumber);
 										
-										// Sorteer opnieuw
-										setWeekPrograms(newPrograms.sort((a, b) => a.week - b.week));
+										// Voeg de gesleepte week in voor de target week
+										const newPrograms = [
+											...otherPrograms.slice(0, targetIndex),
+											draggedProgram,
+											...otherPrograms.slice(targetIndex)
+										];
+										
+										// Hernummer alle weken
+										newPrograms.forEach((prog, idx) => {
+											prog.week = idx + 1;
+										});
+										
+										setWeekPrograms(newPrograms);
 										setHasChanges(true);
 									}
 								}
