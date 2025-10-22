@@ -658,6 +658,52 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		}
 	};
 
+	const copyWeek = (weekNumber: number) => {
+		const weekToCopy = weekPrograms.find(p => p.week === weekNumber);
+		if (!weekToCopy) return;
+
+		const maxWeek = Math.max(...weekPrograms.map(p => p.week));
+		const newWeek: WeekProgram = {
+			week: maxWeek + 1,
+			cal: weekToCopy.cal,
+			steps: weekToCopy.steps.map(step => ({ ...step })) // Deep copy van steps
+		};
+		
+		setWeekPrograms(prev => [...prev, newWeek].sort((a, b) => a.week - b.week));
+		setSelectedWeek(newWeek.week);
+		setHasChanges(true);
+	};
+
+	const moveWeekUp = (weekNumber: number) => {
+		const currentIndex = weekPrograms.findIndex(p => p.week === weekNumber);
+		if (currentIndex <= 0) return; // Al bovenaan
+		
+		const newPrograms = [...weekPrograms];
+		// Swap week nummers
+		const temp = newPrograms[currentIndex - 1].week;
+		newPrograms[currentIndex - 1].week = newPrograms[currentIndex].week;
+		newPrograms[currentIndex].week = temp;
+		
+		// Sorteer opnieuw
+		setWeekPrograms(newPrograms.sort((a, b) => a.week - b.week));
+		setHasChanges(true);
+	};
+
+	const moveWeekDown = (weekNumber: number) => {
+		const currentIndex = weekPrograms.findIndex(p => p.week === weekNumber);
+		if (currentIndex >= weekPrograms.length - 1) return; // Al onderaan
+		
+		const newPrograms = [...weekPrograms];
+		// Swap week nummers
+		const temp = newPrograms[currentIndex + 1].week;
+		newPrograms[currentIndex + 1].week = newPrograms[currentIndex].week;
+		newPrograms[currentIndex].week = temp;
+		
+		// Sorteer opnieuw
+		setWeekPrograms(newPrograms.sort((a, b) => a.week - b.week));
+		setHasChanges(true);
+	};
+
 	const renderStepEditor = (step: SimpleStep, index: number) => {
 		const handleTypeChange = (newType: 'steady' | 'interval_pair') => {
 			if (newType === 'steady') {
@@ -1155,14 +1201,14 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				</div>
 				<div style={{ 
 					display: 'grid', 
-					gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', 
-					gap: '8px',
-					padding: '16px',
+					gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', 
+					gap: '24px',
+					padding: '24px',
 					background: '#f8f9fa',
 					borderRadius: '12px',
 					border: '1px solid #dee2e6'
 				}}>
-					{weekPrograms.map((program) => (
+					{weekPrograms.map((program, index) => (
 						<div key={program.week} style={{ position: 'relative' }}>
 							<button
 								onClick={() => setSelectedWeek(program.week)}
@@ -1182,32 +1228,125 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							>
 								Week {program.week}
 							</button>
-							{weekPrograms.length > 1 && (
+							
+							{/* Week management knoppen */}
+							<div style={{
+								position: 'absolute',
+								top: '-10px',
+								right: '-10px',
+								display: 'flex',
+								flexDirection: 'column',
+								gap: '2px'
+							}}>
+								{/* Verwijder knop */}
+								{weekPrograms.length > 1 && (
+									<button
+										onClick={() => removeWeek(program.week)}
+										style={{
+											width: '18px',
+											height: '18px',
+											background: '#dc3545',
+											color: 'white',
+											border: 'none',
+											borderRadius: '50%',
+											cursor: 'pointer',
+											fontSize: '10px',
+											fontWeight: '600',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											lineHeight: '1'
+										}}
+										title={`Week ${program.week} verwijderen`}
+									>
+										×
+									</button>
+								)}
+								
+								{/* Kopieer knop */}
 								<button
-									onClick={() => removeWeek(program.week)}
+									onClick={() => copyWeek(program.week)}
 									style={{
-										position: 'absolute',
-										top: '-8px',
-										right: '-8px',
-										width: '20px',
-										height: '20px',
-										background: '#dc3545',
+										width: '18px',
+										height: '18px',
+										background: '#28a745',
 										color: 'white',
 										border: 'none',
 										borderRadius: '50%',
 										cursor: 'pointer',
-										fontSize: '12px',
+										fontSize: '9px',
 										fontWeight: '600',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
 										lineHeight: '1'
 									}}
-									title={`Week ${program.week} verwijderen`}
+									title={`Week ${program.week} kopiëren`}
 								>
-									×
+									📄
 								</button>
-							)}
+							</div>
+
+							{/* Verplaats knoppen */}
+							<div style={{
+								position: 'absolute',
+								top: '50%',
+								left: '-15px',
+								transform: 'translateY(-50%)',
+								display: 'flex',
+								flexDirection: 'column',
+								gap: '2px'
+							}}>
+								{/* Omhoog knop */}
+								{index > 0 && (
+									<button
+										onClick={() => moveWeekUp(program.week)}
+										style={{
+											width: '16px',
+											height: '16px',
+											background: '#6c757d',
+											color: 'white',
+											border: 'none',
+											borderRadius: '50%',
+											cursor: 'pointer',
+											fontSize: '8px',
+											fontWeight: '600',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											lineHeight: '1'
+										}}
+										title={`Week ${program.week} omhoog verplaatsen`}
+									>
+										↑
+									</button>
+								)}
+								
+								{/* Omlaag knop */}
+								{index < weekPrograms.length - 1 && (
+									<button
+										onClick={() => moveWeekDown(program.week)}
+										style={{
+											width: '16px',
+											height: '16px',
+											background: '#6c757d',
+											color: 'white',
+											border: 'none',
+											borderRadius: '50%',
+											cursor: 'pointer',
+											fontSize: '8px',
+											fontWeight: '600',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											lineHeight: '1'
+										}}
+										title={`Week ${program.week} omlaag verplaatsen`}
+									>
+										↓
+									</button>
+								)}
+							</div>
 						</div>
 					))}
 				</div>
