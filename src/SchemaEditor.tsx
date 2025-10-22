@@ -674,35 +674,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		setHasChanges(true);
 	};
 
-	const moveWeekUp = (weekNumber: number) => {
-		const currentIndex = weekPrograms.findIndex(p => p.week === weekNumber);
-		if (currentIndex <= 0) return; // Al bovenaan
-		
-		const newPrograms = [...weekPrograms];
-		// Swap week nummers
-		const temp = newPrograms[currentIndex - 1].week;
-		newPrograms[currentIndex - 1].week = newPrograms[currentIndex].week;
-		newPrograms[currentIndex].week = temp;
-		
-		// Sorteer opnieuw
-		setWeekPrograms(newPrograms.sort((a, b) => a.week - b.week));
-		setHasChanges(true);
-	};
 
-	const moveWeekDown = (weekNumber: number) => {
-		const currentIndex = weekPrograms.findIndex(p => p.week === weekNumber);
-		if (currentIndex >= weekPrograms.length - 1) return; // Al onderaan
-		
-		const newPrograms = [...weekPrograms];
-		// Swap week nummers
-		const temp = newPrograms[currentIndex + 1].week;
-		newPrograms[currentIndex + 1].week = newPrograms[currentIndex].week;
-		newPrograms[currentIndex].week = temp;
-		
-		// Sorteer opnieuw
-		setWeekPrograms(newPrograms.sort((a, b) => a.week - b.week));
-		setHasChanges(true);
-	};
 
 	const renderStepEditor = (step: SimpleStep, index: number) => {
 		const handleTypeChange = (newType: 'steady' | 'interval_pair') => {
@@ -1202,14 +1174,65 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				<div style={{ 
 					display: 'grid', 
 					gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', 
-					gap: '24px',
-					padding: '24px',
+					gap: '16px',
+					padding: '16px',
 					background: '#f8f9fa',
 					borderRadius: '12px',
 					border: '1px solid #dee2e6'
 				}}>
-					{weekPrograms.map((program, index) => (
-						<div key={program.week} style={{ position: 'relative' }}>
+					{weekPrograms.map((program) => (
+						<div 
+							key={program.week} 
+							style={{ 
+								position: 'relative',
+								transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+							}}
+							draggable
+							onDragStart={(e) => {
+								e.dataTransfer.setData('text/plain', program.week.toString());
+								e.dataTransfer.effectAllowed = 'move';
+								e.currentTarget.style.opacity = '0.5';
+							}}
+							onDragEnd={(e) => {
+								e.currentTarget.style.opacity = '1';
+							}}
+							onDragOver={(e) => {
+								e.preventDefault();
+								e.dataTransfer.dropEffect = 'move';
+								e.currentTarget.style.transform = 'scale(1.05)';
+								e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
+							}}
+							onDragLeave={(e) => {
+								e.currentTarget.style.transform = 'scale(1)';
+								e.currentTarget.style.boxShadow = 'none';
+							}}
+							onDrop={(e) => {
+								e.preventDefault();
+								e.currentTarget.style.transform = 'scale(1)';
+								e.currentTarget.style.boxShadow = 'none';
+								
+								const draggedWeekNumber = parseInt(e.dataTransfer.getData('text/plain'));
+								const targetWeekNumber = program.week;
+								
+								if (draggedWeekNumber !== targetWeekNumber) {
+									// Vind de indices van beide weken
+									const draggedIndex = weekPrograms.findIndex(p => p.week === draggedWeekNumber);
+									const targetIndex = weekPrograms.findIndex(p => p.week === targetWeekNumber);
+									
+									if (draggedIndex !== -1 && targetIndex !== -1) {
+										const newPrograms = [...weekPrograms];
+										// Swap de week nummers
+										const temp = newPrograms[draggedIndex].week;
+										newPrograms[draggedIndex].week = newPrograms[targetIndex].week;
+										newPrograms[targetIndex].week = temp;
+										
+										// Sorteer opnieuw
+										setWeekPrograms(newPrograms.sort((a, b) => a.week - b.week));
+										setHasChanges(true);
+									}
+								}
+							}}
+						>
 							<button
 								onClick={() => setSelectedWeek(program.week)}
 								style={{
@@ -1219,38 +1242,45 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									color: selectedWeek === program.week ? 'white' : '#495057',
 									border: selectedWeek === program.week ? '2px solid #0056b3' : '2px solid #dee2e6',
 									borderRadius: '8px',
-									cursor: 'pointer',
+									cursor: 'grab',
 									fontSize: '14px',
 									fontWeight: '600',
 									transition: 'all 0.2s ease',
-									textAlign: 'center'
+									textAlign: 'center',
+									position: 'relative'
 								}}
+								onMouseDown={(e) => e.currentTarget.style.cursor = 'grabbing'}
+								onMouseUp={(e) => e.currentTarget.style.cursor = 'grab'}
 							>
+								<span style={{ marginRight: '4px' }}>⋮⋮</span>
 								Week {program.week}
 							</button>
 							
-							{/* Week management knoppen */}
+							{/* Week management knoppen - alleen kopiëren en verwijderen */}
 							<div style={{
 								position: 'absolute',
-								top: '-10px',
-								right: '-10px',
+								top: '-8px',
+								right: '-8px',
 								display: 'flex',
-								flexDirection: 'column',
-								gap: '2px'
+								flexDirection: 'row',
+								gap: '4px'
 							}}>
 								{/* Verwijder knop */}
 								{weekPrograms.length > 1 && (
 									<button
-										onClick={() => removeWeek(program.week)}
+										onClick={(e) => {
+											e.stopPropagation();
+											removeWeek(program.week);
+										}}
 										style={{
-											width: '18px',
-											height: '18px',
+											width: '20px',
+											height: '20px',
 											background: '#dc3545',
 											color: 'white',
 											border: 'none',
 											borderRadius: '50%',
 											cursor: 'pointer',
-											fontSize: '10px',
+											fontSize: '12px',
 											fontWeight: '600',
 											display: 'flex',
 											alignItems: 'center',
@@ -1265,16 +1295,19 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								
 								{/* Kopieer knop */}
 								<button
-									onClick={() => copyWeek(program.week)}
+									onClick={(e) => {
+										e.stopPropagation();
+										copyWeek(program.week);
+									}}
 									style={{
-										width: '18px',
-										height: '18px',
+										width: '20px',
+										height: '20px',
 										background: '#28a745',
 										color: 'white',
 										border: 'none',
 										borderRadius: '50%',
 										cursor: 'pointer',
-										fontSize: '9px',
+										fontSize: '11px',
 										fontWeight: '600',
 										display: 'flex',
 										alignItems: 'center',
@@ -1285,67 +1318,6 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								>
 									📄
 								</button>
-							</div>
-
-							{/* Verplaats knoppen */}
-							<div style={{
-								position: 'absolute',
-								top: '50%',
-								left: '-15px',
-								transform: 'translateY(-50%)',
-								display: 'flex',
-								flexDirection: 'column',
-								gap: '2px'
-							}}>
-								{/* Omhoog knop */}
-								{index > 0 && (
-									<button
-										onClick={() => moveWeekUp(program.week)}
-										style={{
-											width: '16px',
-											height: '16px',
-											background: '#6c757d',
-											color: 'white',
-											border: 'none',
-											borderRadius: '50%',
-											cursor: 'pointer',
-											fontSize: '8px',
-											fontWeight: '600',
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											lineHeight: '1'
-										}}
-										title={`Week ${program.week} omhoog verplaatsen`}
-									>
-										↑
-									</button>
-								)}
-								
-								{/* Omlaag knop */}
-								{index < weekPrograms.length - 1 && (
-									<button
-										onClick={() => moveWeekDown(program.week)}
-										style={{
-											width: '16px',
-											height: '16px',
-											background: '#6c757d',
-											color: 'white',
-											border: 'none',
-											borderRadius: '50%',
-											cursor: 'pointer',
-											fontSize: '8px',
-											fontWeight: '600',
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											lineHeight: '1'
-										}}
-										title={`Week ${program.week} omlaag verplaatsen`}
-									>
-										↓
-									</button>
-								)}
 							</div>
 						</div>
 					))}
