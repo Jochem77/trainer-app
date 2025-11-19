@@ -296,12 +296,12 @@ type WeekProgram = {
 // Startdatum: 30 augustus 2025 is week 1
 const PROGRAM_START_DATE = new Date('2025-08-30'); // Friday, start of week 1
 
-function getCurrentWeek(): number {
+function getCurrentWeek(maxWeek: number = 12): number {
 	const today = new Date();
 	const diffTime = today.getTime() - PROGRAM_START_DATE.getTime();
 	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 	const currentWeek = Math.floor(diffDays / 7) + 1;
-	return Math.max(1, Math.min(currentWeek, 12)); // Begrensd tussen week 1-12
+	return Math.max(1, Math.min(currentWeek, maxWeek)); // Begrensd tussen week 1 en maxWeek
 }
 
 function getWeekDateRange(week: number): { start: Date; end: Date; } {
@@ -312,9 +312,9 @@ function getWeekDateRange(week: number): { start: Date; end: Date; } {
 	return { start: startDate, end: endDate };
 }
 
-function getAdjacentWeeks(week: number) {
+function getAdjacentWeeks(week: number, maxWeek: number = 12) {
 	const prev = week > 1 ? week - 1 : null;
-	const next = week < 12 ? week + 1 : null;
+	const next = week < maxWeek ? week + 1 : null;
 	return { prev, next };
 }
 
@@ -464,8 +464,24 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 		return getCurrentWeek();
 	};
 	const [week, setWeek] = useState(getInitialWeek());
+	
+	// Update week wanneer schema is geladen en de huidige week buiten bereik valt
+	useEffect(() => {
+		if (weekPrograms.length > 0) {
+			const maxWeek = Math.max(...weekPrograms.map(p => p.week));
+			const calculatedWeek = getCurrentWeek(maxWeek);
+			
+			// Als de huidige week niet bestaat in het schema, ga naar de berekende week
+			const weekExists = weekPrograms.some(p => p.week === week);
+			if (!weekExists && calculatedWeek !== week) {
+				setWeek(calculatedWeek);
+			}
+		}
+	}, [weekPrograms, week]);
+	
 	const program = weekPrograms.find((p) => p.week === week);
-	const { prev, next } = getAdjacentWeeks(week);
+	const maxWeek = weekPrograms.length > 0 ? Math.max(...weekPrograms.map(p => p.week)) : 12;
+	const { prev, next } = getAdjacentWeeks(week, maxWeek);
 	const [timer, setTimer] = useState(0); // seconden (integer)
 	const [running, setRunning] = useState(false);
 	const timerRef = React.useRef<NodeJS.Timeout | null>(null);
