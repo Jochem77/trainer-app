@@ -460,24 +460,20 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	}, [user?.id]);
 
 	// Start met de huidige week
-	const getInitialWeek = () => {
-		return getCurrentWeek();
-	};
-	const [week, setWeek] = useState(getInitialWeek());
+	const [week, setWeek] = useState(1);
+	const weekInitializedRef = React.useRef(false);
 	
-	// Update week wanneer schema is geladen en de huidige week buiten bereik valt
+	// Update week wanneer schema is geladen naar de actuele week
 	useEffect(() => {
-		if (weekPrograms.length > 0) {
+		if (weekPrograms.length > 0 && !weekInitializedRef.current) {
 			const maxWeek = Math.max(...weekPrograms.map(p => p.week));
 			const calculatedWeek = getCurrentWeek(maxWeek);
 			
-			// Als de huidige week niet bestaat in het schema, ga naar de berekende week
-			const weekExists = weekPrograms.some(p => p.week === week);
-			if (!weekExists && calculatedWeek !== week) {
-				setWeek(calculatedWeek);
-			}
+			// Update naar de berekende week
+			setWeek(calculatedWeek);
+			weekInitializedRef.current = true;
 		}
-	}, [weekPrograms, week]);
+	}, [weekPrograms]);
 	
 	const program = weekPrograms.find((p) => p.week === week);
 	const maxWeek = weekPrograms.length > 0 ? Math.max(...weekPrograms.map(p => p.week)) : 12;
