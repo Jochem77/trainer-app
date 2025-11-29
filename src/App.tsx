@@ -293,8 +293,8 @@ type WeekProgram = {
 
 // weekPrograms will be managed as state in TrainingProgramDay component
 
-// Startdatum: 30 augustus 2025 is week 1
-const PROGRAM_START_DATE = new Date('2025-08-30'); // Friday, start of week 1
+// Startdatum: 31 augustus 2025 is week 1
+const PROGRAM_START_DATE = new Date('2025-08-31'); // Saturday, start of week 1
 
 function getCurrentWeek(maxWeek: number = 12): number {
 	const today = new Date();
