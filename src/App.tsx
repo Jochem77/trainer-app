@@ -294,18 +294,17 @@ type WeekProgram = {
 // weekPrograms will be managed as state in TrainingProgramDay component
 
 // Startdatum: 31 augustus 2025 is week 1
-const PROGRAM_START_DATE = new Date('2025-08-31'); // Saturday, start of week 1
-
-function getCurrentWeek(maxWeek: number = 12): number {
+function getCurrentWeek(programStartDate: string, maxWeek: number = 12): number {
 	const today = new Date();
-	const diffTime = today.getTime() - PROGRAM_START_DATE.getTime();
+	const startDate = new Date(programStartDate);
+	const diffTime = today.getTime() - startDate.getTime();
 	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 	const currentWeek = Math.floor(diffDays / 7) + 1;
 	return Math.max(1, Math.min(currentWeek, maxWeek)); // Begrensd tussen week 1 en maxWeek
 }
 
-function getWeekDateRange(week: number): { start: Date; end: Date; } {
-	const startDate = new Date(PROGRAM_START_DATE);
+function getWeekDateRange(week: number, programStartDate: string): { start: Date; end: Date; } {
+	const startDate = new Date(programStartDate);
 	startDate.setDate(startDate.getDate() + (week - 1) * 7);
 	const endDate = new Date(startDate);
 	endDate.setDate(endDate.getDate() + 6);
@@ -318,8 +317,8 @@ function getAdjacentWeeks(week: number, maxWeek: number = 12) {
 	return { prev, next };
 }
 
-function formatWeekNL(week: number, calValue?: number): { date: string; calories?: string } {
-	const { start, end } = getWeekDateRange(week);
+function formatWeekNL(week: number, programStartDate: string, calValue?: number): { date: string; calories?: string } {
+	const { start, end } = getWeekDateRange(week, programStartDate);
 	
 	const formatDate = (date: Date) => {
 		const parts = new Intl.DateTimeFormat('nl-NL', {
@@ -418,6 +417,7 @@ function flattenSteps(steps: Step[]) {
 const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user: SupabaseUser | null }> = ({ setMenuOpen, user }) => {
 	// Week programs state with cloud sync
 	const [weekPrograms, setWeekPrograms] = useState<WeekProgram[]>(schema as WeekProgram[]);
+	const [startDate, setStartDate] = useState<string>('2025-08-31');
 	const [schemaLoading, setSchemaLoading] = useState(false);
 
 	// Load user schema from cloud
@@ -429,7 +429,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			try {
 				const { data, error } = await supabase
 					.from('user_schemas')
-					.select('schema_data')
+					.select('schema_data, start_date')
 					.eq('user_id', user.id)
 					.single();
 
@@ -448,6 +448,11 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 					}
 					
 					setWeekPrograms(weekData);
+					
+					// Load start_date if available
+					if (data.start_date) {
+						setStartDate(data.start_date);
+					}
 				}
 			} catch (err) {
 				console.error('Error loading schema in main app:', err);
@@ -470,12 +475,12 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			
 			// Update alleen als het schema echt veranderd is (anders blijft de week staan bij manuele navigatie)
 			if (maxWeek !== prevMaxWeekRef.current) {
-				const calculatedWeek = getCurrentWeek(maxWeek);
+				const calculatedWeek = getCurrentWeek(startDate, maxWeek);
 				setWeek(calculatedWeek);
 				prevMaxWeekRef.current = maxWeek;
 			}
 		}
-	}, [weekPrograms]);
+	}, [weekPrograms, startDate]);
 	
 	const program = weekPrograms.find((p) => p.week === week);
 	const maxWeek = weekPrograms.length > 0 ? Math.max(...weekPrograms.map(p => p.week)) : 12;
@@ -744,7 +749,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 										<div className="date-col">
 											<div className="date-title">
 												{(() => {
-													const weekInfo = formatWeekNL(program.week, program.cal);
+													const weekInfo = formatWeekNL(program.week, startDate, program.cal);
 													return (
 														<>
 															<div className="date-line">{weekInfo.date}</div>

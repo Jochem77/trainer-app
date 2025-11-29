@@ -106,6 +106,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 	]);
 	const [selectedWeek, setSelectedWeek] = useState<number>(1);
 	const [schemaName, setSchemaName] = useState<string>('Mijn Trainingsschema');
+	const [startDate, setStartDate] = useState<string>('2025-08-31');
 	const [hasChanges, setHasChanges] = useState(false);
 	const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | ''>('');
 	const [saveError, setSaveError] = useState<string>('');
@@ -123,7 +124,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				// First try to get the active schema with new columns
 				let { data, error } = await supabase
 					.from('user_schemas')
-					.select('schema_data, schema_name')
+					.select('schema_data, schema_name, start_date')
 					.eq('user_id', userId)
 					.eq('is_active', true)
 					.single();
@@ -134,7 +135,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					// Just get any schema for this user (old single-schema approach)
 					const fallbackResult = await supabase
 						.from('user_schemas')
-						.select('schema_data, schema_name')
+						.select('schema_data, schema_name, start_date')
 						.eq('user_id', userId)
 						.single();
 					
@@ -151,7 +152,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						.eq('user_id', userId)
 						.single();
 					
-					data = oldFormatResult.data ? { ...oldFormatResult.data, schema_name: 'Mijn Trainingsschema' } : null;
+					data = oldFormatResult.data ? { ...oldFormatResult.data, schema_name: 'Mijn Trainingsschema', start_date: '2025-08-31' } : null;
 					error = oldFormatResult.error;
 				}
 
@@ -225,6 +226,10 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					if (data.schema_name) {
 						setSchemaName(data.schema_name);
 					}
+					// Set start date from database column
+					if (data.start_date) {
+						setStartDate(data.start_date);
+					}
 				}
 			} catch (err) {
 				console.error('Error in loadUserSchema:', err);
@@ -280,7 +285,8 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					user_id: userId,
 					schema_data: weekPrograms,
 					schema_name: schemaName,
-					is_active: true
+					is_active: true,
+					start_date: startDate
 				}, {
 					onConflict: 'user_id,schema_name'
 				});
@@ -294,7 +300,8 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						user_id: userId,
 						schema_data: weekPrograms,
 						schema_name: schemaName,
-						is_active: true
+						is_active: true,
+						start_date: startDate
 					}, {
 						onConflict: 'user_id'
 					});
@@ -320,6 +327,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						.update({
 							schema_data: weekPrograms,
 							schema_name: schemaName,
+							start_date: startDate,
 							updated_at: new Date().toISOString()
 						})
 						.eq('user_id', userId);
@@ -1057,7 +1065,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						📋 Schema Editor
 					</h1>
 					<p style={{ margin: '4px 0 0 0', color: '#6c757d', fontSize: '16px' }}>
-						Bewerk je 12-weken trainingsschema
+						Bewerk je trainingsschema
 					</p>
 				</div>
 				<div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -1131,6 +1139,29 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					value={schemaName}
 					onChange={(e) => {
 						setSchemaName(e.target.value);
+						setHasChanges(true);
+					}}
+					style={{ 
+						width: '100%', 
+						padding: '12px 16px', 
+						border: '2px solid #dee2e6', 
+						borderRadius: '8px',
+						fontSize: '16px',
+						fontWeight: '500'
+					}}
+				/>
+			</div>
+
+			{/* Start Date */}
+			<div style={{ marginBottom: '32px' }}>
+				<label style={{ display: 'block', marginBottom: '8px', fontSize: '16px', fontWeight: '600', color: '#495057' }}>
+					Startdatum Programma
+				</label>
+				<input
+					type="date"
+					value={startDate}
+					onChange={(e) => {
+						setStartDate(e.target.value);
 						setHasChanges(true);
 					}}
 					style={{ 
