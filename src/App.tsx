@@ -659,7 +659,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	}
 
 		return (
-			<div className="app-root" style={{ maxWidth: 720, height: '100dvh', margin: "0 auto", padding: 16, paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+			<div className="app-root" style={{ maxWidth: 720, height: '100dvh', margin: "0 auto", padding: 16, paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
 				@supports(height: 100dvh){ .app-root{ height: 100dvh; } }
@@ -669,8 +669,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 						100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 					}
 			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: 12px 0 2px; box-shadow: 0 2px 8px #0001; }
-			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:1px auto 1px; max-width:560px; --statSize: 48px; }
-			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:1px 4px 1px; margin:1px auto; max-width:560px; }
+			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:1px 0 1px; max-width:560px; width:100%; box-sizing:border-box; --statSize: 48px; }
+			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:1px 4px 1px; margin:1px 0; max-width:560px; width:100%; box-sizing:border-box; }
 			.graph-card-mobile { margin: 0 auto 0; padding: 0 1px 0; }
 			@media (max-width: 768px) {
 				.app-root { padding: 12px !important; paddingTop: calc(16px + env(safe-area-inset-top, 0px)) !important; paddingBottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
@@ -701,8 +701,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			.speed .value { font-size:var(--statSize); font-weight:900; letter-spacing:1px; }
 			.speed .value .next-speed { color:#2e7d32; font-weight:800; font-size: calc(var(--statSize) * 0.6); }
 			.current-label { text-align:center; margin-top:4px; font-weight:800; font-size:18px; }
-					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:6px 4px 8px; }
-					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; transition: all 0.2s ease; }
+					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:6px 4px 8px; width:100%; max-width:560px; }
+					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; transition: all 0.2s ease; max-width: 560px; width:100%; box-sizing:border-box; }
 					.card:hover { background:#e8f0ff; box-shadow:0 4px 16px #0002; transform: translateY(-1px); }
 					.card { scroll-margin-top: 16px; }
 					.done { opacity:.55; filter:grayscale(.2); }
@@ -715,7 +715,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 					.b-hard { background:#fdecec; border-left-color:#c62828; }
 					.b-rest { background:#e8f1ff; border-left-color:#1976d2; }
 					/* bottom-actions removed (buttons moved under status card) */
-					.actions-row { display:flex; gap:10px; margin:1px auto 1px; max-width:560px; }
+					.actions-row { display:flex; gap:10px; margin:1px 0 1px; max-width:560px; width:100%; box-sizing:border-box; }
 				.actions-row .btn { flex:1; }
 					.btn { width:100%; font-size:22px; padding:12px 20px; border:none; border-radius:12px; color:#fff; font-weight:800; box-shadow:0 3px 10px #0002; cursor:pointer; }
 					.btn-start { background:#2e7d32; }
@@ -896,7 +896,7 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	// SVG coordinate system
 	const vbW = 1000;
 	const vbH = 200;
-	const padL = 80;
+	const padL = 12;
 	const padR = 12;
 	const padT = 2;
 	const padB = 8;
@@ -920,22 +920,28 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
 			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
 
-			{/* y grid and labels */}
-			{/* gridlines: min, mid, max; labels for min and max */}
+			{/* y grid (no labels) */}
 			{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
-				<g key={i}>
-					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
-					{(v === minSpeed || v === maxSpeed) && (
-						<text x={padL - 8} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={14} fill="#111827" fontWeight={800}>{v}</text>
-					)}
-				</g>
+				<line key={i} x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
 			))}
 
-			{/* x label (left only) */}
-			<text x={padL} y={padT + plotH + 12} textAnchor="start" fontSize={12} fill="#111827" fontWeight={800}>{fmtTime(0)}</text>
-
-			{/* program curve */}
-			<polyline fill="none" stroke="#2563eb" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} />
+			{/* Filled area under the curve - split at cursor */}
+			<defs>
+				<clipPath id="clip-left">
+					<rect x={0} y={0} width={cursorX} height={vbH} />
+				</clipPath>
+				<clipPath id="clip-right">
+					<rect x={cursorX} y={0} width={vbW - cursorX} height={vbH} />
+				</clipPath>
+			</defs>
+			
+			{/* Completed area (green) */}
+			<polyline fill="none" stroke="#4ade80" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} clipPath="url(#clip-left)" />
+			<polygon fill="#4ade8033" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} clipPath="url(#clip-left)" />
+			
+			{/* Remaining area (blue) */}
+			<polyline fill="none" stroke="#2563eb" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} clipPath="url(#clip-right)" />
+			<polygon fill="#2563eb33" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} clipPath="url(#clip-right)" />
 
 			{/* red origin marker and current time cursor */}
 			<circle cx={padL} cy={padT + plotH} r={4} fill="#ef4444" />
