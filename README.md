@@ -1,6 +1,6 @@
-# Trainer App - Persoonlijke Trainingsplanner
+# My Training Coach
 
-Een webapplicatie voor het plannen en volgen van je trainingsschema's. Ontwikkeld met React, TypeScript, Vite en Supabase.
+Een persoonlijke trainingsplanner voor het plannen en volgen van je trainingsschema's. Ontwikkeld met React, TypeScript, Vite en Supabase.
 
 🏃‍♂️ **Live app**: [https://jochem77.github.io/trainer-app/](https://jochem77.github.io/trainer-app/)  
 📖 **Gebruikershandleiding**: [docs/HANDLEIDING.md](docs/HANDLEIDING.md)

@@ -1,4 +1,4 @@
-# Trainer App - Gebruikershandleiding
+# My Training Coach - Gebruikershandleiding
 
 ## Inhoudsopgave
 1. [Introductie](#introductie)
@@ -13,7 +13,7 @@
 
 ## Introductie
 
-De Trainer App is een persoonlijke trainingsplanner waarmee je je eigen trainingsschema kunt maken en volgen. De app berekent automatisch welke week je in je trainingsprogramma zit op basis van de startdatum.
+My Training Coach is een persoonlijke trainingsplanner waarmee je je eigen trainingsschema kunt maken en volgen. De app berekent automatisch welke week je in je trainingsprogramma zit op basis van de startdatum.
 
 **Belangrijkste functies:**
 - Eigen trainingsschema maken en bewerken
