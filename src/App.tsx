@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import schema from "../schema.json";
+import schema from "./backups/schema.json";
 import SchemaEditor from './SchemaEditor';
 import { supabase } from './lib/supabase';
 
