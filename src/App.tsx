@@ -910,8 +910,6 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	const cursorT = Math.max(0, Math.min(currentSec, totalSec));
 	const cursorX = x(cursorT);
 
-	const fmtTime = (s: number) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-
 	// y gridlines are computed inline below
 
 	return (
