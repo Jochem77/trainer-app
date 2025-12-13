@@ -7,6 +7,7 @@
 4. [Schema Editor](#schema-editor)
 5. [Training Uitvoeren](#training-uitvoeren)
 6. [Tips & Tricks](#tips--tricks)
+7. [Veelgestelde Vragen](#veelgestelde-vragen)
 
 ---
 
@@ -15,12 +16,12 @@
 De Trainer App is een persoonlijke trainingsplanner waarmee je je eigen trainingsschema kunt maken en volgen. De app berekent automatisch welke week je in je trainingsprogramma zit op basis van de startdatum.
 
 **Belangrijkste functies:**
-- Meerdere trainingsschema's beheren
+- Eigen trainingsschema maken en bewerken
 - Aangepaste startdatum per schema
 - Week-voor-week trainingsplanning
 - Interval en steady trainingen
-- Ingebouwde timer
 - Calorieën tracking per week
+- Automatische berekening huidige trainingsweek
 
 ---
 
@@ -244,11 +245,9 @@ Je kunt meerdere schema's aanmaken voor verschillende doelen:
 - Een schema voor 10K training  
 - Een schema voor herstelweken
 
-(Schema wisselen functie komt binnenkort)
+### Automatische Cloud Opslag
 
-### Back-up Maken
-
-Je data wordt automatisch opgeslagen in de cloud via Supabase. Je kunt altijd inloggen vanaf elk apparaat en je schema's terugvinden.
+Je data wordt automatisch opgeslagen. Je kunt altijd inloggen vanaf elk apparaat en je schema's terugvinden.
 
 ### Weken Kopiëren
 
@@ -268,74 +267,34 @@ Stel altijd genoeg rusttijd in tussen intervallen!
 
 ---
 
-## Problemen Oplossen
-
-### Ik kan niet opslaan
-
-**Mogelijke oorzaak**: Database kolom ontbreekt
-
-**Oplossing**: 
-1. Ga naar Supabase dashboard
-2. Open SQL Editor
-3. Voer het script uit: `add-start-date-column.sql`
-
-### Verkeerde week wordt getoond
-
-**Controleer**:
-1. Is de startdatum correct ingesteld?
-2. Staat je systeemdatum correct?
-3. Klik op de pijltjes om handmatig te navigeren
-
-### Wijzigingen worden niet opgeslagen
-
-**Let op**:
-1. Klik altijd op **"💾 Opslaan"** 
-2. Wacht op **"✅ Opgeslagen"** bevestiging
-3. Check je internetverbinding
-
-### Ik zie geen schema's
-
-**Mogelijke oorzaken**:
-1. Je bent niet ingelogd - log opnieuw in
-2. Je hebt nog geen schema gemaakt - maak een nieuw schema
-3. Database connectie probleem - herlaad de pagina
-
----
-
-## Keyboard Shortcuts
-
-(Toekomstige functie)
-- `←` / `→`: Vorige/volgende week
-- `Ctrl + S`: Opslaan
-- `Esc`: Terug naar hoofdscherm
-
----
-
 ## Veelgestelde Vragen
 
 **Q: Kan ik mijn schema's delen met anderen?**  
 A: Momenteel niet, elk account heeft eigen schema's.
 
 **Q: Werkt de app offline?**  
-A: Nee, je hebt een internetverbinding nodig voor opslaan en laden.
+A: Nee, je hebt een internetverbinding nodig.
 
 **Q: Hoeveel schema's kan ik maken?**  
 A: Momenteel één actief schema per account.
 
-**Q: Kan ik mijn oude schema terugzien?**  
-A: Ja, alle wijzigingen worden opgeslagen in de database (geen versiebeheer).
-
 **Q: Hoe bereken ik mijn trainingssnelheid?**  
 A: Gebruik je normale loopsnelheid als basis. Bijvoorbeeld: 10 km/u = 6 min/km.
 
+**Q: Kan ik een week overslaan?**  
+A: Ja, gebruik de pijltjes om handmatig naar een andere week te navigeren.
+
+**Q: Wat gebeurt er als ik mijn startdatum wijzig?**  
+A: De app berekent opnieuw in welke week je zit op basis van de nieuwe startdatum.
+
+**Q: Hoe voeg ik een warming-up en cool-down toe?**  
+A: Voeg een "Steady" stap toe aan het begin (warming-up) en einde (cool-down) van je training met lagere snelheid.
+
 ---
 
-## Support
+## Hulp Nodig?
 
-Heb je vragen of problemen? 
-
-- Check de GitHub issues: [github.com/Jochem77/trainer-app/issues](https://github.com/Jochem77/trainer-app/issues)
-- Bekijk de source code: [github.com/Jochem77/trainer-app](https://github.com/Jochem77/trainer-app)
+Heb je vragen of loop je ergens tegenaan? Neem dan contact op via de GitHub pagina van het project.
 
 ---
 
