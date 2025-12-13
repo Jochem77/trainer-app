@@ -333,13 +333,10 @@ function formatWeekNL(week: number, programStartDate: string, calValue?: number)
 	
 	const startFormatted = formatDate(start);
 	const endFormatted = formatDate(end);
-	const formattedDate = `Week ${week}: ${startFormatted} - ${endFormatted}`;
+	const weekLine = calValue !== undefined ? `Week ${week} (cal ±${calValue})` : `Week ${week}`;
+	const dateLine = `${startFormatted} - ${endFormatted}`;
 	
-	if (calValue !== undefined) {
-		return { date: formattedDate, calories: `cal ±${calValue}` };
-	}
-	
-	return { date: formattedDate };
+	return { date: weekLine, calories: dateLine };
 }
 
 function flattenSteps(steps: Step[]) {
