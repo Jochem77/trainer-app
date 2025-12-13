@@ -86,7 +86,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 4. Run database migratie:
 ```sql
 -- Voer uit in Supabase SQL Editor
--- Zie: add-start-date-column.sql
+-- Zie: database/add-start-date-column.sql
 ```
 
 5. Start development server:
@@ -315,7 +315,7 @@ Stel altijd genoeg rusttijd in tussen intervallen!
 **Oplossing**: 
 1. Ga naar Supabase dashboard
 2. Open SQL Editor
-3. Voer het script uit: `add-start-date-column.sql`
+3. Voer het script uit: `database/add-start-date-column.sql`
 
 #### Verkeerde week wordt getoond
 
@@ -371,7 +371,11 @@ trainer-app/
 │   └── types.ts             # TypeScript type definities
 ├── public/                   # Statische bestanden
 ├── dist/                     # Build output (gegenereerd)
-└── add-start-date-column.sql # Database migratie script
+├── database/                 # SQL migratie scripts
+│   └── add-start-date-column.sql
+├── scripts/                  # Utility scripts
+├── docs/                     # Documentatie
+└── backups/                  # Schema backups
 ```
 
 ### Available Scripts
@@ -401,7 +405,7 @@ CREATE TABLE user_schemas (
 
 ### Migrations
 
-Voer `add-start-date-column.sql` uit in Supabase SQL Editor om de `start_date` kolom toe te voegen aan bestaande databases.
+Voer `database/add-start-date-column.sql` uit in Supabase SQL Editor om de `start_date` kolom toe te voegen aan bestaande databases.
 
 ---
 
