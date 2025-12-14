@@ -423,6 +423,9 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	const [startDate, setStartDate] = useState<string>(getTodayDateString());
 	const [schemaLoading, setSchemaLoading] = useState(false);
 
+	console.log('TrainingProgramDay initialized with schema:', schema, 'weekPrograms:', weekPrograms.length);
+
+
 	// Load user schema from cloud
 	useEffect(() => {
 		const loadUserSchema = async () => {

@@ -1,6 +1,6 @@
 [
   {
-    "cal": 350,
+    "cal": 514,
     "week": 1,
     "steps": [
       {
@@ -28,7 +28,7 @@
         "type": "steady",
         "label": "Extra blok",
         "repeats": 1,
-        "speed_kmh": 6.5,
+        "speed_kmh": 7,
         "duration_min": 10
       },
       {
@@ -41,7 +41,7 @@
     ]
   },
   {
-    "cal": 500,
+    "cal": 524,
     "week": 2,
     "steps": [
       {
@@ -817,6 +817,520 @@
         "repeats": 1,
         "speed_kmh": 6,
         "duration_min": 4
+      }
+    ]
+  },
+  {
+    "cal": 962,
+    "week": 13,
+    "steps": [
+      {
+        "type": "steady",
+        "label": "Warming-up",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 2
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 10,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 1
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 11,
+          "duration_min": 2.5
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 11,
+          "duration_min": 6
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 3
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 12,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 5
+      },
+      {
+        "hard": {
+          "label": "Extra interval hard",
+          "speed_kmh": 12,
+          "duration_min": 2
+        },
+        "rest": {
+          "label": "Extra interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 4
+      },
+      {
+        "type": "steady",
+        "label": "Cooling down",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 3
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 1
+      }
+    ]
+  },
+  {
+    "cal": 966,
+    "week": 14,
+    "steps": [
+      {
+        "type": "steady",
+        "label": "Warming-up",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 1
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 2
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 11,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 11,
+          "duration_min": 2
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Extra interval hard",
+          "speed_kmh": 11,
+          "duration_min": 3
+        },
+        "rest": {
+          "label": "Extra interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 11,
+          "duration_min": 4
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 4
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 1
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 3
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 2
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 3
+      },
+      {
+        "type": "steady",
+        "label": "Cooling down",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 3
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 1
+      }
+    ]
+  },
+  {
+    "cal": 897,
+    "week": 15,
+    "steps": [
+      {
+        "type": "steady",
+        "label": "Warming-up",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 1
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 2
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 11,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 12,
+          "duration_min": 2
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Extra interval hard",
+          "speed_kmh": 12,
+          "duration_min": 3
+        },
+        "rest": {
+          "label": "Extra interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 4
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 3
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 2
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 3
+      },
+      {
+        "type": "steady",
+        "label": "Cooling down",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 3
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 1
+      }
+    ]
+  },
+  {
+    "cal": 990,
+    "week": 16,
+    "steps": [
+      {
+        "type": "steady",
+        "label": "Warming-up",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 1
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 2
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 12,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Interval hard",
+          "speed_kmh": 12,
+          "duration_min": 2
+        },
+        "rest": {
+          "label": "Interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Extra interval hard",
+          "speed_kmh": 12,
+          "duration_min": 3
+        },
+        "rest": {
+          "label": "Extra interval rust",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 4
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 3
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 3
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 2
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 2
+      },
+      {
+        "hard": {
+          "label": "Hard",
+          "speed_kmh": 12,
+          "duration_min": 1
+        },
+        "rest": {
+          "label": "Rest",
+          "speed_kmh": 7,
+          "duration_min": 1
+        },
+        "type": "interval_pair",
+        "repeats": 3
+      },
+      {
+        "type": "steady",
+        "label": "Cooling down",
+        "repeats": 1,
+        "speed_kmh": 7,
+        "duration_min": 3
+      },
+      {
+        "type": "steady",
+        "label": "Nieuwe stap",
+        "repeats": 1,
+        "speed_kmh": 6,
+        "duration_min": 1
       }
     ]
   }
