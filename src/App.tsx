@@ -412,9 +412,15 @@ function flattenSteps(steps: Step[]) {
 }
 
 const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user: SupabaseUser | null }> = ({ setMenuOpen, user }) => {
+	// Get today's date in YYYY-MM-DD format
+	const getTodayDateString = () => {
+		const today = new Date();
+		return today.toISOString().split('T')[0];
+	};
+
 	// Week programs state with cloud sync
 	const [weekPrograms, setWeekPrograms] = useState<WeekProgram[]>(schema as WeekProgram[]);
-	const [startDate, setStartDate] = useState<string>('2025-08-31');
+	const [startDate, setStartDate] = useState<string>(getTodayDateString());
 	const [schemaLoading, setSchemaLoading] = useState(false);
 
 	// Load user schema from cloud
