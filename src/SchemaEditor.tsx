@@ -552,7 +552,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		// SVG coordinate system
 		const vbW = 1000;
 		const vbH = 200;
-		const padL = 80;
+		const padL = 12;
 		const padR = 12;
 		const padT = 2;
 		const padB = 8;
@@ -564,29 +564,20 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 
 		const pointsAttr = segments.map(p => `${x(p.t).toFixed(2)},${y(p.v).toFixed(2)}`).join(' ');
 
-		const fmtTime = (s: number) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-
 		return (
 			<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="120" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
 				{/* axes */}
 				<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
 				<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
 
-				{/* y grid and labels */}
+				{/* y grid (no labels) */}
 				{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
-					<g key={i}>
-						<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
-						{(v === minSpeed || v === maxSpeed) && (
-							<text x={padL - 8} y={y(v)} textAnchor="end" dominantBaseline="central" fontSize={14} fill="#111827" fontWeight={800}>{v}</text>
-						)}
-					</g>
+					<line key={i} x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
 				))}
 
-				{/* x label (left only) */}
-				<text x={padL} y={padT + plotH + 12} textAnchor="start" fontSize={12} fill="#111827" fontWeight={800}>{fmtTime(0)}</text>
-
-				{/* program curve */}
+				{/* program curve with filled area */}
 				<polyline fill="none" stroke="#2563eb" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} />
+				<polygon fill="#2563eb33" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} />
 
 				{/* red origin marker */}
 				<circle cx={padL} cy={padT + plotH} r={4} fill="#ef4444" />
@@ -1116,50 +1107,51 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				</div>
 			</div>
 
-			{/* Schema Name */}
-			<div style={{ marginBottom: '32px' }}>
-				<label style={{ display: 'block', marginBottom: '8px', fontSize: '16px', fontWeight: '600', color: '#495057' }}>
-					📝 Schema Naam
-				</label>
-				<input
-					type="text"
-					value={schemaName}
-					onChange={(e) => {
-						setSchemaName(e.target.value);
-						setHasChanges(true);
-					}}
-					style={{ 
-						width: '100%', 
-						padding: '12px 16px', 
-						border: '2px solid #dee2e6', 
-						borderRadius: '8px',
-						fontSize: '16px',
-						fontWeight: '500'
-					}}
-				/>
-			</div>
+			{/* Schema Name and Start Date */}
+			<div style={{ display: 'flex', gap: '64px', marginBottom: '32px', alignItems: 'flex-end' }}>
+				<div style={{ flex: '0 0 400px' }}>
+					<label style={{ display: 'block', marginBottom: '8px', fontSize: '16px', fontWeight: '600', color: '#495057' }}>
+						📝 Schema Naam
+					</label>
+					<input
+						type="text"
+						value={schemaName}
+						onChange={(e) => {
+							setSchemaName(e.target.value);
+							setHasChanges(true);
+						}}
+						style={{ 
+							width: '100%', 
+							padding: '12px 16px', 
+							border: '2px solid #dee2e6', 
+							borderRadius: '8px',
+							fontSize: '16px',
+							fontWeight: '500'
+						}}
+					/>
+				</div>
 
-			{/* Start Date */}
-			<div style={{ marginBottom: '32px' }}>
-				<label style={{ display: 'block', marginBottom: '8px', fontSize: '16px', fontWeight: '600', color: '#495057' }}>
-					Startdatum Programma
-				</label>
-				<input
-					type="date"
-					value={startDate}
-					onChange={(e) => {
-						setStartDate(e.target.value);
-						setHasChanges(true);
-					}}
-					style={{ 
-						width: '100%', 
-						padding: '12px 16px', 
-						border: '2px solid #dee2e6', 
-						borderRadius: '8px',
-						fontSize: '16px',
-						fontWeight: '500'
-					}}
-				/>
+				<div style={{ flex: '0 0 auto' }}>
+					<label style={{ display: 'block', marginBottom: '8px', fontSize: '16px', fontWeight: '600', color: '#495057' }}>
+						Startdatum Programma
+					</label>
+					<input
+						type="date"
+						value={startDate}
+						onChange={(e) => {
+							setStartDate(e.target.value);
+							setHasChanges(true);
+						}}
+						style={{ 
+							width: '100%', 
+							padding: '12px 16px', 
+							border: '2px solid #dee2e6', 
+							borderRadius: '8px',
+							fontSize: '16px',
+							fontWeight: '500'
+						}}
+					/>
+				</div>
 			</div>
 
 			{/* Week Manager */}
