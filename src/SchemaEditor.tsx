@@ -724,310 +724,139 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
 				transition: 'all 0.2s ease'
 			}}>
-				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-					<h4 style={{ margin: 0, color: '#495057', fontSize: '16px', fontWeight: '600' }}>
-						🏃‍♂️ Stap {index + 1} - {step.type === 'interval_pair' ? 'Interval' : 'Steady'}
-					</h4>
-					<div style={{ display: 'flex', gap: '8px' }}>
-						<button 
-							onClick={() => insertStep(index)}
+				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '16px' }}>
+					<div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+						<h4 style={{ margin: 0, color: '#495057', fontSize: '16px', fontWeight: '600' }}>
+							🏃‍♂️ Stap {index + 1}
+						</h4>
+						<select
+							value={step.type}
+							onChange={(e) => handleTypeChange(e.target.value as 'steady' | 'interval_pair')}
 							style={{ 
-								background: '#007bff', 
-								color: 'white', 
-								border: 'none', 
-								borderRadius: '6px', 
-								padding: '8px 12px',
-								cursor: 'pointer',
-								fontSize: '12px',
-								fontWeight: '600'
+								padding: '12px 16px', 
+								border: '2px solid #dee2e6', 
+								borderRadius: '8px',
+								fontSize: '14px',
+								fontWeight: '500',
+								background: 'white',
+								cursor: 'pointer'
 							}}
 						>
-							➕ Invoegen
-						</button>
-						<button 
-							onClick={() => removeStep(index)}
-							style={{ 
-								background: '#dc3545', 
-								color: 'white', 
-								border: 'none', 
-								borderRadius: '6px', 
-								padding: '8px 12px',
-								cursor: 'pointer',
-								fontSize: '12px',
-								fontWeight: '600'
-							}}
-						>
-							🗑️ Verwijder
-						</button>
-					</div>
-				</div>
-				
-				{/* Type selector */}
-				<div style={{ marginBottom: '16px' }}>
-					<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-						🏷️ Type
-					</label>
-					<select
-						value={step.type}
-						onChange={(e) => handleTypeChange(e.target.value as 'steady' | 'interval_pair')}
-						style={{ 
-							width: '200px', 
-							padding: '10px 12px', 
-							border: '2px solid #dee2e6', 
-							borderRadius: '8px',
-							fontSize: '14px',
-							fontWeight: '500',
-							background: 'white'
-						}}
-					>
-						<option value="steady">Steady</option>
-						<option value="interval_pair">Interval Pair</option>
-					</select>
-				</div>
-
-				{/* Steady type fields */}
-				{step.type === 'steady' && (
-					<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '16px', alignItems: 'end' }}>
-						<div>
-							<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-								📝 Label
-							</label>
-							<input
-								type="text"
-								value={step.label || ''}
-								onChange={(e) => updateStep(index, { ...step, label: e.target.value })}
-								style={{ 
-									width: '100%', 
-									padding: '10px 12px', 
-									border: '2px solid #dee2e6', 
-									borderRadius: '8px',
-									fontSize: '14px',
-									fontWeight: '500'
-								}}
-							/>
-						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-								🏃 Snelheid (km/u)
-							</label>
-							<input
-								type="number"
-								step="0.1"
-								value={step.speed_kmh || 0}
-								onChange={(e) => updateStep(index, { ...step, speed_kmh: parseFloat(e.target.value) || 0 })}
-								style={{ 
-									width: '100%', 
-									padding: '10px 12px', 
-									border: '2px solid #dee2e6', 
-									borderRadius: '8px',
-									fontSize: '14px',
-									fontWeight: '500'
-								}}
-							/>
-						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-								⏱️ Duur (min)
-							</label>
-							<input
-								type="number"
-								value={step.duration_min || 0}
-								onChange={(e) => updateStep(index, { ...step, duration_min: parseInt(e.target.value) || 0 })}
-								style={{ 
-									width: '100%', 
-									padding: '10px 12px', 
-									border: '2px solid #dee2e6', 
-									borderRadius: '8px',
-									fontSize: '14px',
-									fontWeight: '500'
-								}}
-							/>
-						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-								🔄 Herhalingen
-							</label>
-							<input
-								type="number"
-								value={step.repeats || 1}
-								onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
-								style={{ 
-									width: '100%', 
-									padding: '10px 12px', 
-									border: '2px solid #dee2e6', 
-									borderRadius: '8px',
-									fontSize: '14px',
-									fontWeight: '500'
-								}}
-							/>
-						</div>
-					</div>
-				)}
-
-				{/* Interval pair type fields */}
-				{step.type === 'interval_pair' && step.hard && step.rest && (
-					<>
-						{/* Hard section */}
-						<div style={{ marginBottom: '16px', padding: '16px', background: '#fff3cd', borderRadius: '8px', border: '1px solid #ffeaa7' }}>
-							<h5 style={{ margin: '0 0 12px 0', color: '#856404', fontSize: '14px', fontWeight: '600' }}>
-								🔥 Hard Phase
-							</h5>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px', alignItems: 'end' }}>
-								<div>
-									<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										📝 Label
-									</label>
-									<input
-										type="text"
-										value={step.hard.label || ''}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											hard: { ...step.hard!, label: e.target.value }
-										})}
-										style={{ 
-											width: '100%', 
-											padding: '10px 12px', 
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										🏃 Snelheid (km/u)
-									</label>
-									<input
-										type="number"
-										step="0.1"
-										value={step.hard.speed_kmh || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											hard: { ...step.hard!, speed_kmh: parseFloat(e.target.value) || 0 }
-										})}
-										style={{ 
-											width: '100%', 
-											padding: '10px 12px', 
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										⏱️ Duur (min)
-									</label>
-									<input
-										type="number"
-										step="0.1"
-										value={step.hard.duration_min || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											hard: { ...step.hard!, duration_min: parseFloat(e.target.value) || 0 }
-										})}
-										style={{ 
-											width: '100%', 
-											padding: '10px 12px', 
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Rest section */}
-						<div style={{ marginBottom: '16px', padding: '16px', background: '#d1ecf1', borderRadius: '8px', border: '1px solid #bee5eb' }}>
-							<h5 style={{ margin: '0 0 12px 0', color: '#0c5460', fontSize: '14px', fontWeight: '600' }}>
-								💤 Rest Phase
-							</h5>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px', alignItems: 'end' }}>
-								<div>
-									<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										📝 Label
-									</label>
-									<input
-										type="text"
-										value={step.rest.label || ''}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											rest: { ...step.rest!, label: e.target.value }
-										})}
-										style={{ 
-											width: '100%', 
-											padding: '10px 12px', 
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										🏃 Snelheid (km/u)
-									</label>
-									<input
-										type="number"
-										step="0.1"
-										value={step.rest.speed_kmh || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											rest: { ...step.rest!, speed_kmh: parseFloat(e.target.value) || 0 }
-										})}
-										style={{ 
-											width: '100%', 
-											padding: '10px 12px', 
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										⏱️ Duur (min)
-									</label>
-									<input
-										type="number"
-										step="0.1"
-										value={step.rest.duration_min || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											rest: { ...step.rest!, duration_min: parseFloat(e.target.value) || 0 }
-										})}
-										style={{ 
-											width: '100%', 
-											padding: '10px 12px', 
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Repeats for interval_pair */}
-						<div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', alignItems: 'end', maxWidth: '200px' }}>
-							<div>
-								<label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-									🔄 Herhalingen
+							<option value="steady">Steady</option>
+							<option value="interval_pair">Interval</option>
+						</select>
+						{step.type === 'steady' && (
+							<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+								<label style={{ fontSize: '14px', fontWeight: '600', color: '#495057', margin: 0 }}>
+									🔄 Herh
 								</label>
 								<input
 									type="number"
 									value={step.repeats || 1}
 									onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
 									style={{ 
-										width: '100%', 
-										padding: '10px 12px', 
+										width: '50px', 
+										padding: '12px 16px', 
+										border: '2px solid #dee2e6', 
+										borderRadius: '8px',
+										fontSize: '14px',
+										fontWeight: '500'
+									}}
+								/>
+							</div>
+						)}
+						{step.type === 'interval_pair' && (
+							<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+								<label style={{ fontSize: '14px', fontWeight: '600', color: '#495057', margin: 0 }}>
+									🔄 Herh
+								</label>
+								<input
+									type="number"
+									value={step.repeats || 1}
+									onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
+									style={{ 
+										width: '50px', 
+										padding: '12px 16px', 
+										border: '2px solid #dee2e6', 
+										borderRadius: '8px',
+										fontSize: '14px',
+										fontWeight: '500'
+									}}
+								/>
+							</div>
+						)}
+					</div>
+					<button 
+						onClick={() => removeStep(index)}
+						style={{ 
+							background: '#dc3545', 
+							color: 'white', 
+							border: 'none', 
+							borderRadius: '6px', 
+							padding: '8px 12px',
+							cursor: 'pointer',
+							fontSize: '12px',
+							fontWeight: '600'
+						}}
+					>
+						🗑️ Verwijder
+					</button>
+				</div>
+
+				{/* Steady type fields */}
+				{step.type === 'steady' && (
+				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
+					<div>
+						<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
+							<div>
+								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									Label
+								</label>
+								<input
+									type="text"
+									value={step.label || ''}
+									onChange={(e) => updateStep(index, { ...step, label: e.target.value })}
+									style={{ 
+										width: 'auto',
+										maxWidth: '200px', 
+										padding: '12px 16px', 
+										border: '2px solid #dee2e6', 
+										borderRadius: '8px',
+										fontSize: '14px',
+										fontWeight: '500'
+									}}
+								/>
+							</div>
+							<div>
+								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									km/u
+								</label>
+								<input
+									type="number"
+									step="0.1"
+									value={step.speed_kmh || 0}
+									onChange={(e) => updateStep(index, { ...step, speed_kmh: parseFloat(e.target.value) || 0 })}
+									style={{ 
+										width: '50px', 
+										padding: '12px 16px', 
+										border: '2px solid #dee2e6', 
+										borderRadius: '8px',
+										fontSize: '14px',
+										fontWeight: '500'
+									}}
+								/>
+							</div>
+							<div>
+								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									min
+								</label>
+								<input
+									type="number"
+									value={step.duration_min || 0}
+									onChange={(e) => updateStep(index, { ...step, duration_min: parseInt(e.target.value) || 0 })}
+									style={{ 
+										width: '50px', 
+										padding: '12px 16px', 
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
@@ -1036,7 +865,165 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								/>
 							</div>
 						</div>
-					</>
+					</div>
+				</div>
+				)}
+
+				{/* Interval pair type fields */}
+				{step.type === 'interval_pair' && step.hard && step.rest && (
+					<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
+							{/* Hard section */}
+							<div>
+								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
+									🔥 Hard
+								</label>
+								<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											Label
+										</label>
+										<input
+											type="text"
+											value={step.hard.label || ''}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, label: e.target.value }
+											})}
+											style={{ 
+												width: 'auto',
+												maxWidth: '200px', 
+												padding: '12px 16px', 
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											km/u
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.hard.speed_kmh || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, speed_kmh: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ 
+												width: '50px', 
+												padding: '12px 16px', 
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											min
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.hard.duration_min || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, duration_min: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ 
+												width: '50px', 
+												padding: '12px 16px', 
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+								</div>
+							</div>
+
+							{/* Rest section */}
+							<div>
+								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
+									💤 Rust
+								</label>
+								<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											Label
+										</label>
+										<input
+											type="text"
+											value={step.rest.label || ''}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, label: e.target.value }
+											})}
+											style={{ 
+												width: 'auto',
+												maxWidth: '200px', 
+												padding: '12px 16px', 
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											km/u
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.rest.speed_kmh || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, speed_kmh: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ 
+												width: '50px', 
+												padding: '12px 16px', 
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											min
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.rest.duration_min || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, duration_min: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ 
+												width: '50px', 
+												padding: '12px 16px', 
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 				)}
 			</div>
 		);
@@ -1518,34 +1505,33 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 			{/* Training Steps */}
 			{currentProgram ? (
 				<div style={{ marginBottom: '32px' }}>
-					<div style={{ 
-						display: 'flex', 
-						justifyContent: 'space-between', 
-						alignItems: 'center', 
-						marginBottom: '20px' 
-					}}>
-						<h2 style={{ margin: 0, color: '#495057' }}>Trainingsstappen - Week {selectedWeek}</h2>
-						<button
-							onClick={addStep}
-							style={{
-								background: '#28a745',
-								color: 'white',
-								border: 'none',
-								borderRadius: '8px',
-								padding: '10px 16px',
-								cursor: 'pointer',
-								fontWeight: '600'
-							}}
-						>
-							➕ Stap Toevoegen
-						</button>
-					</div>
+					<h2 style={{ margin: '0 0 20px 0', color: '#495057' }}>Trainingsstappen - Week {selectedWeek}</h2>
 
 					{currentProgram.steps && currentProgram.steps.length > 0 ? (
 						<div>
-							{currentProgram.steps.map((step, index) => {
-								return renderStepEditor(step, index);
-							})}
+							{currentProgram.steps.map((step, index) => (
+								<div key={`step-${selectedWeek}-${index}`} style={{ marginBottom: '16px' }}>
+									<div>
+										{renderStepEditor(step, index)}
+									</div>
+									<button 
+										onClick={() => insertStep(index)}
+										style={{ 
+											background: '#007bff', 
+											color: 'white', 
+											border: 'none', 
+											borderRadius: '6px', 
+											padding: '6px 12px',
+											cursor: 'pointer',
+											fontSize: '12px',
+											fontWeight: '600',
+											marginTop: '8px'
+										}}
+									>
+										➕ Toevoegen
+									</button>
+								</div>
+							))}
 						</div>
 					) : (
 						<div style={{ 
@@ -1557,7 +1543,21 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							border: '1px dashed #dee2e6'
 						}}>
 							<p>Geen stappen gevonden voor week {selectedWeek}</p>
-							<p>Klik op "➕ Stap Toevoegen" om een nieuwe stap toe te voegen.</p>
+							<button
+								onClick={addStep}
+								style={{
+									background: '#007bff',
+									color: 'white',
+									border: 'none',
+									borderRadius: '6px',
+									padding: '6px 12px',
+									cursor: 'pointer',
+									fontSize: '12px',
+									fontWeight: '600'
+								}}
+							>
+								➕ Toevoegen
+							</button>
 						</div>
 					)}
 				</div>

@@ -420,10 +420,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 
 	// Week programs state with cloud sync
 	const [weekPrograms, setWeekPrograms] = useState<WeekProgram[]>(schema as WeekProgram[]);
-	const [startDate, setStartDate] = useState<string>(getTodayDateString());
+	const [startDate, setStartDate] = useState<string>(getTodayDateString()); // Today for guests, will be updated from cloud for logged-in users
 	const [schemaLoading, setSchemaLoading] = useState(false);
-
-	console.log('TrainingProgramDay initialized with schema:', schema, 'weekPrograms:', weekPrograms.length);
 
 
 	// Load user schema from cloud
@@ -435,9 +433,12 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			try {
 				const { data, error } = await supabase
 					.from('user_schemas')
-					.select('schema_data, start_date')
+					.select('*')
 					.eq('user_id', user.id)
 					.single();
+
+				console.log('Raw data from user_schemas:', data);
+				console.log('Error from user_schemas:', error);
 
 				if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
 					console.error('Error loading schema in main app:', error);
@@ -457,7 +458,10 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 					
 					// Load start_date if available
 					if (data.start_date) {
+						console.log('Setting startDate from cloud:', data.start_date);
 						setStartDate(data.start_date);
+					} else {
+						console.log('No start_date in cloud data. All available fields:', Object.keys(data));
 					}
 				}
 			} catch (err) {
@@ -478,13 +482,10 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	useEffect(() => {
 		if (weekPrograms.length > 0) {
 			const maxWeek = Math.max(...weekPrograms.map(p => p.week));
-			
-			// Update alleen als het schema echt veranderd is (anders blijft de week staan bij manuele navigatie)
-			if (maxWeek !== prevMaxWeekRef.current) {
-				const calculatedWeek = getCurrentWeek(startDate, maxWeek);
-				setWeek(calculatedWeek);
-				prevMaxWeekRef.current = maxWeek;
-			}
+			const calculatedWeek = getCurrentWeek(startDate, maxWeek);
+			console.log('Setting week to:', calculatedWeek, 'from startDate:', startDate, 'maxWeek:', maxWeek);
+			setWeek(calculatedWeek);
+			prevMaxWeekRef.current = maxWeek;
 		}
 	}, [weekPrograms, startDate]);
 	
