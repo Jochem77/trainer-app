@@ -277,11 +277,12 @@ type Step =
 			speed_kmh: number;
 			label: string;
 			repeats: number;
+			speed_increase_kmh?: number;
 		}
 	| {
 			type: "interval_pair";
-			hard: { duration_min: number; speed_kmh: number; label: string };
-			rest: { duration_min: number; speed_kmh: number; label: string };
+			hard: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number };
+			rest: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number };
 			repeats: number;
 		};
 
@@ -354,13 +355,16 @@ function flattenSteps(steps: Step[]) {
 	const toSec = (min: number) => Math.round(min * 60);
 	for (const step of steps) {
 		if (step.type === "steady") {
+			const baseSpeed = step.speed_kmh || 0;
+			const speedIncrease = step.speed_increase_kmh || 0;
 			for (let i = 0; i < step.repeats; i++) {
 				const durSec = toSec(step.duration_min);
+				const currentSpeed = baseSpeed + (speedIncrease * i);
 				result.push({
 					label: step.label,
 					duration_min: step.duration_min,
 					duration_sec: durSec,
-					speed_kmh: step.speed_kmh,
+					speed_kmh: currentSpeed,
 					start_min: currentSec / 60,
 					start_sec: currentSec,
 					type: "steady",
@@ -369,14 +373,19 @@ function flattenSteps(steps: Step[]) {
 			}
 		} else if (step.type === "interval_pair") {
 			const showRep = step.repeats > 1;
+			const hardBaseSpeed = step.hard.speed_kmh || 0;
+			const hardSpeedIncrease = step.hard.speed_increase_kmh || 0;
+			const restBaseSpeed = step.rest.speed_kmh || 0;
+			const restSpeedIncrease = step.rest.speed_increase_kmh || 0;
 			for (let i = 0; i < step.repeats; i++) {
 				const repIndex = showRep ? i + 1 : undefined;
 				const hardSec = toSec(step.hard.duration_min);
+				const currentHardSpeed = hardBaseSpeed + (hardSpeedIncrease * i);
 				result.push({
 					label: step.hard.label,
 					duration_min: step.hard.duration_min,
 					duration_sec: hardSec,
-					speed_kmh: step.hard.speed_kmh,
+					speed_kmh: currentHardSpeed,
 					start_min: currentSec / 60,
 					start_sec: currentSec,
 					type: "interval_hard",
@@ -384,11 +393,12 @@ function flattenSteps(steps: Step[]) {
 				});
 				currentSec += hardSec;
 				const restSec = toSec(step.rest.duration_min);
+				const currentRestSpeed = restBaseSpeed + (restSpeedIncrease * i);
 				result.push({
 					label: step.rest.label,
 					duration_min: step.rest.duration_min,
 					duration_sec: restSec,
-					speed_kmh: step.rest.speed_kmh,
+					speed_kmh: currentRestSpeed,
 					start_min: currentSec / 60,
 					start_sec: currentSec,
 					type: "interval_rest",

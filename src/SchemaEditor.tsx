@@ -20,16 +20,19 @@ export interface SimpleStep {
 	label?: string;
 	speed_kmh?: number;
 	duration_min?: number;
+	speed_increase_kmh?: number;
 	// Voor interval_pair type
 	hard?: {
 		label: string;
 		speed_kmh: number;
 		duration_min: number;
+		speed_increase_kmh?: number;
 	};
 	rest?: {
 		label: string;
 		speed_kmh: number;
 		duration_min: number;
+		speed_increase_kmh?: number;
 	};
 }
 
@@ -44,16 +47,19 @@ interface LoadedStep {
 	label?: string;
 	duration_min?: number;
 	speed_kmh?: number;
+	speed_increase_kmh?: number;
 	repeats?: number;
 	hard?: {
 		duration_min?: number;
 		speed_kmh?: number;
 		label?: string;
+		speed_increase_kmh?: number;
 	};
 	rest?: {
 		duration_min?: number;
 		speed_kmh?: number;
 		label?: string;
+		speed_increase_kmh?: number;
 	};
 	tijd?: number;
 	beschrijving?: string;
@@ -178,12 +184,14 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									hard: {
 										label: step.hard.label || 'Hard',
 										speed_kmh: step.hard.speed_kmh || 10,
-										duration_min: step.hard.duration_min || 1
+										duration_min: step.hard.duration_min || 1,
+										speed_increase_kmh: step.hard.speed_increase_kmh || 0
 									},
 									rest: {
 										label: step.rest.label || 'Rest',
 										speed_kmh: step.rest.speed_kmh || 6,
-										duration_min: step.rest.duration_min || 1
+										duration_min: step.rest.duration_min || 1,
+										speed_increase_kmh: step.rest.speed_increase_kmh || 0
 									},
 									repeats: step.repeats || 1
 								};
@@ -195,6 +203,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									label: step.label || 'Training',
 									speed_kmh: step.speed_kmh || 10,
 									duration_min: step.duration_min || 30,
+									speed_increase_kmh: step.speed_increase_kmh || 0,
 									repeats: step.repeats || 1
 								};
 							}
@@ -468,11 +477,12 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 			if (step.type === "steady") {
 				for (let i = 0; i < (step.repeats || 1); i++) {
 					const durSec = toSec(step.duration_min || 0);
+					const speedIncrease = (step.speed_increase_kmh || 0) * i;
 					result.push({
 						label: step.label || 'Steady',
 						duration_min: step.duration_min || 0,
 						duration_sec: durSec,
-						speed_kmh: step.speed_kmh || 0,
+						speed_kmh: (step.speed_kmh || 0) + speedIncrease,
 						start_min: currentSec / 60,
 						start_sec: currentSec,
 						type: "steady",
@@ -484,11 +494,12 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				for (let i = 0; i < (step.repeats || 1); i++) {
 					const repIndex = showRep ? i + 1 : undefined;
 					const hardSec = toSec(step.hard.duration_min || 0);
+					const hardSpeedIncrease = (step.hard.speed_increase_kmh || 0) * i;
 					result.push({
 						label: step.hard.label || 'Hard',
 						duration_min: step.hard.duration_min || 0,
 						duration_sec: hardSec,
-						speed_kmh: step.hard.speed_kmh || 0,
+						speed_kmh: (step.hard.speed_kmh || 0) + hardSpeedIncrease,
 						start_min: currentSec / 60,
 						start_sec: currentSec,
 						type: "interval_hard",
@@ -496,11 +507,12 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					});
 					currentSec += hardSec;
 					const restSec = toSec(step.rest.duration_min || 0);
+					const restSpeedIncrease = (step.rest.speed_increase_kmh || 0) * i;
 					result.push({
 						label: step.rest.label || 'Rest',
 						duration_min: step.rest.duration_min || 0,
 						duration_sec: restSec,
-						speed_kmh: step.rest.speed_kmh || 0,
+						speed_kmh: (step.rest.speed_kmh || 0) + restSpeedIncrease,
 						start_min: currentSec / 60,
 						start_sec: currentSec,
 						type: "interval_rest",
@@ -724,7 +736,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							value={step.type}
 							onChange={(e) => handleTypeChange(e.target.value as 'steady' | 'interval_pair')}
 							style={{ 
-								padding: '12px 16px', 
+								padding: '12px 8px 12px 4px', 
 								border: '2px solid #dee2e6', 
 								borderRadius: '8px',
 								fontSize: '14px',
@@ -737,7 +749,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							<option value="interval_pair">Interval</option>
 						</select>
 						{step.type === 'steady' && (
-							<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+							<div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
 								<label style={{ fontSize: '14px', fontWeight: '600', color: '#495057', margin: 0 }}>
 									🔄 Herh
 								</label>
@@ -745,9 +757,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									type="number"
 									value={step.repeats || 1}
 									onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
-									style={{ 
-										width: '50px', 
-										padding: '12px 16px', 
+									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
@@ -757,7 +767,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							</div>
 						)}
 						{step.type === 'interval_pair' && (
-							<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+							<div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
 								<label style={{ fontSize: '14px', fontWeight: '600', color: '#495057', margin: 0 }}>
 									🔄 Herh
 								</label>
@@ -765,9 +775,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									type="number"
 									value={step.repeats || 1}
 									onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
-									style={{ 
-										width: '50px', 
-										padding: '12px 16px', 
+									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
@@ -810,7 +818,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									style={{ 
 										width: 'auto',
 										maxWidth: '200px', 
-										padding: '12px 16px', 
+										padding: '12px 8px 12px 4px', 
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
@@ -827,9 +835,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									step="0.1"
 									value={step.speed_kmh || 0}
 									onChange={(e) => updateStep(index, { ...step, speed_kmh: parseFloat(e.target.value) || 0 })}
-									style={{ 
-										width: '50px', 
-										padding: '12px 16px', 
+									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
@@ -845,9 +851,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									type="number"
 									value={step.duration_min || 0}
 									onChange={(e) => updateStep(index, { ...step, duration_min: parseInt(e.target.value) || 0 })}
-									style={{ 
-										width: '50px', 
-										padding: '12px 16px', 
+									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
@@ -862,14 +866,14 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 
 				{/* Interval pair type fields */}
 				{step.type === 'interval_pair' && step.hard && step.rest && (
-					<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
+					<div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', width: '100%' }}>
 							{/* Hard section */}
 							<div>
 								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 									🔥 Hard
 								</label>
-								<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
+								<div style={{ display: 'grid', gridTemplateColumns: '2fr 0.8fr 0.8fr 0.8fr', gap: '2px' }}>
 									<div>
 										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 											Label
@@ -884,29 +888,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 											style={{ 
 												width: 'auto',
 												maxWidth: '200px', 
-												padding: '12px 16px', 
-												border: '2px solid #dee2e6', 
-												borderRadius: '8px',
-												fontSize: '14px',
-												fontWeight: '500'
-											}}
-										/>
-									</div>
-									<div>
-										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-											km/u
-										</label>
-										<input
-											type="number"
-											step="0.1"
-											value={step.hard.speed_kmh || 0}
-											onChange={(e) => updateStep(index, { 
-												...step, 
-												hard: { ...step.hard!, speed_kmh: parseFloat(e.target.value) || 0 }
-											})}
-											style={{ 
-												width: '50px', 
-												padding: '12px 16px', 
+												padding: '12px 8px 12px 4px', 
 												border: '2px solid #dee2e6', 
 												borderRadius: '8px',
 												fontSize: '14px',
@@ -926,9 +908,47 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 												...step, 
 												hard: { ...step.hard!, duration_min: parseFloat(e.target.value) || 0 }
 											})}
-											style={{ 
-												width: '50px', 
-												padding: '12px 16px', 
+											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											km/u
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.hard.speed_kmh || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, speed_kmh: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											+km/u
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.hard.speed_increase_kmh || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, speed_increase_kmh: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 												border: '2px solid #dee2e6', 
 												borderRadius: '8px',
 												fontSize: '14px',
@@ -944,7 +964,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 									💤 Rust
 								</label>
-								<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
+								<div style={{ display: 'grid', gridTemplateColumns: '2fr 0.8fr 0.8fr 0.8fr', gap: '2px' }}>
 									<div>
 										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 											Label
@@ -959,29 +979,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 											style={{ 
 												width: 'auto',
 												maxWidth: '200px', 
-												padding: '12px 16px', 
-												border: '2px solid #dee2e6', 
-												borderRadius: '8px',
-												fontSize: '14px',
-												fontWeight: '500'
-											}}
-										/>
-									</div>
-									<div>
-										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-											km/u
-										</label>
-										<input
-											type="number"
-											step="0.1"
-											value={step.rest.speed_kmh || 0}
-											onChange={(e) => updateStep(index, { 
-												...step, 
-												rest: { ...step.rest!, speed_kmh: parseFloat(e.target.value) || 0 }
-											})}
-											style={{ 
-												width: '50px', 
-												padding: '12px 16px', 
+												padding: '12px 8px 12px 4px', 
 												border: '2px solid #dee2e6', 
 												borderRadius: '8px',
 												fontSize: '14px',
@@ -1001,9 +999,47 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 												...step, 
 												rest: { ...step.rest!, duration_min: parseFloat(e.target.value) || 0 }
 											})}
-											style={{ 
-												width: '50px', 
-												padding: '12px 16px', 
+											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											km/u
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.rest.speed_kmh || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, speed_kmh: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+												border: '2px solid #dee2e6', 
+												borderRadius: '8px',
+												fontSize: '14px',
+												fontWeight: '500'
+											}}
+										/>
+									</div>
+									<div>
+										<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+											+km/u
+										</label>
+										<input
+											type="number"
+											step="0.1"
+											value={step.rest.speed_increase_kmh || 0}
+											onChange={(e) => updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, speed_increase_kmh: parseFloat(e.target.value) || 0 }
+											})}
+											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 												border: '2px solid #dee2e6', 
 												borderRadius: '8px',
 												fontSize: '14px',
@@ -1122,7 +1158,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						}}
 						style={{ 
 							width: '100%', 
-							padding: '12px 16px', 
+							padding: '12px 8px 12px 4px', 
 							border: '2px solid #dee2e6', 
 							borderRadius: '8px',
 							fontSize: '16px',
@@ -1144,7 +1180,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						}}
 						style={{ 
 							width: '100%', 
-							padding: '12px 16px', 
+							padding: '12px 8px 12px 4px', 
 							border: '2px solid #dee2e6', 
 							borderRadius: '8px',
 							fontSize: '16px',
@@ -1284,7 +1320,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								right: '-8px',
 								display: 'flex',
 								flexDirection: 'row',
-								gap: '4px'
+								gap: '2px'
 							}}>
 								{/* Verwijder knop */}
 								{weekPrograms.length > 1 && (
@@ -1450,7 +1486,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								onChange={(e) => updateWeekCalories(parseInt(e.target.value) || 0)}
 								style={{ 
 									width: '150px', 
-									padding: '12px 16px', 
+									padding: '12px 8px 12px 4px', 
 									border: '2px solid #dee2e6', 
 									borderRadius: '8px',
 									fontSize: '14px',
@@ -1481,7 +1517,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								color: 'white',
 								border: 'none',
 								borderRadius: '8px',
-								padding: '12px 16px',
+								padding: '12px 8px 12px 4px',
 								cursor: 'pointer',
 								fontSize: '14px',
 								fontWeight: '600',
