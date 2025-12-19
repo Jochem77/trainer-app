@@ -137,7 +137,8 @@ Kies het type stap:
 - Klik op **"+ Steady"**
 - Vul in:
   - **Label**: bijv. "Warming-up", "Basis tempo"
-  - **Snelheid**: km/u (bijv. 10)
+  - **Snelheid (km/u)**: bijv. 10
+  - **Snelheidstoename (+km/u)**: optioneel, toename per herhaling (bijv. 0.5)
   - **Duur**: minuten (bijv. 5)
   - **Herhalingen**: aantal keer (meestal 1)
 
@@ -146,10 +147,12 @@ Kies het type stap:
 - Vul in voor **Hard**:
   - **Label**: bijv. "Sprint"
   - **Snelheid**: km/u (bijv. 14)
+  - **Snelheidstoename (+km/u)**: optioneel, toename per herhaling (bijv. 0.2)
   - **Duur**: minuten (bijv. 1)
 - Vul in voor **Rust**:
   - **Label**: bijv. "Herstel"
   - **Snelheid**: km/u (bijv. 8)
+  - **Snelheidstoename (+km/u)**: optioneel (bijv. 0)
   - **Duur**: minuten (bijv. 2)
 - **Herhalingen**: aantal keer dit patroon (bijv. 5)
 
@@ -265,6 +268,32 @@ Intervallen zijn perfect voor:
 
 Stel altijd genoeg rusttijd in tussen intervallen!
 
+### Snelheidstoename (Progressieve Training)
+
+Met de **Snelheidstoename (+km/u)** functie kun je progressieve trainingen opbouwen:
+
+**Hoe werkt het:**
+- Voor elke herhaling wordt de snelheid verhoogd
+- Dit zorgt voor natuurlijke voortgang zonder handmatig aanpassen
+
+**Voorbeeld:**
+- Stap: "Basis Tempo"
+- Snelheid: 10 km/u
+- Snelheidstoename: 0.5 km/u
+- Herhalingen: 4
+
+**Resultaat:**
+- Herhaling 1: 10.0 km/u
+- Herhaling 2: 10.5 km/u
+- Herhaling 3: 11.0 km/u
+- Herhaling 4: 11.5 km/u
+
+**Gebruiksscenario's:**
+- **Progressieve opwarmingen**: Begin langzaam, bouw op naar trainingssnelheid
+- **Afsluitende tempo-runs**: Eindigen op hogere snelheid
+- **Intervaltraining**: Hard en rust beide met toename
+- **Stadia training**: Verschillende intensiteiten doorlopen
+
 ---
 
 ## Veelgestelde Vragen
@@ -289,6 +318,12 @@ A: De app berekent opnieuw in welke week je zit op basis van de nieuwe startdatu
 
 **Q: Hoe voeg ik een warming-up en cool-down toe?**  
 A: Voeg een "Steady" stap toe aan het begin (warming-up) en einde (cool-down) van je training met lagere snelheid.
+
+**Q: Hoe gebruik ik de snelheidstoename functie?**  
+A: Vul een waarde in bij "Snelheidstoename (+km/u)" om de snelheid per herhaling te verhogen. Voorbeeld: 0.5 verhoogt de snelheid elke herhaling met 0.5 km/u. Laat het op 0 staan voor vaste snelheid.
+
+**Q: Kan ik alleen bepaalde stappen met snelheidstoename geven?**  
+A: Ja, zet voor enkele stappen een waarde en voor andere stappen 0 (of laat leeg voor geen toename).
 
 ---
 
