@@ -1074,10 +1074,9 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		<div style={{ 
 			maxWidth: '900px', 
 			margin: '0 auto', 
-			padding: '20px', 
+			padding: '20px',
 			fontFamily: 'Inter, system-ui, sans-serif',
-			background: '#ffffff',
-			minHeight: '100vh'
+			background: '#ffffff'
 		}}>
 			{/* Header */}
 			<div style={{ 

@@ -679,7 +679,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	}
 
 		return (
-			<div className="app-root" style={{ maxWidth: 720, height: '100dvh', margin: "0 auto", padding: 16, paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+			<div className="app-root" style={{ maxWidth: 720, flex: 1, margin: "0 auto", padding: 16, paddingTop: 'calc(20px + var(--safe-top, 0px))', paddingBottom: 'calc(16px + var(--safe-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
 				@supports(height: 100dvh){ .app-root{ height: 100dvh; } }
@@ -1073,6 +1073,15 @@ const App: React.FC = () => {
 	const [user, setUser] = useState<SupabaseUser | null>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [currentPage, setCurrentPage] = useState<'training' | 'editor'>('training');
+	const editorScrollRef = React.useRef<HTMLDivElement>(null);
+
+	// Scroll to top when switching to editor page
+	useEffect(() => {
+		if (currentPage === 'editor' && editorScrollRef.current) {
+			editorScrollRef.current.scrollTop = 0;
+			editorScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+	}, [currentPage]);
 
 	// Debug user state
 	console.log('App user state:', user);
@@ -1101,7 +1110,13 @@ const App: React.FC = () => {
 	}, []);
 
 	return (
-		<>
+		<div style={{
+			display: 'flex',
+			flexDirection: 'column',
+			width: '100vw',
+			height: '100vh',
+			overflow: 'hidden'
+		}}>
 			{/* Hamburger menu button */}
 			<style>{`
 				.hambtn { display: none; /* Verbergen omdat we hambtn-grid gebruiken */ }
@@ -1232,20 +1247,21 @@ const App: React.FC = () => {
 			{currentPage === 'training' ? (
 				<TrainingProgramDay setMenuOpen={setMenuOpen} user={user} />
 			) : (
-				<div style={{ 
-					width: '100vw', 
-					height: '100vh', 
-					overflow: 'auto', 
+				<div ref={editorScrollRef} style={{ 
+					flex: 1,
+					width: '100%',
+					overflow: 'auto',
+					overflowY: 'scroll',
 					background: 'linear-gradient(180deg,#dfe9ff,#eaf2ff)',
-					position: 'fixed',
-					top: 0,
-					left: 0,
-					zIndex: 1
+					paddingTop: 'calc(var(--safe-top, 0px))',
+					paddingBottom: 'calc(var(--safe-bottom, 0px))'
 				}}>
-					<SchemaEditor onBack={() => setCurrentPage('training')} userId={user?.id} />
+					<div style={{ paddingTop: '20px', paddingBottom: '20px' }}>
+						<SchemaEditor onBack={() => setCurrentPage('training')} userId={user?.id} />
+					</div>
 				</div>
 			)}
-		</>
+		</div>
 	);
 };
 
