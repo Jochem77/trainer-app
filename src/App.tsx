@@ -714,6 +714,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			.status-col h4 { margin:0 0 2px; font-size:14px; font-weight:800; color:#111; }
 			.status-col small { display:none; }
 			.status-col .time { font-variant-numeric:tabular-nums; font-weight:900; font-size:var(--statSize); line-height:1; }
+			.status-col .time:last-child { font-size: calc(var(--statSize) * 0.5); font-weight: 700; margin-top: 2px; }
 					.time-step { color:#2e7d32; }
 					.time-total { color:#1565c0; }
 			.speed { text-align:center; margin:6px 0 0; }
@@ -796,24 +797,46 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 								const nextStep = flatSteps[currentIdx + 1];
 								const nextSpeed = nextStep && nextStep.speed_kmh != null ? `${nextStep.speed_kmh} km/u` : null;
 								const currentLabel = currentStep.label + (currentStep.repIndex ? ` ${currentStep.repIndex}` : '');
+								
+								// Calculate remaining km for current step
+								const currentStepRemainingKm = currentStep.speed_kmh 
+									? (stepTimeLeft / 3600) * currentStep.speed_kmh 
+									: 0;
+								
+								// Calculate remaining km for total training (from now until end)
+								let totalRemainingKm = 0;
+								for (let i = currentIdx; i < flatSteps.length; i++) {
+									const step = flatSteps[i];
+									if (i === currentIdx) {
+										// Current step: only count remaining time
+										totalRemainingKm += (stepTimeLeft / 3600) * (step.speed_kmh || 0);
+									} else {
+										// Future steps: count full duration in minutes
+										const stepDurationMin = step.duration_min || 0;
+										totalRemainingKm += step.speed_kmh ? (stepDurationMin * step.speed_kmh) / 60 : 0;
+									}
+								}
+								
 								return (
 									<div className="status-card">
-														<div className="status-top">
-															<div className="status-col">
-																<h4>stap</h4>
-																<div className="time time-step">{fmt(stepTimeLeft)}</div>
-															</div>
-															<div className="status-col">
-																<h4>totaal</h4>
-																<div className="time time-total">{fmt(totalTimeLeft)}</div>
-															</div>
-														</div>
-														<div className="speed">
-															<div className="value">{speedText}{nextSpeed ? <span className="next-speed"> (→ {nextSpeed})</span> : null}</div>
-														</div>
-																		<div className="current-label">{currentLabel}</div>
+										<div className="status-top">
+											<div className="status-col">
+												<h4>stap</h4>
+												<div className="time time-step">{fmt(stepTimeLeft)}</div>
+												<div className="time time-step">({currentStepRemainingKm.toFixed(3).replace('.', ',')} km)</div>
+											</div>
+											<div className="status-col">
+												<h4>totaal</h4>
+												<div className="time time-total">{fmt(totalTimeLeft)}</div>
+												<div className="time time-total">({totalRemainingKm.toFixed(3).replace('.', ',')} km)</div>
+											</div>
+										</div>
+										<div className="speed">
+											<div className="value">{speedText}{nextSpeed ? <span className="next-speed"> (→ {nextSpeed})</span> : null}</div>
+										</div>
+										<div className="current-label">{currentLabel}</div>
 									</div>
-																);
+								);
 							})()}
 															{/* Actions directly under status card */}
 															<div className="actions-row actions-under-card">
