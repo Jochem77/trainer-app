@@ -993,12 +993,13 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									</label>
 									<input
 										type="text"
-										value={minToKm(step.hard.duration_min || 0, step.hard.speed_kmh || 0).toFixed(3).replace('.', ',')}
+										value={step.hard ? minToKm(step.hard.duration_min || 0, step.hard.speed_kmh || 0).toFixed(3).replace('.', ',') : ''}
 										onChange={e => {
+											if (!step.hard) return;
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { 
 												...step, 
-												hard: { ...step.hard!, duration_min: kmToMin(parseNumberInput(filtered), step.hard.speed_kmh || 0) }
+												hard: { ...step.hard, duration_min: kmToMin(parseNumberInput(filtered), step.hard.speed_kmh || 0) }
 											});
 										}}
 										style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
@@ -1114,12 +1115,13 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									</label>
 									<input
 										type="text"
-										value={minToKm(step.rest.duration_min || 0, step.rest.speed_kmh || 0).toFixed(3).replace('.', ',')}
+										value={step.rest ? minToKm(step.rest.duration_min || 0, step.rest.speed_kmh || 0).toFixed(3).replace('.', ',') : ''}
 										onChange={e => {
+											if (!step.rest) return;
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { 
 												...step, 
-												rest: { ...step.rest!, duration_min: kmToMin(parseNumberInput(filtered), step.rest.speed_kmh || 0) }
+												rest: { ...step.rest, duration_min: kmToMin(parseNumberInput(filtered), step.rest.speed_kmh || 0) }
 											});
 										}}
 										style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
@@ -1741,13 +1743,6 @@ function minToKm(min: number, speed: number) {
   return (min * speed) / 60;
 }
 // Helper: formatteer minuten op 1 decimaal
-function formatMin(val: number) {
-  return val ? val.toFixed(1) : '0.0';
-}
-// Helper: formatteer km op 3 decimalen
-function formatKm(val: number) {
-  return val ? val.toFixed(3) : '0.000';
-}
 
 // Helper: alleen getallen, punt of komma
 function filterNumericInput(value: string) {
