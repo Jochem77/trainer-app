@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import schema from "./backups/schema.json";
 import SchemaEditor from './SchemaEditor';
+
+// Helpers voor formatting (gekopieerd uit SchemaEditor)
+function formatMin(val: number) {
+	return val ? val.toFixed(1) : '0.0';
+}
 import { supabase } from './lib/supabase';
 
 type UserSchema = {
@@ -823,12 +828,12 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 											<div className="status-col">
 												<h4>stap</h4>
 												<div className="time time-step">{fmt(stepTimeLeft)}</div>
-												<div className="time time-step">({currentStepRemainingKm.toFixed(3).replace('.', ',')} km)</div>
+												<div className="time time-step km-remaining" style={{ fontSize: '1.7em', fontWeight: 800 }}>({currentStepRemainingKm.toFixed(3).replace('.', ',')} km)</div>
 											</div>
 											<div className="status-col">
 												<h4>totaal</h4>
 												<div className="time time-total">{fmt(totalTimeLeft)}</div>
-												<div className="time time-total">({totalRemainingKm.toFixed(3).replace('.', ',')} km)</div>
+												<div className="time time-total km-remaining" style={{ fontSize: '1.7em', fontWeight: 800 }}>({totalRemainingKm.toFixed(3).replace('.', ',')} km)</div>
 											</div>
 										</div>
 										<div className="speed">
@@ -897,7 +902,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 											{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
 										</div>
 										<div className="k-dur">
-											{step.duration_min > 0 ? `${step.duration_min} min` : ''}
+											{step.duration_min > 0 ? `${formatMin(step.duration_min)} min` : ''}
 										</div>
 										  <div className="k-label">{step.label}{step.repIndex ? ` ${step.repIndex}` : ''}</div>
 									</div>

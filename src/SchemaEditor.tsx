@@ -755,13 +755,18 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								</label>
 								<input
 									type="number"
+									inputMode="decimal"
+									pattern="[0-9]*"
 									value={step.repeats || 1}
 									onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
-									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
+									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
-										fontWeight: '500'
+										fontWeight: '500',
+										appearance: 'textfield',
+										MozAppearance: 'textfield',
+										WebkitAppearance: 'none'
 									}}
 								/>
 							</div>
@@ -775,12 +780,15 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									type="number"
 									value={step.repeats || 1}
 									onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
-									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
-										border: '2px solid #dee2e6', 
-										borderRadius: '8px',
-										fontSize: '14px',
-										fontWeight: '500'
-									}}
+									   style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+										   border: '2px solid #dee2e6', 
+										   borderRadius: '8px',
+										   fontSize: '14px',
+										   fontWeight: '500',
+										   appearance: 'textfield',
+										   MozAppearance: 'textfield',
+										   WebkitAppearance: 'none'
+									   }}
 								/>
 							</div>
 						)}
@@ -806,7 +814,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				{step.type === 'steady' && (
 				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
 					<div>
-						<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
+						<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '16px' }}>
 							<div>
 								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 									Label
@@ -831,15 +839,20 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									km/u
 								</label>
 								<input
-									type="number"
-									step="0.1"
-									value={step.speed_kmh || 0}
-									onChange={(e) => updateStep(index, { ...step, speed_kmh: parseFloat(e.target.value) || 0 })}
+									type="text"
+									value={step.speed_kmh?.toString().replace('.', ',') || ''}
+									onChange={e => {
+										const filtered = filterNumericInput(e.target.value);
+										updateStep(index, { ...step, speed_kmh: parseNumberInput(filtered) });
+									}}
 									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
 										border: '2px solid #dee2e6', 
 										borderRadius: '8px',
 										fontSize: '14px',
-										fontWeight: '500'
+										fontWeight: '500',
+										appearance: 'textfield',
+										MozAppearance: 'textfield',
+										WebkitAppearance: 'none'
 									}}
 								/>
 							</div>
@@ -847,23 +860,52 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 									min
 								</label>
-								<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-									<input
-										type="number"
-										step="0.1"
-										value={step.duration_min || 0}
-										onChange={(e) => updateStep(index, { ...step, duration_min: parseFloat(e.target.value) || 0 })}
-										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-									<span style={{ fontSize: '12px', color: '#6c757d', minWidth: '60px' }}>
-										{((step.duration_min || 0) * (step.speed_kmh || 0) / 60).toFixed(2)} km
-									</span>
-								</div>
+								<input
+									type="text"
+									value={step.duration_min?.toString().replace('.', ',') || ''}
+									onChange={e => {
+										const filtered = filterNumericInput(e.target.value);
+										updateStep(index, {
+											...step,
+											duration_min: parseNumberInput(filtered),
+											// km wordt automatisch berekend
+										});
+									}}
+									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
+										border: '2px solid #dee2e6', 
+										borderRadius: '8px',
+										fontSize: '14px',
+										fontWeight: '500',
+										appearance: 'textfield',
+										MozAppearance: 'textfield',
+										WebkitAppearance: 'none'
+									}}
+								/>
+							</div>
+							<div>
+								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									km
+								</label>
+								<input
+									type="text"
+									value={minToKm(step.duration_min || 0, step.speed_kmh || 0).toFixed(3).replace('.', ',')}
+									onChange={e => {
+										const filtered = filterNumericInput(e.target.value);
+										updateStep(index, {
+											...step,
+											duration_min: kmToMin(parseNumberInput(filtered), step.speed_kmh || 0),
+										});
+									}}
+									style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
+										border: '2px solid #dee2e6',
+										borderRadius: '8px',
+										fontSize: '14px',
+										fontWeight: '500',
+										appearance: 'textfield',
+										MozAppearance: 'textfield',
+										WebkitAppearance: 'none'
+									}}
+								/>
 							</div>
 						</div>
 					</div>
@@ -872,13 +914,13 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 
 				{/* Interval pair type fields */}
 				{step.type === 'interval_pair' && step.hard && step.rest && (
-					<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
+					<div style={{ width: '100%' }}>
 						{/* Hard section */}
 						<div>
 							<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 								🔥 Hard
 							</label>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '0px' }}>
+							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 										Label
@@ -906,13 +948,15 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										km/u
 									</label>
 									<input
-										type="number"
-										step="0.1"
-										value={step.hard.speed_kmh || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											hard: { ...step.hard!, speed_kmh: parseFloat(e.target.value) || 0 }
-										})}
+										type="text"
+										value={step.hard.speed_kmh?.toString().replace('.', ',') || ''}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, speed_kmh: parseNumberInput(filtered) || 0 }
+											});
+										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6', 
 											borderRadius: '8px',
@@ -926,18 +970,45 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										min
 									</label>
 									<input
-										type="number"
-										step="0.1"
-										value={step.hard.duration_min || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											hard: { ...step.hard!, duration_min: parseFloat(e.target.value) || 0 }
-										})}
+										type="text"
+										value={step.hard.duration_min?.toString().replace('.', ',') || ''}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, duration_min: parseNumberInput(filtered) || 0 }
+											});
+										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6', 
 											borderRadius: '8px',
 											fontSize: '14px',
 											fontWeight: '500'
+										}}
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+										km
+									</label>
+									<input
+										type="text"
+										value={minToKm(step.hard.duration_min || 0, step.hard.speed_kmh || 0).toFixed(3).replace('.', ',')}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { 
+												...step, 
+												hard: { ...step.hard!, duration_min: kmToMin(parseNumberInput(filtered), step.hard.speed_kmh || 0) }
+											});
+										}}
+										style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
 										}}
 									/>
 								</div>
@@ -961,20 +1032,16 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 												fontWeight: '500'
 											}}
 										/>
-										<span style={{ fontSize: '12px', color: '#6c757d', minWidth: '60px' }}>
-											{((step.hard.duration_min || 0) * (step.hard.speed_kmh || 0) / 60).toFixed(2)} km
-										</span>
 									</div>
 								</div>
 							</div>
 						</div>
-
-						{/* Rest section */}
-						<div>
+						{/* Rest section direct onder hard */}
+						<div style={{ marginTop: '24px' }}>
 							<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 								💤 Rust
 							</label>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '0px' }}>
+							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 										Label
@@ -1002,13 +1069,15 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										km/u
 									</label>
 									<input
-										type="number"
-										step="0.1"
-										value={step.rest.speed_kmh || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											rest: { ...step.rest!, speed_kmh: parseFloat(e.target.value) || 0 }
-										})}
+										type="text"
+										value={step.rest.speed_kmh?.toString().replace('.', ',') || ''}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, speed_kmh: parseNumberInput(filtered) || 0 }
+											});
+										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6', 
 											borderRadius: '8px',
@@ -1022,18 +1091,45 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										min
 									</label>
 									<input
-										type="number"
-										step="0.1"
-										value={step.rest.duration_min || 0}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											rest: { ...step.rest!, duration_min: parseFloat(e.target.value) || 0 }
-										})}
+										type="text"
+										value={step.rest.duration_min?.toString().replace('.', ',') || ''}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, duration_min: parseNumberInput(filtered) || 0 }
+											});
+										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6', 
 											borderRadius: '8px',
 											fontSize: '14px',
 											fontWeight: '500'
+										}}
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+										km
+									</label>
+									<input
+										type="text"
+										value={minToKm(step.rest.duration_min || 0, step.rest.speed_kmh || 0).toFixed(3).replace('.', ',')}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { 
+												...step, 
+												rest: { ...step.rest!, duration_min: kmToMin(parseNumberInput(filtered), step.rest.speed_kmh || 0) }
+											});
+										}}
+										style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
 										}}
 									/>
 								</div>
@@ -1057,9 +1153,6 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 												fontWeight: '500'
 											}}
 										/>
-										<span style={{ fontSize: '12px', color: '#6c757d', minWidth: '60px' }}>
-											{((step.rest.duration_min || 0) * (step.rest.speed_kmh || 0) / 60).toFixed(2)} km
-										</span>
 									</div>
 								</div>
 							</div>
@@ -1069,6 +1162,22 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 			</div>
 		);
 	};
+
+	// Globale CSS om number input spinners te verbergen
+	const style = document.createElement('style');
+	style.innerHTML = `
+	  /* Chrome, Safari, Edge, Opera */
+	  input[type=number]::-webkit-inner-spin-button, 
+	  input[type=number]::-webkit-outer-spin-button {
+	    -webkit-appearance: none;
+	    margin: 0;
+	  }
+	  /* Firefox */
+	  input[type=number] {
+	    -moz-appearance: textfield;
+	  }
+	`;
+	document.head.appendChild(style);
 
 	return (
 		<div style={{ 
@@ -1620,3 +1729,30 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 };
 
 export default SchemaEditor;
+
+// Helper: km naar min
+function kmToMin(km: number, speed: number) {
+  if (!speed) return 0;
+  return (km / speed) * 60;
+}
+// Helper: min naar km
+function minToKm(min: number, speed: number) {
+  if (!speed) return 0;
+  return (min * speed) / 60;
+}
+// Helper: formatteer minuten op 1 decimaal
+function formatMin(val: number) {
+  return val ? val.toFixed(1) : '0.0';
+}
+// Helper: formatteer km op 3 decimalen
+function formatKm(val: number) {
+  return val ? val.toFixed(3) : '0.000';
+}
+
+// Helper: alleen getallen, punt of komma
+function filterNumericInput(value: string) {
+  return value.replace(/[^0-9.,]/g, '');
+}
+function parseNumberInput(value: string) {
+  return parseFloat(value.replace(',', '.')) || 0;
+}
