@@ -8,6 +8,7 @@ function formatMin(val: number) {
 	return val ? val.toFixed(1) : '0.0';
 }
 import { supabase } from './lib/supabase';
+import TreadmillPage from './TreadmillPage';
 
 type UserSchema = {
 	id: number;
@@ -1077,7 +1078,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ user }) => {
 const App: React.FC = () => {
 	const [user, setUser] = useState<SupabaseUser | null>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [currentPage, setCurrentPage] = useState<'training' | 'editor'>('training');
+	const [currentPage, setCurrentPage] = useState<'training' | 'editor' | 'treadmill'>('training');
 	const editorScrollRef = React.useRef<HTMLDivElement>(null);
 
 	// Scroll to top when switching to editor page
@@ -1235,6 +1236,20 @@ const App: React.FC = () => {
 								)}
 							</div>
 
+							{/* Loopband testpagina */}
+							<div className="menu-section">
+								<h3>🏃 Loopband</h3>
+								<button
+									className="menu-button primary"
+									onClick={() => {
+										setCurrentPage('treadmill');
+										setMenuOpen(false);
+									}}
+								>
+									🔗 Loopband Verbinden & Bedienen
+								</button>
+							</div>
+
 							{/* App Info */}
 							<div className="menu-section">
 								<h3>ℹ️ Informatie</h3>
@@ -1249,7 +1264,11 @@ const App: React.FC = () => {
 				</>
 			)}
 
-			{currentPage === 'training' ? (
+			{currentPage === 'treadmill' ? (
+				<div style={{ flex: 1, width: '100%', overflow: 'auto', overflowY: 'scroll', background: 'linear-gradient(180deg,#dfe9ff,#eaf2ff)' }}>
+					<TreadmillPage onBack={() => setCurrentPage('training')} />
+				</div>
+			) : currentPage === 'training' ? (
 				<TrainingProgramDay setMenuOpen={setMenuOpen} user={user} />
 			) : (
 				<div ref={editorScrollRef} style={{ 
