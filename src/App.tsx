@@ -9,6 +9,7 @@ function formatMin(val: number) {
 }
 import { supabase } from './lib/supabase';
 import TreadmillPage from './TreadmillPage';
+import { useTreadmill } from './lib/useTreadmill';
 
 type UserSchema = {
 	id: number;
@@ -439,6 +440,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	const [startDate, setStartDate] = useState<string>(getTodayDateString()); // Today for guests, will be updated from cloud for logged-in users
 	const [schemaLoading, setSchemaLoading] = useState(false);
 
+	// Bluetooth loopband koppeling
+	const { btStatus, btDeviceName, connect: btConnect, disconnect: btDisconnect, sendSpeed } = useTreadmill();
 
 	// Load user schema from cloud
 	useEffect(() => {
@@ -570,7 +573,14 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			prevLeftRef.current = { idx: currentIdx, left: stepTimeLeft };
 		}, [stepTimeLeft, running, currentIdx]);
 
-		// Wake Lock API: scherm actief houden (her-acquire bij terugkeren naar app)
+	// Auto-stuur snelheid naar loopband bij stapwissel en bij start/verbinding
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	useEffect(() => {
+		if (!running || btStatus !== 'connected') return;
+		if (currentStep.speed_kmh != null && currentStep.type !== 'end') {
+			sendSpeed(currentStep.speed_kmh);
+		}
+	}, [currentIdx, running, btStatus]);
 		useEffect(() => {
 			let isMounted = true;
 			let wakeLockRef: WakeLockSentinel | null = null;
@@ -852,7 +862,31 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 																>
 																	{running ? 'Pauze' : 'Start'}
 																</button>
-															</div>
+													{/* Loopband koppelknop */}
+													<button
+														onClick={() => btStatus === 'connected' ? btDisconnect() : btConnect()}
+														disabled={btStatus === 'connecting'}
+														title={btStatus === 'connected' ? `Loopband: ${btDeviceName} — klik om te verbreken` : 'Verbinden met loopband'}
+														style={{
+															minWidth: 58, padding: '0 8px', height: 52, border: 'none', borderRadius: 12,
+															background:
+																btStatus === 'connected' ? '#28a745' :
+																btStatus === 'connecting' ? '#fd7e14' :
+																btStatus === 'error' ? '#dc3545' : '#455a64',
+															color: '#fff', fontWeight: 700,
+															cursor: btStatus === 'connecting' ? 'default' : 'pointer',
+															boxShadow: '0 2px 8px #0002', flexShrink: 0,
+															display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+														}}
+													>
+														<span style={{ fontSize: 20 }}>
+															{btStatus === 'connecting' ? '⏳' : btStatus === 'connected' ? '✓' : '📶'}
+														</span>
+														<span style={{ fontSize: 9, lineHeight: 1 }}>
+															{btStatus === 'connecting' ? '...' : btStatus === 'connected' ? btDeviceName.split(' ')[0] || 'Verbonden' : btStatus === 'error' ? 'Fout' : 'Loopband'}
+														</span>
+													</button>
+						</div>
 
 																{/* Program graph: speed (y) over time (x) with live cursor */}
 																{flatSteps.length > 1 && (
