@@ -988,7 +988,7 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	// SVG coordinate system
 	const vbW = 1000;
 	const vbH = 200;
-	const padL = 12;
+	const padL = 34;
 	const padR = 12;
 	const padT = 2;
 	const padB = 8;
@@ -1023,9 +1023,12 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 				</linearGradient>
 			</defs>
 
-			{/* y grid */}
+			{/* y grid + labels */}
 			{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
-				<line key={i} x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#2a2750" strokeWidth={1} />
+				<g key={i}>
+					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#2a2750" strokeWidth={1} />
+					<text x={padL - 4} y={y(v) + (i === 2 ? -3 : 5)} textAnchor="end" fontSize={18} fill="#4a4870" fontFamily="system-ui">{v}</text>
+				</g>
 			))}
 
 			{/* Completed area (neon green) */}
