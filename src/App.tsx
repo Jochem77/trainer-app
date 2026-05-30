@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import schema from "./backups/schema.json";
 import SchemaEditor from './SchemaEditor';
@@ -699,76 +699,72 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	}
 
 		return (
-			<div className="app-root" style={{ maxWidth: 720, flex: 1, margin: "0 auto", padding: 16, paddingTop: 'calc(20px + var(--safe-top, 0px))', paddingBottom: 'calc(16px + var(--safe-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+			<div className="app-root" style={{ maxWidth: 720, flex: 1, margin: "0 auto", padding: 0, background: "#0f0c29", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'stretch', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
 				@supports (height: 100dvh){ .app-root{ height: 100dvh; } }
-					@keyframes blink-border {
-						0% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
-						50% { box-shadow: 0 0 0 10px #43a04733, 0 2px 8px #0001; }
-						100% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
-					}
-			.top-sticky { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg,#dfe9ff,#eaf2ff 80%, #eaf2ff); padding: 12px 0 2px; box-shadow: 0 2px 8px #0001; }
-			.status-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:10px 14px; margin:1px 0 1px; max-width:560px; width:100%; box-sizing:border-box; --statSize: 48px; }
-			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:1px 4px 1px; margin:1px 0; max-width:560px; width:100%; box-sizing:border-box; }
-			.graph-card-mobile { margin: 0 auto 0; padding: 0 1px 0; }
-			@media (max-width: 768px) {
-				.app-root { padding: 12px !important; padding-top: calc(16px + env(safe-area-inset-top, 0px)) !important; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
-				.graph-card-mobile { margin: 0 auto 0; padding: 0 0 0; border-radius: 8px; }
-			}
-			.hambtn-grid { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
-			.hambtn-inline { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
-			.topbar { display: grid; grid-template-columns: 60px 50px 1fr 50px; align-items: center; gap: 8px; padding: 8px 10px 0 10px; }
-			.hamburger-col { justify-self: start; }
-			.prev-col { justify-self: center; }
-			.date-col { justify-self: center; }
-			.next-col { justify-self: center; }
-			.date-title { margin:0; text-align:center; font-family: inherit; text-shadow: 0 1px 0 #fff; }
-			.date-line { font-size: 18px; font-weight: 800; line-height: 1.1; }
-			.calories-line { font-size: 14px; font-weight: 600; color: #666; margin-top: 1px; }
-			.nav-arrow { width:44px; height:48px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:#2e7d32; color:#fff; font-size:20px; font-weight:800; cursor:pointer; box-shadow:0 3px 10px #0002; }
-			.nav-arrow:disabled { opacity: .4; cursor: default; }
-			.status-top { display:flex; justify-content:space-between; gap:8px; align-items:center; }
-					.status-col { flex:1; text-align:center; }
-			.status-col h4 { margin:0 0 2px; font-size:14px; font-weight:800; color:#111; }
-			.status-col small { display:none; }
-			.status-col .time { font-variant-numeric:tabular-nums; font-weight:900; font-size:var(--statSize); line-height:1; }
-			.status-col .time:last-child { font-size: calc(var(--statSize) * 0.5); font-weight: 700; margin-top: 2px; }
-					.time-step { color:#2e7d32; }
-					.time-total { color:#1565c0; }
-			.speed { text-align:center; margin:6px 0 0; }
-			.speed small { display:block; font-size:11px; color:#777; margin-bottom:0; }
-			.speed .value { font-size:var(--statSize); font-weight:900; letter-spacing:1px; }
-			.speed .value .next-speed { color:#2e7d32; font-weight:800; font-size: calc(var(--statSize) * 0.6); }
-			.current-label { text-align:center; margin-top:4px; font-weight:800; font-size:18px; }
-					.steps { display:flex; flex-direction:column; gap:12px; flex:1; min-height:0; overflow:auto; padding:6px 4px 8px; width:100%; max-width:560px; }
-					.card { display:flex; align-items:center; background:#f5f7fb; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px #0001; border-left:10px solid #999; transition: all 0.2s ease; max-width: 560px; width:100%; box-sizing:border-box; }
-					.card:hover { background:#e8f0ff; box-shadow:0 4px 16px #0002; transform: translateY(-1px); }
-					.card { scroll-margin-top: 16px; }
-					.done { opacity:.55; filter:grayscale(.2); }
-					.cur { animation: blink-border 1s infinite; outline:6px solid #43a047; outline-offset:0; z-index:1; }
-				.k-time { width:68px; font-variant-numeric:tabular-nums; font-weight:800; font-size:20px; }
-				.k-speed { width:80px; text-align:right; margin-right:8px; color:#0d47a1; font-weight:600; }
-				.k-dur { width:72px; text-align:right; margin-right:8px; color:#0d47a1; font-weight:600; }
-				.k-label { flex:1; font-weight:700; min-width:0; }
-					.b-steady { background:#e8f8ea; border-left-color:#2e7d32; }
-					.b-hard { background:#fdecec; border-left-color:#c62828; }
-					.b-rest { background:#e8f1ff; border-left-color:#1976d2; }
-					/* bottom-actions removed (buttons moved under status card) */
-					.actions-row { display:flex; gap:10px; margin:1px 0 1px; max-width:560px; width:100%; box-sizing:border-box; }
-				.actions-row .btn { flex:1; }
-					.btn { width:100%; font-size:22px; padding:12px 20px; border:none; border-radius:12px; color:#fff; font-weight:800; box-shadow:0 3px 10px #0002; cursor:pointer; }
-					.btn-start { background:#2e7d32; }
-					.btn-pause { background:#ff9800; }
-			@media (max-width:520px){ .status-card{--statSize:36px} .k-time{width:60px} .k-speed{width:70px} .k-dur{width:64px} }
-			@media (max-width: 768px) {
-				.graph-svg { height: 100px !important; }
-			}
-			@media (max-width: 480px) {
-				.graph-svg { height: 90px !important; }
-			}
+				@keyframes blink-border {
+					0% { box-shadow: 0 0 0 0 #a8ff78; }
+					50% { box-shadow: 0 0 0 10px rgba(168,255,120,0.2); }
+					100% { box-shadow: 0 0 0 0 #a8ff78; }
+				}
+				.top-sticky { position: sticky; top: 0; z-index: 20; background: #0f0c29; }
+				.c3-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px 16px 32px; }
+				.topbar { display: grid; grid-template-columns: 60px 50px 1fr 50px; align-items: center; gap: 8px; padding: 0 0 16px; }
+				.hamburger-col { justify-self: start; }
+				.prev-col { justify-self: center; }
+				.date-col { justify-self: center; }
+				.next-col { justify-self: center; }
+				.hambtn-grid { background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; cursor: pointer; }
+				.nav-arrow { width:44px; height:44px; display:flex; align-items:center; justify-content:center; border:none; border-radius:12px; background:rgba(255,255,255,0.2); color:#fff; font-size:20px; font-weight:800; cursor:pointer; }
+				.nav-arrow:disabled { opacity: .3; cursor: default; }
+				.date-title { margin:0; text-align:center; }
+				.date-line { font-size: 17px; font-weight: 800; line-height: 1.1; color: #fff; }
+				.calories-line { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); margin-top: 2px; }
+				.c3-speed-section { text-align: center; padding-bottom: 4px; }
+				.c3-step-badge { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: rgba(255,255,255,0.85); margin-bottom: 8px; letter-spacing: 0.5px; }
+				.c3-speed-value { font-size: 72px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -3px; }
+				.c3-speed-unit { font-size: 18px; color: rgba(255,255,255,0.6); font-weight: 400; }
+				.c3-next-info { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 6px; }
+				.c3-next-info span { color: #a8ff78; font-weight: 700; }
+				.c3-cards-row { display: flex; gap: 10px; padding: 0 14px; margin-top: -20px; margin-bottom: 10px; }
+				.c3-card { flex: 1; background: #1a1835; border-radius: 14px; padding: 12px 8px; text-align: center; border: 1px solid #2a2750; }
+				.c3-card-lbl { font-size: 9px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; font-weight: 600; }
+				.c3-card-val { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+				.c3-card-val.green { color: #a8ff78; }
+				.c3-card-val.purple { color: #c084fc; }
+				.c3-card-val.amber { color: #fbbf24; }
+				.c3-card-sub { font-size: 10px; color: #555; margin-top: 3px; }
+				.actions-row { display:flex; gap:10px; margin:0 14px 10px; box-sizing:border-box; }
+				.btn { flex:1; font-size:16px; padding:14px 20px; border:none; border-radius:14px; font-weight:800; box-shadow:0 3px 10px #0003; cursor:pointer; letter-spacing:0.5px; text-transform:uppercase; }
+				.btn-start { background: linear-gradient(135deg, #a8ff78, #78ffd6); color: #0d1f0d; }
+				.btn-pause { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; }
+				.btn-bt { min-width:56px; padding:0 8px; height:52px; border:none; border-radius:14px; color:#fff; font-weight:700; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+				.graph-card { background:#1a1835; border-radius:12px; border:1px solid #2a2750; margin:0 14px 10px; padding:4px; box-sizing:border-box; }
+				.graph-card-mobile { }
+				.steps { display:flex; flex-direction:column; gap:8px; flex:1; min-height:0; overflow:auto; padding:4px 14px 8px; width:100%; box-sizing:border-box; }
+				.card { display:flex; align-items:center; background:#1a1835; border-radius:12px; padding:12px 14px; border:1px solid #2a2750; border-left:4px solid #444; transition:all 0.2s ease; box-sizing:border-box; scroll-margin-top:16px; }
+				.card:hover { background:#221d40; }
+				.done { opacity:.3; }
+				.cur { animation:blink-border 1s infinite; outline:3px solid #a8ff78; outline-offset:1px; z-index:1; background:#0d1f14 !important; border-left-color:#a8ff78 !important; }
+				.b-steady { border-left-color:#a8ff78; background:#0e1e14; }
+				.b-hard { border-left-color:#ff6b9d; background:#1f0d17; }
+				.b-rest { border-left-color:#78ffd6; background:#0a1f1a; }
+				.k-time { width:52px; font-variant-numeric:tabular-nums; font-weight:700; font-size:13px; color:#666; }
+				.k-speed { width:72px; text-align:right; margin-right:8px; font-weight:700; font-size:14px; color:#888; }
+				.b-steady .k-speed { color:#a8ff78; }
+				.b-hard .k-speed { color:#ff6b9d; }
+				.b-rest .k-speed { color:#78ffd6; }
+				.cur .k-speed { color:#a8ff78 !important; }
+				.k-dur { width:62px; text-align:right; margin-right:8px; color:#555; font-size:13px; }
+				.k-label { flex:1; font-weight:600; min-width:0; color:#aaa; font-size:13px; }
+				.cur .k-label { color:#fff !important; }
+				@media (max-width:520px){ .c3-card-val{font-size:20px} .c3-speed-value{font-size:56px} .k-time{width:44px} .k-speed{width:60px} .k-dur{width:52px} }
+				@media (max-width: 768px) { .graph-svg { height: 90px !important; } }
+				@media (max-width: 480px) { .c3-speed-value { font-size: 48px !important; } .graph-svg { height: 80px !important; } }
 				`}</style>
 								<div className="top-sticky">
+									<div className="c3-hero">
 									<div className="topbar">
 										<div className="hamburger-col">
 											<button className="hambtn-grid" aria-label="Menu" onClick={() => setMenuOpen(true)}>☰</button>
@@ -807,58 +803,66 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 											</button>
 										</div>
 									</div>
-							{/* Status card */}
-							{(() => {
-					const totalDurationSec = flatSteps.length ? Math.round(flatSteps[flatSteps.length - 1].start_min * 60) : 0;
-					const totalTimeLeft = Math.max(0, totalDurationSec - timer);
-					const fmt = (s:number)=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-								const speedText = currentStep.speed_kmh != null ? `${currentStep.speed_kmh} km/u` : '-';
-								const nextStep = flatSteps[currentIdx + 1];
-								const nextSpeed = nextStep && nextStep.speed_kmh != null ? `${nextStep.speed_kmh} km/u` : null;
-								const currentLabel = currentStep.label + (currentStep.repIndex ? ` ${currentStep.repIndex}` : '');
-								
-								// Calculate remaining km for current step
-								const currentStepRemainingKm = currentStep.speed_kmh 
-									? (stepTimeLeft / 3600) * currentStep.speed_kmh 
-									: 0;
-								
-								// Calculate remaining km for total training (from now until end)
-								let totalRemainingKm = 0;
-								for (let i = currentIdx; i < flatSteps.length; i++) {
-									const step = flatSteps[i];
-									if (i === currentIdx) {
-										// Current step: only count remaining time
-										totalRemainingKm += (stepTimeLeft / 3600) * (step.speed_kmh || 0);
-									} else {
-										// Future steps: count full duration in minutes
-										const stepDurationMin = step.duration_min || 0;
-										totalRemainingKm += step.speed_kmh ? (stepDurationMin * step.speed_kmh) / 60 : 0;
-									}
-								}
-								
-								return (
-									<div className="status-card">
-										<div className="status-top">
-											<div className="status-col">
-												<h4>stap</h4>
-												<div className="time time-step">{fmt(stepTimeLeft)}</div>
-												<div className="time time-step km-remaining" style={{ fontSize: '1.7em', fontWeight: 800 }}>({currentStepRemainingKm.toFixed(3).replace('.', ',')} km)</div>
-											</div>
-											<div className="status-col">
-												<h4>totaal</h4>
-												<div className="time time-total">{fmt(totalTimeLeft)}</div>
-												<div className="time time-total km-remaining" style={{ fontSize: '1.7em', fontWeight: 800 }}>({totalRemainingKm.toFixed(3).replace('.', ',')} km)</div>
-											</div>
+					{/* C3: Speed section inside gradient hero */}
+						{(() => {
+							const speedKmh = currentStep.speed_kmh;
+							const nextStepItem = flatSteps[currentIdx + 1];
+							const nextSpeedVal = nextStepItem?.speed_kmh ?? null;
+							const currentLabel = currentStep.label + (currentStep.repIndex ? `  ${currentStep.repIndex}` : '');
+							return (
+								<>
+									<div className="c3-speed-section">
+										<div className="c3-step-badge">{currentLabel || 'Training'}</div>
+										<div>
+											<span className="c3-speed-value">{speedKmh != null ? `${speedKmh}` : '\u2014'}</span>
+											{speedKmh != null && <span className="c3-speed-unit"> km/u</span>}
 										</div>
-										<div className="speed">
-											<div className="value">{speedText}{nextSpeed ? <span className="next-speed"> (→ {nextSpeed})</span> : null}</div>
-										</div>
-										<div className="current-label">{currentLabel}</div>
+										{nextSpeedVal != null && (
+											<div className="c3-next-info">Volgende: <span>{nextSpeedVal} km/u</span></div>
+										)}
 									</div>
-								);
-							})()}
+								</>
+							);
+						})()}
+						</div>{/* closes c3-hero */}
+						{/* Timer cards */}
+						{(() => {
+							const fmt = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+							const totalDurationSec = flatSteps.length ? Math.round(flatSteps[flatSteps.length - 1].start_min * 60) : 0;
+							const totalTimeLeft = Math.max(0, totalDurationSec - timer);
+							const speedKmh = currentStep.speed_kmh;
+							const currentStepRemainingKm = speedKmh ? (stepTimeLeft / 3600) * speedKmh : 0;
+							let totalRemainingKm = 0;
+							for (let i = currentIdx; i < flatSteps.length; i++) {
+								const st = flatSteps[i];
+								if (i === currentIdx) {
+									totalRemainingKm += (stepTimeLeft / 3600) * (st.speed_kmh || 0);
+								} else {
+									totalRemainingKm += st.speed_kmh ? (st.duration_min * st.speed_kmh) / 60 : 0;
+								}
+							}
+							return (
+								<div className="c3-cards-row">
+									<div className="c3-card">
+										<div className="c3-card-lbl">Stap</div>
+										<div className="c3-card-val green">{fmt(stepTimeLeft)}</div>
+										<div className="c3-card-sub">{currentStepRemainingKm.toFixed(3).replace('.', ',')} km</div>
+									</div>
+									<div className="c3-card">
+										<div className="c3-card-lbl">Totaal</div>
+										<div className="c3-card-val purple">{fmt(totalTimeLeft)}</div>
+										<div className="c3-card-sub">{totalRemainingKm.toFixed(3).replace('.', ',')} km</div>
+									</div>
+									<div className="c3-card">
+										<div className="c3-card-lbl">Cal</div>
+										<div className="c3-card-val amber">±{program.cal ?? '?'}</div>
+										<div className="c3-card-sub">kcal</div>
+									</div>
+								</div>
+							);
+						})()}
 															{/* Actions directly under status card */}
-															<div className="actions-row actions-under-card">
+															<div className="actions-row">
 																<button
 																	onClick={() => {
 																		if (running) {
@@ -878,23 +882,17 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 														onClick={() => btStatus === 'connected' ? btDisconnect() : btConnect()}
 														disabled={btStatus === 'connecting'}
 														title={btStatus === 'connected' ? `Loopband: ${btDeviceName} — klik om te verbreken` : 'Verbinden met loopband'}
-														style={{
-															minWidth: 58, padding: '0 8px', height: 52, border: 'none', borderRadius: 12,
-															background:
-																btStatus === 'connected' ? '#28a745' :
-																btStatus === 'connecting' ? '#fd7e14' :
-																btStatus === 'error' ? '#dc3545' : '#455a64',
-															color: '#fff', fontWeight: 700,
-															cursor: btStatus === 'connecting' ? 'default' : 'pointer',
-															boxShadow: '0 2px 8px #0002', flexShrink: 0,
-															display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
-														}}
+						className="btn-bt"
+						style={{
+							background: btStatus === 'connected' ? '#28a745' : btStatus === 'connecting' ? '#764ba2' : btStatus === 'error' ? '#dc3545' : '#1a1835',
+							cursor: btStatus === 'connecting' ? 'default' : 'pointer',
+						}}
 													>
 														<span style={{ fontSize: 20 }}>
 															{btStatus === 'connecting' ? '⏳' : btStatus === 'connected' ? '✓' : '📶'}
 														</span>
 														<span style={{ fontSize: 9, lineHeight: 1 }}>
-															{btStatus === 'connecting' ? '...' : btStatus === 'connected' ? btDeviceName.split(' ')[0] || 'Verbonden' : btStatus === 'error' ? 'Fout' : 'Loopband'}
+															{btStatus === 'connecting' ? '...' : btStatus === 'connected' ? btDeviceName.split(' ')[0] || 'Verbonden' : btStatus === 'error' ? 'Fout' : 'BT'}
 														</span>
 													</button>
 						</div>

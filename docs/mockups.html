@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainer App — Trainingsscherm Mockups</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a1a2e;
+    color: #fff;
+    padding: 40px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: #e0e0ff;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 48px;
+    font-size: 15px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 48px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .concept {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .concept-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #c0c0ff;
+  }
+  .concept-desc {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    max-width: 340px;
+    line-height: 1.5;
+  }
+  .phone {
+    width: 375px;
+    min-height: 780px;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 6px #333;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* ─────────────────────────────────────────── */
+  /* CONCEPT 1 — DARK SPORTS (Nike/Garmin vibe) */
+  /* ─────────────────────────────────────────── */
+  .c1 {
+    background: #0d0d0d;
+    height: 100%;
+  }
+  .c1-topbar {
+    background: #0d0d0d;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .c1-menu { width: 36px; height: 36px; background: #00e676; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
+  .c1-menu span { display: block; width: 18px; height: 2px; background: #000; border-radius: 2px; }
+  .c1-week { text-align: center; }
+  .c1-week-label { font-size: 11px; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+  .c1-week-num { font-size: 18px; font-weight: 800; color: #00e676; }
+  .c1-week-date { font-size: 11px; color: #555; }
+  .c1-nav { display: flex; gap: 4px; }
+  .c1-nav button { background: #1a1a1a; border: none; color: #00e676; font-size: 18px; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; }
+
+  .c1-speed-hero {
+    padding: 24px 20px 16px;
+    text-align: center;
+    background: linear-gradient(180deg, #0d0d0d 0%, #111 100%);
+  }
+  .c1-speed-label { font-size: 11px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .c1-speed-value { font-size: 80px; font-weight: 900; color: #00e676; line-height: 1; letter-spacing: -4px; }
+  .c1-speed-unit { font-size: 20px; color: #444; font-weight: 400; }
+  .c1-step-label { font-size: 14px; color: #777; margin-top: 6px; }
+  .c1-next { font-size: 12px; color: #444; margin-top: 2px; }
+  .c1-next span { color: #00bcd4; }
+
+  .c1-timers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #1a1a1a;
+    margin: 0 0 16px;
+  }
+  .c1-timer-cell {
+    background: #111;
+    padding: 12px 16px;
+    text-align: center;
+  }
+  .c1-timer-lbl { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+  .c1-timer-val { font-size: 30px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+  .c1-timer-km { font-size: 11px; color: #444; margin-top: 2px; }
+
+  .c1-actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px 16px;
+  }
+  .c1-btn-start {
+    flex: 1;
+    height: 56px;
+    background: #00e676;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .c1-btn-bt {
+    width: 56px;
+    height: 56px;
+    background: #1a1a1a;
+    color: #00e676;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .c1-graph {
+    margin: 0 16px 16px;
+    background: #111;
+    border-radius: 12px;
+    height: 80px;
+    overflow: hidden;
+    position: relative;
+  }
+  .c1-graph svg { width: 100%; height: 100%; }
+
+  .c1-steps {
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .c1-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #111;
+    border-left: 3px solid transparent;
+  }
+  .c1-step.done { opacity: 0.35; }
+  .c1-step.cur { border-left-color: #00e676; background: #0d1f14; }
+  .c1-step.hard { border-left-color: #ff5252; }
+  .c1-step.rest { border-left-color: #40c4ff; }
+  .c1-step-time { font-size: 11px; color: #555; width: 36px; flex-shrink: 0; }
+  .c1-step-speed { font-size: 14px; font-weight: 700; color: #00e676; width: 48px; text-align: right; flex-shrink: 0; }
+  .c1-step-name { font-size: 13px; color: #bbb; flex: 1; }
+  .c1-step-dur { font-size: 11px; color: #555; }
+
+  /* ─────────────────────────────────────────── */
+  /* CONCEPT 2 — CLEAN MINIMAL (Apple Fitness)  */
+  /* ─────────────────────────────────────────── */
+  .c2 {
+    background: #f5f5f7;
+    height: 100%;
+  }
+  .c2-topbar {
+    background: #fff;
+    padding: 16px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  .c2-menu { width: 36px; height: 36px; background: #007aff; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .c2-menu span { display: block; width: 16px; height: 2px; background: #fff; border-radius: 2px; }
+  .c2-week-num { font-size: 17px; font-weight: 700; color: #1c1c1e; }
+  .c2-week-date { font-size: 12px; color: #8e8e93; text-align: center; }
+  .c2-nav button { background: none; border: none; color: #007aff; font-size: 22px; cursor: pointer; padding: 4px 8px; }
+
+  .c2-card {
+    margin: 16px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .c2-speed-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .c2-speed-big { font-size: 64px; font-weight: 800; color: #1c1c1e; line-height: 1; letter-spacing: -3px; }
+  .c2-speed-unit { font-size: 18px; color: #8e8e93; font-weight: 500; }
+  .c2-step-name { font-size: 15px; color: #8e8e93; margin-bottom: 12px; }
+  .c2-next-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0f9f4;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+    color: #34c759;
+    font-weight: 600;
+  }
+
+  .c2-timers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 0 16px 12px;
+  }
+  .c2-timer-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .c2-timer-lbl { font-size: 11px; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .c2-timer-val { font-size: 32px; font-weight: 700; color: #1c1c1e; margin: 2px 0; }
+  .c2-timer-green .c2-timer-val { color: #34c759; }
+  .c2-timer-blue .c2-timer-val { color: #007aff; }
+  .c2-timer-km { font-size: 12px; color: #c7c7cc; }
+
+  .c2-actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px 12px;
+  }
+  .c2-btn-start {
+    flex: 1;
+    height: 54px;
+    background: #34c759;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .c2-btn-bt {
+    width: 54px;
+    height: 54px;
+    background: #fff;
+    color: #007aff;
+    border: 1px solid #e5e5ea;
+    border-radius: 16px;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .c2-graph {
+    margin: 0 16px 12px;
+    background: #fff;
+    border-radius: 16px;
+    height: 80px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .c2-steps { padding: 0 16px; display: flex; flex-direction: column; gap: 6px; }
+  .c2-step {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .c2-step.done { opacity: 0.4; }
+  .c2-step.cur { box-shadow: 0 0 0 2px #34c759; }
+  .c2-step-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .c2-step-dot.green { background: #34c759; }
+  .c2-step-dot.red { background: #ff3b30; }
+  .c2-step-dot.blue { background: #007aff; }
+  .c2-step-time { font-size: 11px; color: #c7c7cc; width: 36px; }
+  .c2-step-speed { font-size: 14px; font-weight: 600; color: #1c1c1e; width: 50px; text-align: right; }
+  .c2-step-name { flex: 1; font-size: 13px; color: #3c3c43; }
+  .c2-step-dur { font-size: 11px; color: #c7c7cc; }
+
+  /* ─────────────────────────────────────── */
+  /* CONCEPT 3 — VIBRANT GRADIENT (modern)  */
+  /* ─────────────────────────────────────── */
+  .c3 { background: #0f0c29; height: 100%; }
+  .c3-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 16px 20px 28px;
+    position: relative;
+  }
+  .c3-toprow {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .c3-menu { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .c3-menu span { display: block; width: 16px; height: 2px; background: #fff; border-radius: 2px; }
+  .c3-week-label { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1px; text-transform: uppercase; text-align: center; }
+  .c3-week-num { font-size: 18px; font-weight: 800; color: #fff; text-align: center; }
+  .c3-week-date { font-size: 11px; color: rgba(255,255,255,0.6); text-align: center; }
+  .c3-nav button { background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 16px; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; }
+
+  .c3-speed-center { text-align: center; }
+  .c3-speed-big { font-size: 72px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -3px; }
+  .c3-speed-unit { font-size: 18px; color: rgba(255,255,255,0.6); }
+  .c3-step-name { font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 4px; }
+
+  .c3-cards-row {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px;
+    margin-top: -20px;
+    margin-bottom: 12px;
+  }
+  .c3-card {
+    flex: 1;
+    background: #1a1835;
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    border: 1px solid #2a2750;
+  }
+  .c3-card-lbl { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .c3-card-val { font-size: 26px; font-weight: 700; }
+  .c3-card-val.green { color: #a8ff78; }
+  .c3-card-val.purple { color: #c084fc; }
+  .c3-card-sub { font-size: 10px; color: #555; margin-top: 2px; }
+
+  .c3-actions {
+    display: flex; gap: 10px; padding: 0 16px 14px;
+  }
+  .c3-btn-start {
+    flex: 1;
+    height: 56px;
+    background: linear-gradient(135deg, #a8ff78, #78ffd6);
+    color: #0d1f0d;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .c3-btn-bt {
+    width: 56px; height: 56px;
+    background: #1a1835;
+    border: 1px solid #2a2750;
+    border-radius: 16px;
+    font-size: 22px;
+    color: #c084fc;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .c3-graph {
+    margin: 0 16px 14px;
+    background: #1a1835;
+    border-radius: 16px;
+    height: 80px;
+    overflow: hidden;
+    border: 1px solid #2a2750;
+  }
+  .c3-steps { padding: 0 16px; display: flex; flex-direction: column; gap: 4px; }
+  .c3-step {
+    display: flex; align-items: center; gap: 10px;
+    background: #1a1835;
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+  }
+  .c3-step.done { opacity: 0.3; }
+  .c3-step.cur { border-color: #a8ff78; background: #0d1f14; }
+  .c3-step-time { font-size: 11px; color: #555; width: 36px; }
+  .c3-step-speed { font-size: 14px; font-weight: 700; color: #a8ff78; width: 50px; text-align: right; }
+  .c3-step-speed.hard { color: #ff6b9d; }
+  .c3-step-speed.rest { color: #78ffd6; }
+  .c3-step-name { flex: 1; font-size: 13px; color: #aaa; }
+  .c3-step-dur { font-size: 11px; color: #555; }
+
+  /* ───────────────────────────────────── */
+  /* CONCEPT 4 — DASHBOARD (data-rich)    */
+  /* ───────────────────────────────────── */
+  .c4 { background: #f0f4ff; height: 100%; }
+  .c4-topbar {
+    background: #2d3a8c;
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .c4-menu { width: 34px; height: 34px; background: rgba(255,255,255,0.15); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .c4-menu span { display: block; width: 16px; height: 2px; background: #fff; border-radius: 2px; }
+  .c4-week-num { font-size: 17px; font-weight: 700; color: #fff; text-align: center; }
+  .c4-week-date { font-size: 11px; color: rgba(255,255,255,0.6); text-align: center; }
+  .c4-nav button { background: rgba(255,255,255,0.1); border: none; color: #fff; font-size: 18px; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; }
+
+  .c4-hero {
+    background: linear-gradient(180deg, #2d3a8c 0%, #3d52c4 100%);
+    padding: 20px 18px 28px;
+    text-align: center;
+  }
+  .c4-step-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .c4-speed { font-size: 68px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -3px; }
+  .c4-speed-unit { font-size: 16px; color: rgba(255,255,255,0.5); }
+  .c4-next-row { margin-top: 8px; font-size: 13px; color: rgba(255,255,255,0.6); }
+  .c4-next-row strong { color: #93c5fd; }
+
+  .c4-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin: -16px 16px 12px;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(45,58,140,0.15);
+  }
+  .c4-metric {
+    padding: 16px 14px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .c4-metric:nth-child(odd) { border-right: 1px solid #f0f0f0; }
+  .c4-metric:last-child, .c4-metric:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+  .c4-metric-lbl { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 3px; }
+  .c4-metric-val { font-size: 26px; font-weight: 700; }
+  .c4-metric-val.blue { color: #3b82f6; }
+  .c4-metric-val.green { color: #10b981; }
+  .c4-metric-val.orange { color: #f59e0b; }
+  .c4-metric-val.red { color: #ef4444; }
+  .c4-metric-sub { font-size: 11px; color: #d1d5db; }
+
+  .c4-actions { display: flex; gap: 10px; padding: 0 16px 12px; }
+  .c4-btn-start {
+    flex: 1; height: 52px;
+    background: #10b981; color: #fff; border: none;
+    border-radius: 14px; font-size: 16px; font-weight: 700;
+    cursor: pointer;
+  }
+  .c4-btn-pause {
+    flex: 1; height: 52px;
+    background: #f59e0b; color: #fff; border: none;
+    border-radius: 14px; font-size: 16px; font-weight: 700;
+    cursor: pointer;
+    display: none;
+  }
+  .c4-btn-bt {
+    width: 52px; height: 52px;
+    background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 14px; font-size: 20px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #3b82f6; box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .c4-graph {
+    margin: 0 16px 12px;
+    background: #fff;
+    border-radius: 14px;
+    height: 76px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .c4-steps { padding: 0 16px; display: flex; flex-direction: column; gap: 4px; }
+  .c4-step {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 9px 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .c4-step.done { opacity: 0.4; }
+  .c4-step.cur { box-shadow: 0 0 0 2px #10b981; }
+  .c4-step-time { font-size: 11px; color: #9ca3af; width: 34px; }
+  .c4-step-bar { width: 3px; height: 28px; border-radius: 2px; background: #e5e7eb; flex-shrink: 0; }
+  .c4-step-bar.green { background: #10b981; }
+  .c4-step-bar.red { background: #ef4444; }
+  .c4-step-bar.blue { background: #3b82f6; }
+  .c4-step-info { flex: 1; }
+  .c4-step-name { font-size: 12px; color: #374151; font-weight: 600; }
+  .c4-step-detail { font-size: 10px; color: #9ca3af; }
+  .c4-step-speed { font-size: 14px; font-weight: 700; color: #3b82f6; }
+
+  /* SVG graphs */
+  .graph-svg { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+
+<h1>🏃‍♂️ Trainer App — Trainingsscherm Mockups</h1>
+<p class="subtitle">4 verschillende ontwerpen ter inspiratie · scroll om te vergelijken</p>
+
+<div class="grid">
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- CONCEPT 1: DARK SPORTS                  -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-title">⚡ Concept 1 — Dark Sports</div>
+    <div class="concept-desc">Donker, neon groen accent. Grote snelheid centraal. Strak en sportief als Nike Run Club of Wahoo.</div>
+    <div class="phone">
+      <div class="c1">
+        <!-- topbar -->
+        <div class="c1-topbar">
+          <div class="c1-menu"><span></span><span></span><span></span></div>
+          <div class="c1-week">
+            <div class="c1-week-label">Programma</div>
+            <div class="c1-week-num">Week 5</div>
+            <div class="c1-week-date">26 mei – 1 jun</div>
+          </div>
+          <div class="c1-nav">
+            <button>‹</button>
+            <button>›</button>
+          </div>
+        </div>
+
+        <!-- speed hero -->
+        <div class="c1-speed-hero">
+          <div class="c1-speed-label">Snelheid</div>
+          <div>
+            <span class="c1-speed-value">10.5</span>
+            <span class="c1-speed-unit">km/u</span>
+          </div>
+          <div class="c1-step-label">Interval hard &nbsp;·&nbsp; herhaling 3/8</div>
+          <div class="c1-next">Volgende: <span>6.0 km/u rust</span> over 0:38</div>
+        </div>
+
+        <!-- timers -->
+        <div class="c1-timers">
+          <div class="c1-timer-cell">
+            <div class="c1-timer-lbl">Stap rest.</div>
+            <div class="c1-timer-val" style="color:#00e676">0:38</div>
+            <div class="c1-timer-km">0,110 km</div>
+          </div>
+          <div class="c1-timer-cell">
+            <div class="c1-timer-lbl">Totaal rest.</div>
+            <div class="c1-timer-val" style="color:#40c4ff">31:12</div>
+            <div class="c1-timer-km">5,240 km</div>
+          </div>
+        </div>
+
+        <!-- actions -->
+        <div class="c1-actions">
+          <button class="c1-btn-start">⏸ Pauze</button>
+          <div class="c1-btn-bt">📶</div>
+        </div>
+
+        <!-- graph -->
+        <div class="c1-graph">
+          <svg class="graph-svg" viewBox="0 0 343 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g1done" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00e676" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#00e676" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="g1future" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#40c4ff" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#40c4ff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- done area -->
+            <path d="M0,60 L0,40 L40,40 L40,20 L80,20 L80,45 L120,45 L120,20 L160,20" fill="url(#g1done)" stroke="none"/>
+            <path d="M0,40 L40,40 L40,20 L80,20 L80,45 L120,45 L120,20 L160,20" fill="none" stroke="#00e676" stroke-width="2"/>
+            <!-- future area -->
+            <path d="M160,20 L200,45 L240,45 L240,20 L280,20 L280,45 L343,45 L343,80 L160,80 Z" fill="url(#g1future)" stroke="none"/>
+            <path d="M160,20 L200,45 L240,45 L240,20 L280,20 L280,45 L343,45" fill="none" stroke="#40c4ff" stroke-width="2"/>
+            <!-- cursor -->
+            <line x1="160" y1="0" x2="160" y2="80" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="4,3"/>
+          </svg>
+        </div>
+
+        <!-- steps -->
+        <div class="c1-steps">
+          <div class="c1-step done">
+            <span class="c1-step-time">00:00</span>
+            <span class="c1-step-speed">6.0</span>
+            <span class="c1-step-name">Warming-up</span>
+            <span class="c1-step-dur">5 min</span>
+          </div>
+          <div class="c1-step done hard">
+            <span class="c1-step-time">05:00</span>
+            <span class="c1-step-speed" style="color:#ff5252">10.5</span>
+            <span class="c1-step-name">Interval hard 1</span>
+            <span class="c1-step-dur">1 min</span>
+          </div>
+          <div class="c1-step done rest">
+            <span class="c1-step-time">06:00</span>
+            <span class="c1-step-speed" style="color:#40c4ff">6.0</span>
+            <span class="c1-step-name">Interval rust 1</span>
+            <span class="c1-step-dur">2 min</span>
+          </div>
+          <div class="c1-step cur hard">
+            <span class="c1-step-time">13:00</span>
+            <span class="c1-step-speed" style="color:#ff5252">10.5</span>
+            <span class="c1-step-name">Interval hard 3 ◀</span>
+            <span class="c1-step-dur">1 min</span>
+          </div>
+          <div class="c1-step rest">
+            <span class="c1-step-time">14:00</span>
+            <span class="c1-step-speed" style="color:#40c4ff">6.0</span>
+            <span class="c1-step-name">Interval rust 3</span>
+            <span class="c1-step-dur">2 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- CONCEPT 2: CLEAN MINIMAL               -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-title">🍎 Concept 2 — Clean Minimal</div>
+    <div class="concept-desc">Licht, wit, grote typografie. Rustgevend en overzichtelijk als Apple Fitness. Werkt goed in felle zon.</div>
+    <div class="phone">
+      <div class="c2">
+        <!-- topbar -->
+        <div class="c2-topbar">
+          <div class="c2-menu"><span></span><span></span><span></span></div>
+          <div>
+            <div class="c2-week-num">Week 5</div>
+            <div class="c2-week-date">26 mei – 1 jun · ±180 kcal</div>
+          </div>
+          <div>
+            <button class="c2-nav" style="background:none;border:none;color:#007aff;font-size:22px;cursor:pointer">‹</button>
+            <button class="c2-nav" style="background:none;border:none;color:#007aff;font-size:22px;cursor:pointer">›</button>
+          </div>
+        </div>
+
+        <!-- main card -->
+        <div class="c2-card">
+          <div style="font-size:12px;color:#8e8e93;margin-bottom:2px;">Interval hard · herhaling 3/8</div>
+          <div class="c2-speed-row">
+            <span class="c2-speed-big">10.5</span>
+            <span class="c2-speed-unit">km/u</span>
+          </div>
+          <div class="c2-next-badge">→ 6.0 km/u &nbsp;rust over 0:38</div>
+        </div>
+
+        <!-- timers -->
+        <div class="c2-timers">
+          <div class="c2-timer-card c2-timer-green">
+            <div class="c2-timer-lbl">Stap</div>
+            <div class="c2-timer-val">0:38</div>
+            <div class="c2-timer-km">0,110 km</div>
+          </div>
+          <div class="c2-timer-card c2-timer-blue">
+            <div class="c2-timer-lbl">Totaal</div>
+            <div class="c2-timer-val">31:12</div>
+            <div class="c2-timer-km">5,240 km</div>
+          </div>
+        </div>
+
+        <!-- actions -->
+        <div class="c2-actions">
+          <button class="c2-btn-start">⏸ Pauze</button>
+          <div class="c2-btn-bt">📶</div>
+        </div>
+
+        <!-- graph -->
+        <div class="c2-graph">
+          <svg class="graph-svg" viewBox="0 0 343 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g2done" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#34c759" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#34c759" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="g2future" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#007aff" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#007aff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,60 L0,40 L40,40 L40,20 L80,20 L80,45 L120,45 L120,20 L160,20 L160,80 Z" fill="url(#g2done)"/>
+            <path d="M0,40 L40,40 L40,20 L80,20 L80,45 L120,45 L120,20 L160,20" fill="none" stroke="#34c759" stroke-width="2.5"/>
+            <path d="M160,20 L200,45 L240,45 L240,20 L280,20 L280,45 L343,45 L343,80 L160,80 Z" fill="url(#g2future)"/>
+            <path d="M160,20 L200,45 L240,45 L240,20 L280,20 L280,45 L343,45" fill="none" stroke="#007aff" stroke-width="2" stroke-dasharray="5,3"/>
+            <line x1="160" y1="0" x2="160" y2="80" stroke="#ff3b30" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <circle cx="160" cy="20" r="4" fill="#ff3b30"/>
+          </svg>
+        </div>
+
+        <!-- steps -->
+        <div class="c2-steps">
+          <div class="c2-step done">
+            <div class="c2-step-dot green"></div>
+            <span class="c2-step-time">00:00</span>
+            <span class="c2-step-speed">6.0</span>
+            <span class="c2-step-name">Warming-up</span>
+            <span class="c2-step-dur">5 min</span>
+          </div>
+          <div class="c2-step done">
+            <div class="c2-step-dot red"></div>
+            <span class="c2-step-time">05:00</span>
+            <span class="c2-step-speed">10.5</span>
+            <span class="c2-step-name">Interval hard 1</span>
+            <span class="c2-step-dur">1 min</span>
+          </div>
+          <div class="c2-step cur">
+            <div class="c2-step-dot red"></div>
+            <span class="c2-step-time">13:00</span>
+            <span class="c2-step-speed" style="color:#ff3b30">10.5</span>
+            <span class="c2-step-name" style="font-weight:700;color:#1c1c1e">Interval hard 3</span>
+            <span class="c2-step-dur">1 min</span>
+          </div>
+          <div class="c2-step">
+            <div class="c2-step-dot blue"></div>
+            <span class="c2-step-time">14:00</span>
+            <span class="c2-step-speed">6.0</span>
+            <span class="c2-step-name">Interval rust 3</span>
+            <span class="c2-step-dur">2 min</span>
+          </div>
+          <div class="c2-step">
+            <div class="c2-step-dot red"></div>
+            <span class="c2-step-time">16:00</span>
+            <span class="c2-step-speed">10.5</span>
+            <span class="c2-step-name">Interval hard 4</span>
+            <span class="c2-step-dur">1 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- CONCEPT 3: VIBRANT GRADIENT            -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-title">🌈 Concept 3 — Vibrant Gradient</div>
+    <div class="concept-desc">Paars-blauw gradient header, neon accenten. Energiek en modern. Goed zichtbaar in donkere sportruimtes.</div>
+    <div class="phone">
+      <div class="c3">
+        <div class="c3-header">
+          <div class="c3-toprow">
+            <div class="c3-menu"><span></span><span></span><span></span></div>
+            <div>
+              <div class="c3-week-label">Training</div>
+              <div class="c3-week-num">Week 5</div>
+              <div class="c3-week-date">26 mei – 1 jun</div>
+            </div>
+            <div style="display:flex;gap:4px">
+              <button class="c3-nav">‹</button>
+              <button class="c3-nav">›</button>
+            </div>
+          </div>
+          <div class="c3-speed-center">
+            <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:4px;">Interval hard · rep 3/8</div>
+            <div>
+              <span class="c3-speed-big">10.5</span>
+              <span class="c3-speed-unit">km/u</span>
+            </div>
+            <div class="c3-step-name">→ 6.0 km/u rust over 0:38</div>
+          </div>
+        </div>
+
+        <!-- cards -->
+        <div class="c3-cards-row">
+          <div class="c3-card">
+            <div class="c3-card-lbl">Stap</div>
+            <div class="c3-card-val green">0:38</div>
+            <div class="c3-card-sub">0,110 km</div>
+          </div>
+          <div class="c3-card">
+            <div class="c3-card-lbl">Totaal</div>
+            <div class="c3-card-val purple">31:12</div>
+            <div class="c3-card-sub">5,240 km</div>
+          </div>
+          <div class="c3-card">
+            <div class="c3-card-lbl">Cal</div>
+            <div class="c3-card-val" style="color:#fbbf24;font-size:22px">±180</div>
+            <div class="c3-card-sub">kcal</div>
+          </div>
+        </div>
+
+        <!-- actions -->
+        <div class="c3-actions">
+          <button class="c3-btn-start">⏸ Pauze</button>
+          <div class="c3-btn-bt">📶</div>
+        </div>
+
+        <!-- graph -->
+        <div class="c3-graph">
+          <svg class="graph-svg" viewBox="0 0 343 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g3done" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a8ff78" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#a8ff78" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="g3future" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c084fc" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#c084fc" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,60 L0,40 L40,40 L40,20 L80,20 L80,45 L120,45 L120,20 L160,20 L160,80 Z" fill="url(#g3done)"/>
+            <path d="M0,40 L40,40 L40,20 L80,20 L80,45 L120,45 L120,20 L160,20" fill="none" stroke="#a8ff78" stroke-width="2"/>
+            <path d="M160,20 L200,45 L240,45 L240,20 L280,20 L280,45 L343,45 L343,80 L160,80 Z" fill="url(#g3future)"/>
+            <path d="M160,20 L200,45 L240,45 L240,20 L280,20 L280,45 L343,45" fill="none" stroke="#c084fc" stroke-width="2"/>
+            <line x1="160" y1="0" x2="160" y2="80" stroke="#ff6b9d" stroke-width="1.5" stroke-dasharray="4,3"/>
+          </svg>
+        </div>
+
+        <!-- steps -->
+        <div class="c3-steps">
+          <div class="c3-step done">
+            <span class="c3-step-time">00:00</span>
+            <span class="c3-step-speed">6.0</span>
+            <span class="c3-step-name">Warming-up</span>
+            <span class="c3-step-dur">5 min</span>
+          </div>
+          <div class="c3-step done">
+            <span class="c3-step-time">05:00</span>
+            <span class="c3-step-speed hard">10.5</span>
+            <span class="c3-step-name">Interval hard 1</span>
+            <span class="c3-step-dur">1 min</span>
+          </div>
+          <div class="c3-step cur">
+            <span class="c3-step-time">13:00</span>
+            <span class="c3-step-speed hard">10.5</span>
+            <span class="c3-step-name" style="color:#fff;font-weight:600">Interval hard 3 ◀</span>
+            <span class="c3-step-dur">1 min</span>
+          </div>
+          <div class="c3-step">
+            <span class="c3-step-time">14:00</span>
+            <span class="c3-step-speed rest">6.0</span>
+            <span class="c3-step-name">Interval rust 3</span>
+            <span class="c3-step-dur">2 min</span>
+          </div>
+          <div class="c3-step">
+            <span class="c3-step-time">16:00</span>
+            <span class="c3-step-speed hard">10.5</span>
+            <span class="c3-step-name">Interval hard 4</span>
+            <span class="c3-step-dur">1 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- CONCEPT 4: DASHBOARD                   -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-title">📊 Concept 4 — Dashboard</div>
+    <div class="concept-desc">Blauw/indigo, data-rijk, meerdere metrieken in grid. Professioneel en overzichtelijk. Goed voor datafans.</div>
+    <div class="phone">
+      <div class="c4">
+        <div class="c4-topbar">
+          <div class="c4-menu"><span></span><span></span><span></span></div>
+          <div>
+            <div class="c4-week-num">Week 5 · ±180 kcal</div>
+            <div class="c4-week-date">26 mei – 1 jun 2026</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="c4-nav">‹</button>
+            <button class="c4-nav">›</button>
+          </div>
+        </div>
+
+        <div class="c4-hero">
+          <div class="c4-step-badge">Interval hard · rep 3 van 8</div>
+          <div>
+            <span class="c4-speed">10.5</span>
+            <span class="c4-speed-unit">km/u</span>
+          </div>
+          <div class="c4-next-row">Volgende stap: <strong>6.0 km/u</strong> rust · over 0:38</div>
+        </div>
+
+        <div class="c4-metrics">
+          <div class="c4-metric">
+            <div class="c4-metric-lbl">Stap rest.</div>
+            <div class="c4-metric-val green">0:38</div>
+            <div class="c4-metric-sub">0,110 km</div>
+          </div>
+          <div class="c4-metric">
+            <div class="c4-metric-lbl">Totaal rest.</div>
+            <div class="c4-metric-val blue">31:12</div>
+            <div class="c4-metric-sub">5,240 km</div>
+          </div>
+          <div class="c4-metric">
+            <div class="c4-metric-lbl">Stap afstand</div>
+            <div class="c4-metric-val orange" style="font-size:22px">0,175</div>
+            <div class="c4-metric-sub">km totaal</div>
+          </div>
+          <div class="c4-metric">
+            <div class="c4-metric-lbl">Voortgang</div>
+            <div class="c4-metric-val red" style="font-size:22px">37%</div>
+            <div class="c4-metric-sub">van training</div>
+          </div>
+        </div>
+
+        <div class="c4-actions">
+          <button class="c4-btn-start">⏸ Pauze</button>
+          <div class="c4-btn-bt">✓</div>
+        </div>
+
+        <div class="c4-graph">
+          <svg class="graph-svg" viewBox="0 0 343 76" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g4done" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="g4future" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,56 L0,38 L40,38 L40,18 L80,18 L80,43 L120,43 L120,18 L160,18 L160,76 Z" fill="url(#g4done)"/>
+            <path d="M0,38 L40,38 L40,18 L80,18 L80,43 L120,43 L120,18 L160,18" fill="none" stroke="#10b981" stroke-width="2.5"/>
+            <path d="M160,18 L200,43 L240,43 L240,18 L280,18 L280,43 L343,43 L343,76 L160,76 Z" fill="url(#g4future)"/>
+            <path d="M160,18 L200,43 L240,43 L240,18 L280,18 L280,43 L343,43" fill="none" stroke="#3b82f6" stroke-width="2"/>
+            <line x1="160" y1="0" x2="160" y2="76" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <circle cx="0" cy="38" r="3" fill="#ef4444"/>
+          </svg>
+        </div>
+
+        <div class="c4-steps">
+          <div class="c4-step done">
+            <span class="c4-step-time">00:00</span>
+            <div class="c4-step-bar green"></div>
+            <div class="c4-step-info">
+              <div class="c4-step-name">Warming-up</div>
+              <div class="c4-step-detail">5,0 min · 0,500 km</div>
+            </div>
+            <span class="c4-step-speed" style="color:#9ca3af">6.0</span>
+          </div>
+          <div class="c4-step done">
+            <span class="c4-step-time">05:00</span>
+            <div class="c4-step-bar red"></div>
+            <div class="c4-step-info">
+              <div class="c4-step-name">Interval hard 1</div>
+              <div class="c4-step-detail">1,0 min · 0,175 km</div>
+            </div>
+            <span class="c4-step-speed" style="color:#9ca3af">10.5</span>
+          </div>
+          <div class="c4-step cur">
+            <span class="c4-step-time">13:00</span>
+            <div class="c4-step-bar red"></div>
+            <div class="c4-step-info">
+              <div class="c4-step-name" style="color:#1d4ed8">Interval hard 3 ◀</div>
+              <div class="c4-step-detail">1,0 min · 0,175 km</div>
+            </div>
+            <span class="c4-step-speed" style="color:#ef4444">10.5</span>
+          </div>
+          <div class="c4-step">
+            <span class="c4-step-time">14:00</span>
+            <div class="c4-step-bar blue"></div>
+            <div class="c4-step-info">
+              <div class="c4-step-name">Interval rust 3</div>
+              <div class="c4-step-detail">2,0 min · 0,200 km</div>
+            </div>
+            <span class="c4-step-speed">6.0</span>
+          </div>
+          <div class="c4-step">
+            <span class="c4-step-time">16:00</span>
+            <div class="c4-step-bar red"></div>
+            <div class="c4-step-info">
+              <div class="c4-step-name">Interval hard 4</div>
+              <div class="c4-step-detail">1,0 min · 0,175 km</div>
+            </div>
+            <span class="c4-step-speed" style="color:#ef4444">10.5</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:60px;color:#555;font-size:13px;line-height:1.8;">
+  <p>Alle mockups tonen hetzelfde moment: Week 5 · Interval hard herhaling 3/8 · 10.5 km/u · 0:38 rest. in stap</p>
+  <p>Vertel welk concept je aanspreekt (of elementen uit meerdere) en de app wordt dienovereenkomstig aangepast.</p>
+</div>
+
+</body>
+</html>

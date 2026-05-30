@@ -1,0 +1,59 @@
+						{/* C3: Speed section inside gradient hero */}
+						{(() => {
+							const fmt = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+							const speedKmh = currentStep.speed_kmh;
+							const nextStepItem = flatSteps[currentIdx + 1];
+							const nextSpeedVal = nextStepItem?.speed_kmh ?? null;
+							const currentLabel = currentStep.label + (currentStep.repIndex ? `  ${currentStep.repIndex}` : '');
+							return (
+								<>
+									<div className="c3-speed-section">
+										<div className="c3-step-badge">{currentLabel || 'Training'}</div>
+										<div>
+											<span className="c3-speed-value">{speedKmh != null ? `${speedKmh}` : '\u2014'}</span>
+											{speedKmh != null && <span className="c3-speed-unit"> km/u</span>}
+										</div>
+										{nextSpeedVal != null && (
+											<div className="c3-next-info">Volgende: <span>{nextSpeedVal} km/u</span></div>
+										)}
+									</div>
+								</>
+							);
+						})()}
+						</div>{/* closes c3-hero */}
+						{/* Timer cards */}
+						{(() => {
+							const fmt = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+							const totalDurationSec = flatSteps.length ? Math.round(flatSteps[flatSteps.length - 1].start_min * 60) : 0;
+							const totalTimeLeft = Math.max(0, totalDurationSec - timer);
+							const speedKmh = currentStep.speed_kmh;
+							const currentStepRemainingKm = speedKmh ? (stepTimeLeft / 3600) * speedKmh : 0;
+							let totalRemainingKm = 0;
+							for (let i = currentIdx; i < flatSteps.length; i++) {
+								const st = flatSteps[i];
+								if (i === currentIdx) {
+									totalRemainingKm += (stepTimeLeft / 3600) * (st.speed_kmh || 0);
+								} else {
+									totalRemainingKm += st.speed_kmh ? (st.duration_min * st.speed_kmh) / 60 : 0;
+								}
+							}
+							return (
+								<div className="c3-cards-row">
+									<div className="c3-card">
+										<div className="c3-card-lbl">Stap</div>
+										<div className="c3-card-val green">{fmt(stepTimeLeft)}</div>
+										<div className="c3-card-sub">{currentStepRemainingKm.toFixed(3).replace('.', ',')} km</div>
+									</div>
+									<div className="c3-card">
+										<div className="c3-card-lbl">Totaal</div>
+										<div className="c3-card-val purple">{fmt(totalTimeLeft)}</div>
+										<div className="c3-card-sub">{totalRemainingKm.toFixed(3).replace('.', ',')} km</div>
+									</div>
+									<div className="c3-card">
+										<div className="c3-card-lbl">Cal</div>
+										<div className="c3-card-val amber">±{program.cal ?? '?'}</div>
+										<div className="c3-card-sub">kcal</div>
+									</div>
+								</div>
+							);
+						})()}
