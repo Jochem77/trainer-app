@@ -1,603 +1,472 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 
-// ─── FTMS UUIDs ────────────────────────────────────────────────────────────
-const FTMS_SERVICE = 0x1826;
-const TREADMILL_DATA_UUID = 0x2acd;
-const CONTROL_POINT_UUID = 0x2ad9;
-const MACHINE_STATUS_UUID = 0x2ada;
-
-// ─── FTMS Control Point Opcodes ────────────────────────────────────────────
-const OP_REQUEST_CONTROL = 0x00; // Must be sent first before any other command
-const OP_RESET = 0x01;           // Reset machine
-const OP_SET_SPEED = 0x02;       // param: uint16 in 0.01 km/h
-const OP_SET_INCLINATION = 0x03; // param: int16 in 0.1%
-const OP_START = 0x07;
-const OP_STOP_PAUSE = 0x08;      // param: 0x01=stop, 0x02=pause
-const CP_RESPONSE_CODE = 0x80;   // Response opcode from CP
-
-const CP_RESULT: Record<number, string> = {
-  0x01: 'Succes',
-  0x02: 'Niet ondersteund',
-  0x03: 'Ongeldige parameter',
-  0x04: 'Operatie mislukt',
-  0x05: 'Controle niet toegestaan',
-};
+// ─── FTMS UUIDs (full 128-bit form for matching) ──────────────────────────
+const FTMS_SERVICE_SHORT = 0x1826;
+const TREADMILL_DATA_UUID = '00002acd-0000-1000-8000-00805f9b34fb';
+const CONTROL_POINT_UUID  = '00002ad9-0000-1000-8000-00805f9b34fb';
 
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-type TreadmillData = {
-  speed: number | null;       // km/h
-  avgSpeed: number | null;    // km/h
-  distance: number | null;    // m
-  inclination: number | null; // %
-  elapsedTime: number | null; // s
-  heartRate: number | null;   // bpm
-  calories: number | null;
-};
+function toHex(dv: DataView): string {
+  return Array.from({ length: dv.byteLength }, (_, i) =>
+    dv.getUint8(i).toString(16).padStart(2, '0').toUpperCase()
+  ).join(' ');
+}
 
-function parseTreadmillData(buffer: DataView): TreadmillData {
-  const data: TreadmillData = {
-    speed: null,
-    avgSpeed: null,
-    distance: null,
-    inclination: null,
-    elapsedTime: null,
-    heartRate: null,
-    calories: null,
+function parseTreadmillData(dv: DataView): Record<string, number | null> {
+  const result: Record<string, number | null> = {
+    speed: null, inclination: null, distance: null,
+    elapsedTime: null, heartRate: null, calories: null,
   };
-
-  let offset = 0;
-  const flags = buffer.getUint16(offset, true);
-  offset += 2;
-
-  // Bit 0: More Data flag — 0 means Instantaneous Speed is present
-  if ((flags & 0x01) === 0) {
-    data.speed = buffer.getUint16(offset, true) * 0.01;
-    offset += 2;
-  }
-
-  // Bit 1: Average Speed
-  if (flags & 0x02) {
-    data.avgSpeed = buffer.getUint16(offset, true) * 0.01;
-    offset += 2;
-  }
-
-  // Bit 2: Total Distance
-  if (flags & 0x04) {
-    data.distance = buffer.getUint16(offset, true) | (buffer.getUint8(offset + 2) << 16);
-    offset += 3;
-  }
-
-  // Bit 3: Inclination and Ramp Angle
-  if (flags & 0x08) {
-    data.inclination = buffer.getInt16(offset, true) * 0.1;
-    offset += 4; // inclination (2 bytes) + ramp angle (2 bytes)
-  }
-
-  // Bit 4: Elevation Gain
-  if (flags & 0x10) {
-    offset += 4; // Positive (2 bytes) + Negative (2 bytes)
-  }
-
-  // Bit 5: Instantaneous Pace
-  if (flags & 0x20) {
-    offset += 2;
-  }
-
-  // Bit 6: Average Pace
-  if (flags & 0x40) {
-    offset += 2;
-  }
-
-  // Bit 7: Expended Energy
-  if (flags & 0x80) {
-    data.calories = buffer.getUint16(offset, true);
-    offset += 6; // Total Energy (2) + Energy per Hour (2) + Energy per Minute (1) + reserved (1)
-  }
-
-  // Bit 8: Heart Rate
-  if (flags & 0x100) {
-    data.heartRate = buffer.getUint8(offset);
-    offset += 1;
-  }
-
-  // Bit 9: Metabolic Equivalent
-  if (flags & 0x200) {
-    offset += 1;
-  }
-
-  // Bit 10: Elapsed Time
-  if (flags & 0x400) {
-    data.elapsedTime = buffer.getUint16(offset, true);
-    offset += 2;
-  }
-
-  return data;
+  if (dv.byteLength < 2) return result;
+  const flags = dv.getUint16(0, true);
+  let o = 2;
+  const safe = (need: number) => o + need <= dv.byteLength;
+  if ((flags & 0x01) === 0 && safe(2)) { result.speed = dv.getUint16(o, true) * 0.01; o += 2; }
+  if ((flags & 0x02) && safe(2))       { o += 2; } // avg speed — skip
+  if ((flags & 0x04) && safe(3))       { result.distance = dv.getUint16(o, true) | (dv.getUint8(o + 2) << 16); o += 3; }
+  if ((flags & 0x08) && safe(4))       { result.inclination = dv.getInt16(o, true) * 0.1; o += 4; }
+  if ((flags & 0x10) && safe(4))       { o += 4; }
+  if ((flags & 0x20) && safe(2))       { o += 2; }
+  if ((flags & 0x40) && safe(2))       { o += 2; }
+  if ((flags & 0x80) && safe(6))       { result.calories = dv.getUint16(o, true); o += 6; }
+  if ((flags & 0x100) && safe(1))      { result.heartRate = dv.getUint8(o); o += 1; }
+  if ((flags & 0x200) && safe(1))      { o += 1; }
+  if ((flags & 0x400) && safe(2))      { result.elapsedTime = dv.getUint16(o, true); o += 2; }
+  return result;
 }
 
-function formatTime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
+// ─── Sub-components ────────────────────────────────────────────────────────
 
-type TreadmillPageProps = {
-  onBack: () => void;
+const Card: React.FC<{ title?: string; children: React.ReactNode }> = ({ title, children }) => (
+  <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 14, boxShadow: '0 2px 12px #0002' }}>
+    {title && <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: '#333' }}>{title}</h3>}
+    {children}
+  </div>
+);
+
+const StatusDot: React.FC<{ status: ConnectionStatus }> = ({ status }) => {
+  const colors: Record<ConnectionStatus, string> = { disconnected: '#aaa', connecting: '#fd7e14', connected: '#28a745', error: '#dc3545' };
+  const labels: Record<ConnectionStatus, string> = { disconnected: 'Niet verbonden', connecting: 'Verbinden…', connected: 'Verbonden', error: 'Fout' };
+  return (
+    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <span style={{ width: 10, height: 10, borderRadius: '50%', background: colors[status], display: 'inline-block', boxShadow: status === 'connected' ? '0 0 6px #28a74588' : undefined }} />
+      <span style={{ fontWeight: 700, color: colors[status], fontSize: 15 }}>{labels[status]}</span>
+    </span>
+  );
 };
+
+type AdjustRowProps = { value: number; unit: string; color: string; deltas: number[]; onSend: (v: number) => void };
+const AdjustRow: React.FC<AdjustRowProps> = ({ value, unit, color, deltas, onSend }) => {
+  const [local, setLocal] = React.useState(value);
+  React.useEffect(() => { setLocal(value); }, [value]);
+  const neg = deltas.filter(d => d < 0);
+  const pos = deltas.filter(d => d > 0);
+  const adjust = (d: number) => setLocal(v => Math.round((v + d) * 100) / 100);
+  const btnBase: React.CSSProperties = { width: 50, height: 46, fontWeight: 700, fontSize: 13, background: '#f0f4ff', color, border: `2px solid ${color}55`, borderRadius: 8, cursor: 'pointer' };
+  return (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center', marginBottom: 10 }}>
+        {neg.map(d => <button key={d} onClick={() => adjust(d)} style={btnBase}>{d}</button>)}
+        <div style={{ textAlign: 'center', minWidth: 76 }}>
+          <div style={{ fontSize: 30, fontWeight: 900, color, lineHeight: 1 }}>{local.toFixed(1)}</div>
+          <div style={{ fontSize: 11, color: '#999' }}>{unit}</div>
+        </div>
+        {pos.map(d => <button key={d} onClick={() => adjust(d)} style={btnBase}>+{d}</button>)}
+      </div>
+      <button
+        onClick={() => onSend(local)}
+        style={{ width: '100%', padding: '11px', fontWeight: 800, fontSize: 14, background: color, color: '#fff', border: 'none', borderRadius: 9, cursor: 'pointer' }}
+      >
+        Stuur {local.toFixed(1)} {unit} naar loopband
+      </button>
+    </>
+  );
+};
+
+function btnStyle(bg: string): React.CSSProperties {
+  return { background: bg, color: '#fff', border: 'none', borderRadius: 8, padding: '10px 16px', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' };
+}
+
+// ─── Main component ────────────────────────────────────────────────────────
+
+type TreadmillPageProps = { onBack: () => void };
 
 const TreadmillPage: React.FC<TreadmillPageProps> = ({ onBack }) => {
-  const [status, setStatus] = useState<ConnectionStatus>('disconnected');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [deviceName, setDeviceName] = useState('');
-  const [treadmillData, setTreadmillData] = useState<TreadmillData>({
-    speed: null, avgSpeed: null, distance: null,
-    inclination: null, elapsedTime: null, heartRate: null, calories: null,
-  });
-  const [targetSpeed, setTargetSpeed] = useState(8.0);   // km/h
-  const [targetInclination, setTargetInclination] = useState(0.0); // %
-  const [machineRunning, setMachineRunning] = useState(false);
-  const [log, setLog] = useState<string[]>([]);
+  const [status, setStatus]           = useState<ConnectionStatus>('disconnected');
+  const [deviceName, setDeviceName]   = useState('');
+  const [log, setLog]                 = useState<string[]>([]);
+  const [liveData, setLiveData]       = useState<Record<string, number | null>>({});
+  const [targetSpeed, setTargetSpeed] = useState(8.0);
+  const [targetIncl, setTargetIncl]   = useState(0.0);
+  const [hexInput, setHexInput]       = useState('');
+  const [discoveredChars, setDiscoveredChars] = useState<Array<{ uuid: string; props: string[] }>>([]);
 
+  const cpRef     = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
   const deviceRef = useRef<BluetoothDevice | null>(null);
-  const controlPointRef = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
 
   const addLog = useCallback((msg: string) => {
-    const time = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setLog(prev => [`[${time}] ${msg}`, ...prev].slice(0, 50));
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setLog(prev => [`[${t}] ${msg}`, ...prev].slice(0, 120));
   }, []);
 
-  // Handle disconnect event from device
-  useEffect(() => {
-    const device = deviceRef.current;
-    if (!device) return;
-
-    const onDisconnected = () => {
-      setStatus('disconnected');
-      setMachineRunning(false);
-      controlPointRef.current = null;
-      addLog('Loopband verbinding verbroken');
-    };
-
-    device.addEventListener('gattserverdisconnected', onDisconnected);
-    return () => device.removeEventListener('gattserverdisconnected', onDisconnected);
-  }, [status, addLog]);
-
+  // ── Connect ──────────────────────────────────────────────────────────────
   const connect = async () => {
     if (!('bluetooth' in navigator)) {
-      setErrorMsg('Web Bluetooth wordt niet ondersteund in deze browser. Gebruik Chrome of Edge op desktop/Android.');
+      addLog('❌ Web Bluetooth niet ondersteund — gebruik Chrome of Edge op PC/Android');
       setStatus('error');
       return;
     }
-
     try {
       setStatus('connecting');
-      setErrorMsg('');
-      addLog('Zoeken naar Bluetooth apparaten...');
+      addLog('Bluetooth scan gestart…');
 
-      const device = await (navigator as Navigator & { bluetooth: { requestDevice: (opts: unknown) => Promise<BluetoothDevice> } }).bluetooth.requestDevice({
-        filters: [{ services: [FTMS_SERVICE] }],
-        optionalServices: [FTMS_SERVICE],
-      });
+      const nav = navigator as Navigator & {
+        bluetooth: { requestDevice: (opts: unknown) => Promise<BluetoothDevice> };
+      };
+
+      // Try FTMS filter first; fall back to acceptAllDevices if nothing found
+      let device: BluetoothDevice;
+      try {
+        device = await nav.bluetooth.requestDevice({
+          filters: [{ services: [FTMS_SERVICE_SHORT] }],
+          optionalServices: [FTMS_SERVICE_SHORT],
+        });
+      } catch (e1) {
+        const m = e1 instanceof Error ? e1.message : String(e1);
+        if (m.toLowerCase().includes('cancel') || m.toLowerCase().includes('chosen')) throw e1;
+        addLog('Geen FTMS filter treffer, probeer "alle apparaten"…');
+        device = await nav.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: [FTMS_SERVICE_SHORT],
+        });
+      }
 
       deviceRef.current = device;
-      setDeviceName(device.name ?? 'Onbekend apparaat');
-      addLog(`Gevonden: ${device.name ?? 'Onbekend'}`);
+      setDeviceName(device.name ?? 'Onbekend');
+      addLog(`Apparaat: ${device.name ?? 'Onbekend'}`);
+
+      device.addEventListener('gattserverdisconnected', () => {
+        setStatus('disconnected');
+        cpRef.current = null;
+        addLog('Verbinding verbroken');
+      });
 
       const server = await device.gatt!.connect();
-      addLog('GATT verbonden, services ophalen...');
+      addLog('GATT verbonden ✓');
 
-      const service = await server.getPrimaryService(FTMS_SERVICE);
-
-      // Treadmill Data notifications
+      // ── Enumerate all primary services ──────────────────────────────────
       try {
-        const treadmillChar = await service.getCharacteristic(TREADMILL_DATA_UUID);
-        await treadmillChar.startNotifications();
-        treadmillChar.addEventListener('characteristicvaluechanged', (event: Event) => {
-          const target = event.target as BluetoothRemoteGATTCharacteristic;
-          if (target.value) {
-            const data = parseTreadmillData(target.value);
-            setTreadmillData(data);
-          }
-        });
-        addLog('Loopband data notificaties gestart');
+        const services = await server.getPrimaryServices();
+        addLog(`${services.length} service(s):`);
+        for (const svc of services) addLog(`  • ${svc.uuid}`);
       } catch {
-        addLog('Waarschuwing: Treadmill Data karakteristiek niet beschikbaar');
+        addLog('(Services enumerate niet gelukt — ga verder met FTMS)');
       }
 
-      // Machine Status notifications
+      // ── Get FTMS service ────────────────────────────────────────────────
+      let ftms: BluetoothRemoteGATTService;
       try {
-        const statusChar = await service.getCharacteristic(MACHINE_STATUS_UUID);
-        await statusChar.startNotifications();
-        statusChar.addEventListener('characteristicvaluechanged', (event: Event) => {
-          const target = event.target as BluetoothRemoteGATTCharacteristic;
-          if (target.value) {
-            const opCode = target.value.getUint8(0);
-            if (opCode === 0x04) setMachineRunning(true);   // Started/Resumed
-            if (opCode === 0x02 || opCode === 0x03) setMachineRunning(false); // Stopped/Paused
-          }
-        });
-        addLog('Machine status notificaties gestart');
+        ftms = await server.getPrimaryService(FTMS_SERVICE_SHORT);
+        addLog('FTMS service (0x1826) ✓');
       } catch {
-        addLog('Waarschuwing: Machine Status karakteristiek niet beschikbaar');
+        addLog('❌ FTMS service niet gevonden');
+        setStatus('error');
+        return;
       }
 
-      // Control Point — enable notifications (required by FTMS spec) and request control
+      // ── Enumerate all characteristics ────────────────────────────────────
+      let chars: BluetoothRemoteGATTCharacteristic[] = [];
       try {
-        const cpChar = await service.getCharacteristic(CONTROL_POINT_UUID);
-        // Enable notifications so we receive command responses
-        await cpChar.startNotifications();
-        cpChar.addEventListener('characteristicvaluechanged', (event: Event) => {
-          const target = event.target as BluetoothRemoteGATTCharacteristic;
-          if (target.value && target.value.byteLength >= 3) {
-            const responseCode = target.value.getUint8(0);
-            if (responseCode === CP_RESPONSE_CODE) {
-              const requestOp = target.value.getUint8(1);
-              const result = target.value.getUint8(2);
-              const resultText = CP_RESULT[result] ?? `onbekend (0x${result.toString(16)})`;
-              addLog(`CP respons op 0x${requestOp.toString(16).padStart(2,'0')}: ${resultText}`);
+        chars = await ftms.getCharacteristics();
+        addLog(`${chars.length} karakteristiek(en) in FTMS:`);
+        const disc: Array<{ uuid: string; props: string[] }> = [];
+        for (const c of chars) {
+          const props = Object.entries(c.properties).filter(([, v]) => v).map(([k]) => k);
+          addLog(`  • ${c.uuid}  [${props.join(', ')}]`);
+          disc.push({ uuid: c.uuid, props });
+        }
+        setDiscoveredChars(disc);
+      } catch {
+        addLog('Karakteristieken enumerate mislukt');
+      }
+
+      // ── Subscribe to ALL notifiable characteristics ───────────────────────
+      for (const c of chars) {
+        if (!c.properties.notify && !c.properties.indicate) continue;
+        try {
+          await c.startNotifications();
+          c.addEventListener('characteristicvaluechanged', (e: Event) => {
+            const tgt = e.target as BluetoothRemoteGATTCharacteristic;
+            if (!tgt.value) return;
+            const hex = toHex(tgt.value);
+            const shortId = tgt.uuid.slice(4, 8).toUpperCase();
+            addLog(`📡 ${shortId}: ${hex}`);
+            if (tgt.uuid === TREADMILL_DATA_UUID) {
+              setLiveData(parseTreadmillData(tgt.value));
             }
+          });
+          addLog(`Notificaties ✓ ${c.uuid.slice(4, 8).toUpperCase()}`);
+        } catch { /* skip */ }
+      }
+
+      // ── Setup control point ──────────────────────────────────────────────
+      try {
+        const cp = chars.find(c => c.uuid === CONTROL_POINT_UUID)
+          ?? await ftms.getCharacteristic(CONTROL_POINT_UUID);
+
+        if (cp.properties.indicate || cp.properties.notify) {
+          try { await cp.startNotifications(); } catch { /* already started */ }
+          cp.addEventListener('characteristicvaluechanged', (e: Event) => {
+            const tgt = e.target as BluetoothRemoteGATTCharacteristic;
+            if (!tgt.value) return;
+            const hex = toHex(tgt.value);
+            addLog(`📨 CP respons: ${hex}`);
+            if (tgt.value.byteLength >= 3 && tgt.value.getUint8(0) === 0x80) {
+              const op  = tgt.value.getUint8(1);
+              const res = tgt.value.getUint8(2);
+              const txt = ['', 'Succes ✓', 'Niet ondersteund', 'Ongeldige param', 'Mislukt', 'Controle niet toegestaan'][res] ?? `0x${res.toString(16)}`;
+              addLog(`  → opcode 0x${op.toString(16).padStart(2,'0')}: ${txt}`);
+            }
+          });
+        }
+
+        cpRef.current = cp;
+
+        // Request Control (0x00) — mandatory before any other command
+        try {
+          await cp.writeValueWithResponse(new Uint8Array([0x00]));
+          addLog('Request Control (0x00) ✓');
+        } catch {
+          try {
+            await cp.writeValueWithoutResponse(new Uint8Array([0x00]));
+            addLog('Request Control (0x00) ✓ (without-response)');
+          } catch (e3) {
+            addLog(`⚠️ Request Control mislukt: ${e3 instanceof Error ? e3.message : e3}`);
           }
-        });
-        controlPointRef.current = cpChar;
-        // Send Request Control — required before any other FTMS command
-        await cpChar.writeValueWithResponse(new Uint8Array([OP_REQUEST_CONTROL]));
-        addLog('Control Point gereed, controle aangevraagd');
-      } catch (err: unknown) {
-        addLog(`Waarschuwing: Control Point fout — ${err instanceof Error ? err.message : String(err)}`);
+        }
+      } catch {
+        addLog('⚠️ Control Point niet gevonden — alleen uitlezen mogelijk');
       }
 
       setStatus('connected');
-      addLog('✅ Verbonden met loopband!');
+      addLog('✅ Verbonden!');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (message.includes('User cancelled')) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.toLowerCase().includes('cancel') || msg.toLowerCase().includes('chosen')) {
         addLog('Verbinding geannuleerd');
         setStatus('disconnected');
       } else {
-        setErrorMsg(message);
+        addLog(`❌ ${msg}`);
         setStatus('error');
-        addLog(`Fout: ${message}`);
       }
     }
   };
 
   const disconnect = () => {
-    if (deviceRef.current?.gatt?.connected) {
-      deviceRef.current.gatt.disconnect();
-    }
+    deviceRef.current?.gatt?.disconnect();
     setStatus('disconnected');
-    setMachineRunning(false);
-    controlPointRef.current = null;
-    addLog('Verbinding verbroken');
+    cpRef.current = null;
+    addLog('Verbroken');
   };
 
-  const controlNeeded = useRef(true);
-
-  const sendCommand = async (bytes: number[]) => {
-    const cp = controlPointRef.current;
-    if (!cp) {
-      addLog('Geen control point verbinding');
-      return;
-    }
+  // ── Write to control point ───────────────────────────────────────────────
+  const writeCp = async (bytes: number[]) => {
+    const cp = cpRef.current;
+    if (!cp) { addLog('Geen Control Point beschikbaar'); return; }
+    const hex = bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
     try {
-      // Re-request control if needed (e.g. after reconnect)
-      if (controlNeeded.current) {
-        await cp.writeValueWithResponse(new Uint8Array([OP_REQUEST_CONTROL]));
-        controlNeeded.current = false;
-        // Small delay to let the treadmill process the request
-        await new Promise(r => setTimeout(r, 150));
-      }
       try {
         await cp.writeValueWithResponse(new Uint8Array(bytes));
       } catch {
-        // Fallback: some devices only support writeValueWithoutResponse
         await cp.writeValueWithoutResponse(new Uint8Array(bytes));
       }
+      addLog(`→ Gestuurd: ${hex}`);
     } catch (err: unknown) {
-      addLog(`Commando fout: ${err instanceof Error ? err.message : String(err)}`);
-      // If we got a control error, re-request on next attempt
-      controlNeeded.current = true;
+      addLog(`❌ Write fout: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
-  const startMachine = async () => {
-    // Some treadmills need a Reset before Start
-    await sendCommand([OP_RESET]);
-    await new Promise(r => setTimeout(r, 200));
-    await sendCommand([OP_START]);
-    setMachineRunning(true);
-    addLog('Start commando gestuurd');
-  };
-
-  const pauseMachine = async () => {
-    await sendCommand([OP_STOP_PAUSE, 0x02]);
-    setMachineRunning(false);
-    addLog('Pauze commando gestuurd');
-  };
-
-  const stopMachine = async () => {
-    await sendCommand([OP_STOP_PAUSE, 0x01]);
-    setMachineRunning(false);
-    addLog('Stop commando gestuurd');
-  };
-
-  const setSpeed = async (speed: number) => {
+  const sendSpeed = async (speed: number) => {
     const clamped = Math.max(0, Math.min(30, speed));
-    const val = Math.round(clamped * 100); // 0.01 km/h units
-    await sendCommand([OP_SET_SPEED, val & 0xff, (val >> 8) & 0xff]);
+    const v = Math.round(clamped * 100);
     setTargetSpeed(clamped);
-    addLog(`Snelheid ingesteld: ${clamped.toFixed(1)} km/u`);
+    addLog(`Snelheid → ${clamped.toFixed(1)} km/u  (val=${v}  bytes=02 ${(v & 0xff).toString(16).padStart(2,'0').toUpperCase()} ${((v >> 8) & 0xff).toString(16).padStart(2,'0').toUpperCase()})`);
+    await writeCp([0x02, v & 0xff, (v >> 8) & 0xff]);
   };
 
-  const setInclination = async (incl: number) => {
+  const sendInclination = async (incl: number) => {
     const clamped = Math.max(-3, Math.min(15, incl));
-    const val = Math.round(clamped * 10); // 0.1% units, signed
-    const lo = val & 0xff;
-    const hi = (val >> 8) & 0xff;
-    await sendCommand([OP_SET_INCLINATION, lo, hi]);
-    setTargetInclination(clamped);
-    addLog(`Helling ingesteld: ${clamped.toFixed(1)}%`);
+    const v = Math.round(clamped * 10);
+    const v16 = v < 0 ? (0x10000 + v) : v;
+    setTargetIncl(clamped);
+    addLog(`Helling → ${clamped.toFixed(1)}%  (val=${v}  bytes=03 ${(v16 & 0xff).toString(16).padStart(2,'0').toUpperCase()} ${((v16 >> 8) & 0xff).toString(16).padStart(2,'0').toUpperCase()})`);
+    await writeCp([0x03, v16 & 0xff, (v16 >> 8) & 0xff]);
   };
 
-  const statusColor: Record<ConnectionStatus, string> = {
-    disconnected: '#6c757d',
-    connecting: '#fd7e14',
-    connected: '#28a745',
-    error: '#dc3545',
+  const sendHex = async () => {
+    const bytes = hexInput.trim().split(/[\s,;]+/).map(h => parseInt(h, 16)).filter(n => !isNaN(n) && n >= 0 && n <= 255);
+    if (bytes.length === 0) { addLog('Ongeldige hex invoer'); return; }
+    await writeCp(bytes);
   };
 
-  const statusLabel: Record<ConnectionStatus, string> = {
-    disconnected: 'Niet verbonden',
-    connecting: 'Verbinden...',
-    connected: `Verbonden${deviceName ? ` — ${deviceName}` : ''}`,
-    error: 'Fout',
-  };
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{
-      maxWidth: 560,
-      margin: '0 auto',
-      padding: '16px 16px calc(16px + env(safe-area-inset-bottom, 0px))',
-      fontFamily: 'Inter, system-ui, sans-serif',
-      background: 'linear-gradient(180deg,#dfe9ff,#eaf2ff)',
-      minHeight: '100vh',
-      boxSizing: 'border-box',
-    }}>
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '16px', fontFamily: 'Inter, system-ui, sans-serif', background: 'linear-gradient(180deg,#dfe9ff,#eaf2ff)', minHeight: '100vh', boxSizing: 'border-box' }}>
+
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}>
-        <button
-          onClick={onBack}
-          style={{ background: '#0d47a1', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontSize: 20, cursor: 'pointer', boxShadow: '0 2px 8px #0003' }}
-        >
-          ←
-        </button>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#0d47a1' }}>🏃 Loopband Bediening</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, paddingTop: 'calc(12px + env(safe-area-inset-top,0px))' }}>
+        <button onClick={onBack} style={{ background: '#0d47a1', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontSize: 20, cursor: 'pointer', boxShadow: '0 2px 8px #0003' }}>←</button>
+        <h1 style={{ margin: 0, fontSize: 21, fontWeight: 800, color: '#0d47a1' }}>🏃 Loopband Bediening</h1>
       </div>
 
-      {/* Connection Status */}
-      <div style={{
-        background: '#fff',
-        borderRadius: 12,
-        padding: '16px 18px',
-        marginBottom: 16,
-        boxShadow: '0 2px 12px #0002',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{
-              width: 10, height: 10, borderRadius: '50%',
-              background: statusColor[status],
-              display: 'inline-block',
-              boxShadow: status === 'connected' ? '0 0 6px #28a74588' : undefined,
-            }} />
-            <span style={{ fontWeight: 700, fontSize: 15, color: statusColor[status] }}>{statusLabel[status]}</span>
+      {/* Connection card */}
+      <Card>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div>
+            <StatusDot status={status} />
+            {deviceName && <div style={{ fontSize: 12, color: '#777', marginTop: 3 }}>{deviceName}</div>}
           </div>
-          {errorMsg && <div style={{ color: '#dc3545', fontSize: 13, marginTop: 4 }}>{errorMsg}</div>}
+          {status === 'connected'
+            ? <button onClick={disconnect} style={btnStyle('#dc3545')}>✕ Verbreken</button>
+            : <button onClick={connect} disabled={status === 'connecting'} style={btnStyle('#0d47a1')}>
+                {status === 'connecting' ? '⏳ Bezig…' : '🔗 Verbinden'}
+              </button>
+          }
         </div>
-        {status === 'disconnected' || status === 'error' ? (
-          <button
-            onClick={connect}
-            style={{ background: '#0d47a1', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
-          >
-            🔗 Verbinden
-          </button>
-        ) : status === 'connecting' ? (
-          <span style={{ color: '#fd7e14', fontWeight: 600, fontSize: 14 }}>Bezig...</span>
-        ) : (
-          <button
-            onClick={disconnect}
-            style={{ background: '#dc3545', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 18px', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
-          >
-            ✕ Verbreken
-          </button>
-        )}
-      </div>
+      </Card>
 
       {/* Live Data */}
-      <div style={{
-        background: '#fff',
-        borderRadius: 12,
-        padding: '16px 18px',
-        marginBottom: 16,
-        boxShadow: '0 2px 12px #0002',
-      }}>
-        <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#333' }}>📊 Live Data</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+      <Card title="📊 Live Data">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
           {[
-            { label: 'Snelheid', value: treadmillData.speed != null ? `${treadmillData.speed.toFixed(1)}` : '—', unit: 'km/u', color: '#1565c0' },
-            { label: 'Helling', value: treadmillData.inclination != null ? `${treadmillData.inclination.toFixed(1)}` : '—', unit: '%', color: '#6a1b9a' },
-            { label: 'Afstand', value: treadmillData.distance != null ? `${(treadmillData.distance / 1000).toFixed(2)}` : '—', unit: 'km', color: '#2e7d32' },
-            { label: 'Tijd', value: treadmillData.elapsedTime != null ? formatTime(treadmillData.elapsedTime) : '—', unit: '', color: '#e65100' },
-            { label: 'Hartslag', value: treadmillData.heartRate != null ? `${treadmillData.heartRate}` : '—', unit: 'bpm', color: '#c62828' },
-            { label: 'Calorieën', value: treadmillData.calories != null ? `${treadmillData.calories}` : '—', unit: 'kcal', color: '#f57f17' },
-          ].map(({ label, value, unit, color }) => (
-            <div key={label} style={{ textAlign: 'center', background: '#f8f9ff', borderRadius: 10, padding: '10px 6px' }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#888', marginBottom: 2 }}>{label}</div>
-              <div style={{ fontSize: 22, fontWeight: 900, color, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-              {unit && <div style={{ fontSize: 11, color: '#aaa', marginTop: 1 }}>{unit}</div>}
-            </div>
-          ))}
+            { k: 'speed',       label: 'Snelheid',  unit: 'km/u', color: '#1565c0', fmt: (v: number) => v.toFixed(1) },
+            { k: 'inclination', label: 'Helling',   unit: '%',    color: '#6a1b9a', fmt: (v: number) => v.toFixed(1) },
+            { k: 'distance',    label: 'Afstand',   unit: 'km',   color: '#2e7d32', fmt: (v: number) => (v / 1000).toFixed(2) },
+            { k: 'elapsedTime', label: 'Tijd',      unit: '',     color: '#e65100', fmt: (v: number) => `${Math.floor(v/60)}:${String(v%60).padStart(2,'0')}` },
+            { k: 'heartRate',   label: 'Hartslag',  unit: 'bpm',  color: '#c62828', fmt: (v: number) => String(v) },
+            { k: 'calories',    label: 'Calorieën', unit: 'kcal', color: '#f57f17', fmt: (v: number) => String(v) },
+          ].map(({ k, label, unit, color, fmt }) => {
+            const val = liveData[k];
+            return (
+              <div key={k} style={{ textAlign: 'center', background: '#f8f9ff', borderRadius: 10, padding: '10px 4px' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#888' }}>{label}</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color, fontVariantNumeric: 'tabular-nums' }}>{val != null ? fmt(val) : '—'}</div>
+                {unit && <div style={{ fontSize: 10, color: '#aaa' }}>{unit}</div>}
+              </div>
+            );
+          })}
         </div>
-      </div>
+      </Card>
 
-      {/* Controls — only shown when connected */}
       {status === 'connected' && (
         <>
-          {/* Start / Pause / Stop */}
-          <div style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: '16px 18px',
-            marginBottom: 16,
-            boxShadow: '0 2px 12px #0002',
-          }}>
-            <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#333' }}>⚙️ Bediening</h3>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                onClick={startMachine}
-                disabled={machineRunning}
-                style={{
-                  flex: 1, padding: '14px 8px', fontWeight: 800, fontSize: 16,
-                  background: machineRunning ? '#ccc' : '#2e7d32', color: '#fff',
-                  border: 'none', borderRadius: 10, cursor: machineRunning ? 'default' : 'pointer',
-                  boxShadow: '0 2px 8px #0002',
-                }}
-              >
-                ▶ Start
-              </button>
-              <button
-                onClick={pauseMachine}
-                disabled={!machineRunning}
-                style={{
-                  flex: 1, padding: '14px 8px', fontWeight: 800, fontSize: 16,
-                  background: !machineRunning ? '#ccc' : '#ff9800', color: '#fff',
-                  border: 'none', borderRadius: 10, cursor: !machineRunning ? 'default' : 'pointer',
-                  boxShadow: '0 2px 8px #0002',
-                }}
-              >
-                ⏸ Pauze
-              </button>
-              <button
-                onClick={stopMachine}
-                style={{
-                  flex: 1, padding: '14px 8px', fontWeight: 800, fontSize: 16,
-                  background: '#dc3545', color: '#fff',
-                  border: 'none', borderRadius: 10, cursor: 'pointer',
-                  boxShadow: '0 2px 8px #0002',
-                }}
-              >
-                ■ Stop
-              </button>
+          {/* Machine control */}
+          <Card title="⚙️ Bediening">
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[
+                { label: '▶ Start',  color: '#2e7d32', bytes: [0x07] },
+                { label: '⏸ Pauze', color: '#ff9800', bytes: [0x08, 0x02] },
+                { label: '■ Stop',   color: '#dc3545', bytes: [0x08, 0x01] },
+              ].map(({ label, color, bytes }) => (
+                <button key={label} onClick={() => writeCp(bytes)}
+                  style={{ flex: 1, padding: '13px 4px', fontWeight: 800, fontSize: 15, background: color, color: '#fff', border: 'none', borderRadius: 10, cursor: 'pointer' }}>
+                  {label}
+                </button>
+              ))}
             </div>
-          </div>
+          </Card>
 
-          {/* Speed Control */}
-          <div style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: '16px 18px',
-            marginBottom: 16,
-            boxShadow: '0 2px 12px #0002',
-          }}>
-            <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#333' }}>💨 Snelheid</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center' }}>
-              {[-1, -0.5, -0.1].map(delta => (
-                <button key={delta}
-                  onClick={() => setSpeed(targetSpeed + delta)}
-                  style={{ width: 52, height: 52, fontWeight: 800, fontSize: 16, background: '#e3f0ff', color: '#1565c0', border: '2px solid #90caf9', borderRadius: 10, cursor: 'pointer' }}
-                >
-                  {delta}
-                </button>
-              ))}
-              <div style={{ textAlign: 'center', minWidth: 80 }}>
-                <div style={{ fontSize: 32, fontWeight: 900, color: '#1565c0', lineHeight: 1 }}>{targetSpeed.toFixed(1)}</div>
-                <div style={{ fontSize: 12, color: '#888' }}>km/u</div>
-              </div>
-              {[0.1, 0.5, 1].map(delta => (
-                <button key={delta}
-                  onClick={() => setSpeed(targetSpeed + delta)}
-                  style={{ width: 52, height: 52, fontWeight: 800, fontSize: 16, background: '#e3f0ff', color: '#1565c0', border: '2px solid #90caf9', borderRadius: 10, cursor: 'pointer' }}
-                >
-                  +{delta}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setSpeed(targetSpeed)}
-              style={{ width: '100%', marginTop: 14, padding: '12px', fontWeight: 800, fontSize: 15, background: '#1565c0', color: '#fff', border: 'none', borderRadius: 10, cursor: 'pointer' }}
-            >
-              Stuur snelheid naar loopband
-            </button>
-          </div>
+          {/* Speed */}
+          <Card title="💨 Snelheid">
+            <AdjustRow value={targetSpeed} unit="km/u" color="#1565c0"
+              deltas={[-1, -0.5, -0.1, 0.1, 0.5, 1]} onSend={sendSpeed} />
+          </Card>
 
-          {/* Inclination Control */}
-          <div style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: '16px 18px',
-            marginBottom: 16,
-            boxShadow: '0 2px 12px #0002',
-          }}>
-            <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#333' }}>📐 Helling</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center' }}>
-              {[-2, -1, -0.5].map(delta => (
-                <button key={delta}
-                  onClick={() => setInclination(targetInclination + delta)}
-                  style={{ width: 52, height: 52, fontWeight: 800, fontSize: 16, background: '#f3e5f5', color: '#6a1b9a', border: '2px solid #ce93d8', borderRadius: 10, cursor: 'pointer' }}
-                >
-                  {delta}
-                </button>
-              ))}
-              <div style={{ textAlign: 'center', minWidth: 80 }}>
-                <div style={{ fontSize: 32, fontWeight: 900, color: '#6a1b9a', lineHeight: 1 }}>{targetInclination.toFixed(1)}</div>
-                <div style={{ fontSize: 12, color: '#888' }}>%</div>
-              </div>
-              {[0.5, 1, 2].map(delta => (
-                <button key={delta}
-                  onClick={() => setInclination(targetInclination + delta)}
-                  style={{ width: 52, height: 52, fontWeight: 800, fontSize: 16, background: '#f3e5f5', color: '#6a1b9a', border: '2px solid #ce93d8', borderRadius: 10, cursor: 'pointer' }}
-                >
-                  +{delta}
+          {/* Inclination */}
+          <Card title="📐 Helling">
+            <AdjustRow value={targetIncl} unit="%" color="#6a1b9a"
+              deltas={[-2, -1, -0.5, 0.5, 1, 2]} onSend={sendInclination} />
+          </Card>
+
+          {/* Raw hex command panel */}
+          <Card title="🔧 Handmatig commando (hex bytes)">
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 8, lineHeight: 1.5 }}>
+              Bytes gescheiden door spaties, bijv. <code style={{ background: '#f0f0f0', padding: '1px 4px', borderRadius: 4 }}>02 E8 03</code> = snelheid 10.0 km/u
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input value={hexInput} onChange={e => setHexInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && sendHex()}
+                placeholder="00  02 DC 05  …"
+                style={{ flex: 1, padding: '10px 12px', border: '1px solid #ccc', borderRadius: 8, fontFamily: 'monospace', fontSize: 14 }} />
+              <button onClick={sendHex} style={btnStyle('#333')}>Stuur</button>
+            </div>
+            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {[
+                { label: 'Req Control', bytes: '00' },
+                { label: 'Reset',       bytes: '01' },
+                { label: 'Start',       bytes: '07' },
+                { label: 'Stop',        bytes: '08 01' },
+                { label: '6 km/u',      bytes: '02 58 02' },
+                { label: '8 km/u',      bytes: '02 20 03' },
+                { label: '10 km/u',     bytes: '02 E8 03' },
+                { label: '12 km/u',     bytes: '02 B0 04' },
+                { label: 'Helling 0%',  bytes: '03 00 00' },
+                { label: 'Helling 1%',  bytes: '03 0A 00' },
+                { label: 'Helling 2%',  bytes: '03 14 00' },
+              ].map(({ label, bytes }) => (
+                <button key={label}
+                  onClick={() => {
+                    setHexInput(bytes);
+                    const parsed = bytes.split(' ').map(h => parseInt(h, 16));
+                    writeCp(parsed);
+                  }}
+                  style={{ padding: '5px 10px', fontSize: 11, background: '#f0f4ff', border: '1px solid #ccc', borderRadius: 6, cursor: 'pointer', fontFamily: 'monospace' }}>
+                  {label}
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => setInclination(targetInclination)}
-              style={{ width: '100%', marginTop: 14, padding: '12px', fontWeight: 800, fontSize: 15, background: '#6a1b9a', color: '#fff', border: 'none', borderRadius: 10, cursor: 'pointer' }}
-            >
-              Stuur helling naar loopband
-            </button>
-          </div>
+          </Card>
         </>
       )}
 
-      {/* Log */}
-      <div style={{
-        background: '#fff',
-        borderRadius: 12,
-        padding: '14px 16px',
-        boxShadow: '0 2px 12px #0002',
-      }}>
-        <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: '#555' }}>📋 Log</h3>
-        {log.length === 0 ? (
-          <div style={{ fontSize: 13, color: '#aaa' }}>Geen berichten</div>
-        ) : (
-          <div style={{ maxHeight: 180, overflowY: 'auto', fontFamily: 'monospace', fontSize: 12, color: '#444', lineHeight: 1.6 }}>
-            {log.map((entry, i) => <div key={i}>{entry}</div>)}
-          </div>
-        )}
-      </div>
+      {/* Discovered characteristics */}
+      {discoveredChars.length > 0 && (
+        <Card title="🔍 Gevonden karakteristieken">
+          {discoveredChars.map(c => (
+            <div key={c.uuid} style={{ fontSize: 11, fontFamily: 'monospace', padding: '3px 0', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+              <span style={{ color: '#1565c0', wordBreak: 'break-all' }}>{c.uuid}</span>
+              <span style={{ color: '#888', whiteSpace: 'nowrap' }}>[{c.props.join(', ')}]</span>
+            </div>
+          ))}
+        </Card>
+      )}
 
-      {/* Web Bluetooth note */}
-      <div style={{ marginTop: 16, fontSize: 12, color: '#999', textAlign: 'center', lineHeight: 1.5 }}>
+      {/* Log */}
+      <Card title="📋 Log">
+        {log.length === 0
+          ? <div style={{ fontSize: 13, color: '#aaa' }}>Geen berichten</div>
+          : <>
+              <button onClick={() => setLog([])} style={{ float: 'right', fontSize: 11, padding: '2px 8px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', marginTop: -4 }}>Wissen</button>
+              <div style={{ maxHeight: 300, overflowY: 'auto', fontFamily: 'monospace', fontSize: 11, lineHeight: 1.7, clear: 'both' }}>
+                {log.map((entry, i) => (
+                  <div key={i} style={{
+                    color: entry.includes('❌') ? '#c62828'
+                      : entry.includes('✅') || entry.includes('✓') ? '#2e7d32'
+                      : entry.includes('📡') || entry.includes('📨') ? '#999'
+                      : '#444'
+                  }}>
+                    {entry}
+                  </div>
+                ))}
+              </div>
+            </>
+        }
+      </Card>
+
+      <div style={{ marginTop: 12, fontSize: 11, color: '#aaa', textAlign: 'center', lineHeight: 1.5 }}>
         Vereist Chrome of Edge op Windows/Android.<br />
-        Loopband moet FTMS (Fitness Machine Service) ondersteunen.
+        Loopband moet Bluetooth FTMS (service 0x1826) ondersteunen.
       </div>
     </div>
   );
