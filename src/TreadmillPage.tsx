@@ -7,10 +7,21 @@ const CONTROL_POINT_UUID = 0x2ad9;
 const MACHINE_STATUS_UUID = 0x2ada;
 
 // ─── FTMS Control Point Opcodes ────────────────────────────────────────────
-const OP_SET_SPEED = 0x02;        // param: uint16 in 0.01 km/h
-const OP_SET_INCLINATION = 0x03;  // param: int16 in 0.1%
+const OP_REQUEST_CONTROL = 0x00; // Must be sent first before any other command
+const OP_RESET = 0x01;           // Reset machine
+const OP_SET_SPEED = 0x02;       // param: uint16 in 0.01 km/h
+const OP_SET_INCLINATION = 0x03; // param: int16 in 0.1%
 const OP_START = 0x07;
-const OP_STOP_PAUSE = 0x08;       // param: 0x01=stop, 0x02=pause
+const OP_STOP_PAUSE = 0x08;      // param: 0x01=stop, 0x02=pause
+const CP_RESPONSE_CODE = 0x80;   // Response opcode from CP
+
+const CP_RESULT: Record<number, string> = {
+  0x01: 'Succes',
+  0x02: 'Niet ondersteund',
+  0x03: 'Ongeldige parameter',
+  0x04: 'Operatie mislukt',
+  0x05: 'Controle niet toegestaan',
+};
 
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -212,13 +223,29 @@ const TreadmillPage: React.FC<TreadmillPageProps> = ({ onBack }) => {
         addLog('Waarschuwing: Machine Status karakteristiek niet beschikbaar');
       }
 
-      // Control Point
+      // Control Point — enable notifications (required by FTMS spec) and request control
       try {
         const cpChar = await service.getCharacteristic(CONTROL_POINT_UUID);
+        // Enable notifications so we receive command responses
+        await cpChar.startNotifications();
+        cpChar.addEventListener('characteristicvaluechanged', (event: Event) => {
+          const target = event.target as BluetoothRemoteGATTCharacteristic;
+          if (target.value && target.value.byteLength >= 3) {
+            const responseCode = target.value.getUint8(0);
+            if (responseCode === CP_RESPONSE_CODE) {
+              const requestOp = target.value.getUint8(1);
+              const result = target.value.getUint8(2);
+              const resultText = CP_RESULT[result] ?? `onbekend (0x${result.toString(16)})`;
+              addLog(`CP respons op 0x${requestOp.toString(16).padStart(2,'0')}: ${resultText}`);
+            }
+          }
+        });
         controlPointRef.current = cpChar;
-        addLog('Control Point gereed');
-      } catch {
-        addLog('Waarschuwing: Control Point niet beschikbaar — bediening niet mogelijk');
+        // Send Request Control — required before any other FTMS command
+        await cpChar.writeValueWithResponse(new Uint8Array([OP_REQUEST_CONTROL]));
+        addLog('Control Point gereed, controle aangevraagd');
+      } catch (err: unknown) {
+        addLog(`Waarschuwing: Control Point fout — ${err instanceof Error ? err.message : String(err)}`);
       }
 
       setStatus('connected');
@@ -246,19 +273,39 @@ const TreadmillPage: React.FC<TreadmillPageProps> = ({ onBack }) => {
     addLog('Verbinding verbroken');
   };
 
+  const controlNeeded = useRef(true);
+
   const sendCommand = async (bytes: number[]) => {
-    if (!controlPointRef.current) {
+    const cp = controlPointRef.current;
+    if (!cp) {
       addLog('Geen control point verbinding');
       return;
     }
     try {
-      await controlPointRef.current.writeValueWithResponse(new Uint8Array(bytes));
+      // Re-request control if needed (e.g. after reconnect)
+      if (controlNeeded.current) {
+        await cp.writeValueWithResponse(new Uint8Array([OP_REQUEST_CONTROL]));
+        controlNeeded.current = false;
+        // Small delay to let the treadmill process the request
+        await new Promise(r => setTimeout(r, 150));
+      }
+      try {
+        await cp.writeValueWithResponse(new Uint8Array(bytes));
+      } catch {
+        // Fallback: some devices only support writeValueWithoutResponse
+        await cp.writeValueWithoutResponse(new Uint8Array(bytes));
+      }
     } catch (err: unknown) {
       addLog(`Commando fout: ${err instanceof Error ? err.message : String(err)}`);
+      // If we got a control error, re-request on next attempt
+      controlNeeded.current = true;
     }
   };
 
   const startMachine = async () => {
+    // Some treadmills need a Reset before Start
+    await sendCommand([OP_RESET]);
+    await new Promise(r => setTimeout(r, 200));
     await sendCommand([OP_START]);
     setMachineRunning(true);
     addLog('Start commando gestuurd');
