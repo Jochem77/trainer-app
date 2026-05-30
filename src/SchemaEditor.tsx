@@ -544,10 +544,11 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 			0,
 			...steps.map(s => (s.duration_sec && s.duration_sec > 0 ? (s.start_sec + s.duration_sec) : s.start_sec))
 		);
-		const speeds = steps.map(s => s.speed_kmh ?? 0);
+		const speeds = steps.map(s => s.speed_kmh ?? 0).filter(v => v > 0);
 		const maxSpeedRaw = Math.max(0, ...speeds);
-		const minSpeed = 4; // Minimum y-axis value set to 4 km/u
-		const maxSpeed = Math.max(minSpeed + 2, Math.ceil(maxSpeedRaw + 0.5)); // Ensure at least 2 km/u above minimum
+		const minSpeedRaw = speeds.length ? Math.min(...speeds) : 4;
+		const minSpeed = Math.floor(minSpeedRaw);
+		const maxSpeed = Math.ceil(maxSpeedRaw);
 		if (totalSec <= 0) return null;
 
 		// Build step-function points: for each step with speed and duration, add (start, speed) and (end, speed)
@@ -564,7 +565,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		// SVG coordinate system
 		const vbW = 1000;
 		const vbH = 200;
-		const padL = 12;
+		const padL = 34;
 		const padR = 12;
 		const padT = 2;
 		const padB = 8;
@@ -577,22 +578,23 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		const pointsAttr = segments.map(p => `${x(p.t).toFixed(2)},${y(p.v).toFixed(2)}`).join(' ');
 
 		return (
-			<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="120" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
-				{/* axes */}
-				<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
-				<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
-
-				{/* y grid (no labels) */}
+			<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="130" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
+				<defs>
+					<linearGradient id="se-c3-full" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0%" stopColor="#a8ff78" stopOpacity={0.35} />
+						<stop offset="100%" stopColor="#a8ff78" stopOpacity={0} />
+					</linearGradient>
+				</defs>
+				{/* y grid + labels */}
 				{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
-					<line key={i} x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
+					<g key={i}>
+						<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#2a2750" strokeWidth={1} />
+						<text x={padL - 4} y={y(v) + (i === 2 ? -3 : 5)} textAnchor="end" fontSize={18} fill="#4a4870" fontFamily="system-ui">{v}</text>
+					</g>
 				))}
-
-				{/* program curve with filled area */}
-				<polyline fill="none" stroke="#2563eb" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} />
-				<polygon fill="#2563eb33" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} />
-
-				{/* red origin marker */}
-				<circle cx={padL} cy={padT + plotH} r={4} fill="#ef4444" />
+				{/* filled area + curve */}
+				<polygon fill="url(#se-c3-full)" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} />
+				<polyline fill="none" stroke="#a8ff78" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} />
 			</svg>
 		);
 	};
@@ -719,12 +721,12 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 
 		return (
 			<div key={`${selectedWeek}-${index}`} style={{ 
-				border: '2px solid #e9ecef', 
+				border: '1px solid #2a2750', 
 				borderRadius: '12px', 
 				padding: '20px', 
 				marginBottom: '16px',
-				background: '#ffffff',
-				boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+				background: '#1a1835',
+				boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
 				transition: 'all 0.2s ease'
 			}}>
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '16px' }}>
@@ -1187,8 +1189,26 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 			margin: '0 auto', 
 			padding: '20px',
 			fontFamily: 'Inter, system-ui, sans-serif',
-			background: '#ffffff'
+			background: '#0f0c29',
+			minHeight: '100%',
+			color: '#ccc'
 		}}>
+			<style>{`
+				.se-root label { color: #9090b8 !important; }
+				.se-root input, .se-root select {
+					background: #1a1835 !important;
+					border-color: #2a2750 !important;
+					color: #e0e0ff !important;
+				}
+				.se-root input:focus, .se-root select:focus {
+					border-color: #667eea !important;
+					outline: none;
+				}
+				.se-root input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+				.se-root h1, .se-root h2, .se-root h3, .se-root h4 { color: #e8e8ff !important; }
+				.se-root p { color: #7070a0 !important; }
+			`}</style>
+			<div className="se-root">
 			{/* Header */}
 			<div style={{ 
 				display: 'flex', 
@@ -1196,7 +1216,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				alignItems: 'center', 
 				marginBottom: '32px',
 				paddingBottom: '16px',
-				borderBottom: '2px solid #e9ecef'
+				borderBottom: '2px solid #2a2750'
 			}}>
 				<div>
 					<h1 style={{ margin: 0, color: '#495057', fontSize: '28px', fontWeight: '700' }}>
@@ -1268,7 +1288,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 			</div>
 
 			{/* Schema Name and Start Date */}
-			<div style={{ display: 'flex', gap: '64px', marginBottom: '32px', alignItems: 'flex-end' }}>
+			<div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '32px', alignItems: 'flex-end' }}>
 				<div style={{ flex: '0 0 400px' }}>
 					<label style={{ display: 'block', marginBottom: '8px', fontSize: '16px', fontWeight: '600', color: '#495057' }}>
 						📝 Schema Naam
@@ -1346,9 +1366,9 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', 
 					gap: '16px',
 					padding: '16px',
-					background: '#f8f9fa',
+					background: '#110e2a',
 					borderRadius: '12px',
-					border: '1px solid #dee2e6'
+					border: '1px solid #2a2750'
 				}}>
 					{weekPrograms.map((program) => (
 						<div 
@@ -1564,22 +1584,12 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					{/* Training Graph */}
 					<div style={{ 
 						marginTop: '20px',
-						padding: '20px',
-						background: '#f8f9fa',
+						padding: '8px',
+						background: '#1a1835',
 						borderRadius: '12px',
-						border: '1px solid #dee2e6'
+						border: '1px solid #2a2750'
 					}}>
-						<h3 style={{ margin: '0 0 16px 0', color: '#495057', fontSize: '16px', fontWeight: '600' }}>
-							📈 Snelheid Profiel
-						</h3>
-						<div style={{ 
-							background: 'white',
-							borderRadius: '8px',
-							padding: '16px',
-							border: '1px solid #e9ecef'
-						}}>
-							<ProgramGraph steps={flattenSteps(currentProgram.steps)} />
-						</div>
+						<ProgramGraph steps={flattenSteps(currentProgram.steps)} />
 					</div>
 				</div>
 			)}
@@ -1657,7 +1667,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 			{/* Training Steps */}
 			{currentProgram ? (
 				<div style={{ marginBottom: '32px' }}>
-					<h2 style={{ margin: '0 0 20px 0', color: '#495057' }}>Trainingsstappen - Week {selectedWeek}</h2>
+					<h2 style={{ margin: '0 0 20px 0', color: '#e8e8ff' }}>Trainingsstappen - Week {selectedWeek}</h2>
 
 					{currentProgram.steps && currentProgram.steps.length > 0 ? (
 						<div>
@@ -1717,15 +1727,16 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				<div style={{ 
 					textAlign: 'center', 
 					padding: '40px', 
-					color: '#6c757d',
-					background: '#f8f9fa',
+					color: '#7070a0',
+					background: '#1a1835',
 					borderRadius: '8px',
-					border: '2px dashed #dee2e6'
+					border: '2px dashed #2a2750'
 				}}>
 					<h3>Selecteer een week om te bewerken</h3>
 					<p>Klik op een week in de Week Manager om de trainingsstappen te bewerken.</p>
 				</div>
 			)}
+		</div>{/* closes se-root */}
 		</div>
 	);
 };
