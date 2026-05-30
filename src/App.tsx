@@ -441,7 +441,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	const [schemaLoading, setSchemaLoading] = useState(false);
 
 	// Bluetooth loopband koppeling
-	const { btStatus, btDeviceName, connect: btConnect, disconnect: btDisconnect, sendSpeed } = useTreadmill();
+	const { btStatus, btDeviceName, connect: btConnect, disconnect: btDisconnect, sendSpeed, start: btStart, pause: btPause } = useTreadmill();
 
 	// Load user schema from cloud
 	useEffect(() => {
@@ -857,7 +857,15 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 															{/* Actions directly under status card */}
 															<div className="actions-row actions-under-card">
 																<button
-																	onClick={() => setRunning((r) => !r)}
+																	onClick={() => {
+																		if (running) {
+																			setRunning(false);
+																			if (btStatus === 'connected') btPause();
+																		} else {
+																			setRunning(true);
+																			if (btStatus === 'connected') btStart();
+																		}
+																	}}
 																	className={`btn ${running ? 'btn-pause' : 'btn-start'}`}
 																>
 																	{running ? 'Pauze' : 'Start'}

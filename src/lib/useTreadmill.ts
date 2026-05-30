@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 const FTMS_SERVICE_SHORT = 0x1826;
 const CONTROL_POINT_UUID = '00002ad9-0000-1000-8000-00805f9b34fb';
@@ -10,6 +10,13 @@ export function useTreadmill() {
   const [btDeviceName, setBtDeviceName] = useState('');
   const cpRef = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
   const deviceRef = useRef<BluetoothDevice | null>(null);
+  const currentSpeedRef = useRef(0);
+  const slowdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Clean up slowdown interval on unmount
+  useEffect(() => () => {
+    if (slowdownIntervalRef.current) clearInterval(slowdownIntervalRef.current);
+  }, []);
 
   const writeCp = useCallback(async (bytes: number[]) => {
     const cp = cpRef.current;
@@ -89,6 +96,12 @@ export function useTreadmill() {
   /** Send target speed (km/h) to the treadmill via FTMS opcode 0x02 */
   const sendSpeed = useCallback(async (speed: number) => {
     if (!cpRef.current) return;
+    // Cancel any ongoing slowdown when explicitly setting speed
+    if (slowdownIntervalRef.current) {
+      clearInterval(slowdownIntervalRef.current);
+      slowdownIntervalRef.current = null;
+    }
+    currentSpeedRef.current = speed;
     const v = Math.round(Math.max(0, Math.min(30, speed)) * 100); // units: 0.01 km/h
     await writeCp([0x02, v & 0xff, (v >> 8) & 0xff]);
   }, [writeCp]);
@@ -102,5 +115,38 @@ export function useTreadmill() {
     await writeCp([0x03, v16 & 0xff, (v16 >> 8) & 0xff]);
   }, [writeCp]);
 
-  return { btStatus, btDeviceName, connect, disconnect, sendSpeed, sendInclination, writeCp };
+  /** Send FTMS Start/Resume command (opcode 0x07) */
+  const start = useCallback(async () => {
+    if (!cpRef.current) return;
+    // Cancel any ongoing slowdown before starting
+    if (slowdownIntervalRef.current) {
+      clearInterval(slowdownIntervalRef.current);
+      slowdownIntervalRef.current = null;
+    }
+    await writeCp([0x07]);
+  }, [writeCp]);
+
+  /** Gradually slow the treadmill to 0 km/h, then send Pause (opcode 0x08 0x02) */
+  const pause = useCallback(() => {
+    if (!cpRef.current) return;
+    if (slowdownIntervalRef.current) clearInterval(slowdownIntervalRef.current);
+    const STEP = 0.5;  // km/h per tick
+    const TICK = 400;  // ms between steps
+    slowdownIntervalRef.current = setInterval(async () => {
+      const next = currentSpeedRef.current - STEP;
+      if (next <= 0) {
+        clearInterval(slowdownIntervalRef.current!);
+        slowdownIntervalRef.current = null;
+        currentSpeedRef.current = 0;
+        await writeCp([0x02, 0x00, 0x00]); // speed = 0
+        await writeCp([0x08, 0x02]);        // Pause command
+      } else {
+        currentSpeedRef.current = next;
+        const v = Math.round(next * 100);
+        await writeCp([0x02, v & 0xff, (v >> 8) & 0xff]);
+      }
+    }, TICK);
+  }, [writeCp]);
+
+  return { btStatus, btDeviceName, connect, disconnect, sendSpeed, sendInclination, start, pause, writeCp };
 }
