@@ -57,6 +57,10 @@ export function useTreadmill() {
       setBtDeviceName(device.name ?? 'Onbekend');
 
       device.addEventListener('gattserverdisconnected', () => {
+        if (slowdownIntervalRef.current) {
+          clearInterval(slowdownIntervalRef.current);
+          slowdownIntervalRef.current = null;
+        }
         setBtStatus('disconnected');
         cpRef.current = null;
         setBtDeviceName('');
@@ -87,6 +91,10 @@ export function useTreadmill() {
   }, []);
 
   const disconnect = useCallback(() => {
+    if (slowdownIntervalRef.current) {
+      clearInterval(slowdownIntervalRef.current);
+      slowdownIntervalRef.current = null;
+    }
     deviceRef.current?.gatt?.disconnect();
     setBtStatus('disconnected');
     cpRef.current = null;

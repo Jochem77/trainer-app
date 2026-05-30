@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import schema from "./backups/schema.json";
 import SchemaEditor from './SchemaEditor';
@@ -21,9 +21,10 @@ type UserSchema = {
 
 type SchemaSelectorProps = {
 	userId: string;
+	onSchemaActivated?: () => void;
 };
 
-const SchemaSelector: React.FC<SchemaSelectorProps> = ({ userId }) => {
+const SchemaSelector: React.FC<SchemaSelectorProps> = ({ userId, onSchemaActivated }) => {
 	const [schemas, setSchemas] = useState<UserSchema[]>([]);
 	const [selectedSchemaId, setSelectedSchemaId] = useState<number | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -111,6 +112,7 @@ const SchemaSelector: React.FC<SchemaSelectorProps> = ({ userId }) => {
 				setError(error.message);
 			} else {
 				setMessage("Schema geselecteerd!");
+				onSchemaActivated?.();
 				// Refresh schemas to update UI
 				const { data } = await supabase
 					.from("user_schemas")
@@ -428,7 +430,7 @@ function flattenSteps(steps: Step[]) {
 	return result;
 }
 
-const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user: SupabaseUser | null }> = ({ setMenuOpen, user }) => {
+const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user: SupabaseUser | null; schemaVersion?: number }> = ({ setMenuOpen, user, schemaVersion = 0 }) => {
 	// Get today's date in YYYY-MM-DD format
 	const getTodayDateString = () => {
 		const today = new Date();
@@ -491,8 +493,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 		};
 
 		loadUserSchema();
-	}, [user?.id]);
-
+		}, [user?.id, schemaVersion]);
 	// Start met de huidige week
 	const [week, setWeek] = useState(1);
 	const prevMaxWeekRef = React.useRef<number>(0);
@@ -521,11 +522,12 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	const prevLeftRef = React.useRef<{ idx: number; left: number }>({ idx: -1, left: Number.POSITIVE_INFINITY });
     
 
-		// Bepaal huidige stap
-		const flatSteps = program ? flattenSteps(program.steps) : [];
+		// Bepaal huidige stap (gememoized om herberekening bij elke timer-tick te voorkomen)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const flatSteps = useMemo(() => program ? flattenSteps(program.steps) : [], [program]);
 		let currentIdx = 0;
 		for (let i = 0; i < flatSteps.length; i++) {
-			if (timer / 60 >= flatSteps[i].start_min) currentIdx = i;
+			if (timer >= flatSteps[i].start_sec) currentIdx = i;
 			else break;
 		}
 		const currentStep = flatSteps[currentIdx] ?? { start_min: 0, duration_min: 0, speed_kmh: null, label: '', type: '' };
@@ -577,7 +579,9 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
 		if (!running || btStatus !== 'connected') return;
-		if (currentStep.speed_kmh != null && currentStep.type !== 'end') {
+		if (currentStep.type === 'end') {
+			btPause(); // training klaar: loopband geleidelijk afremmen naar 0
+		} else if (currentStep.speed_kmh != null) {
 			sendSpeed(currentStep.speed_kmh);
 		}
 	}, [currentIdx, running, btStatus]);
@@ -698,7 +702,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			<div className="app-root" style={{ maxWidth: 720, flex: 1, margin: "0 auto", padding: 16, paddingTop: 'calc(20px + var(--safe-top, 0px))', paddingBottom: 'calc(16px + var(--safe-bottom, 0px))', borderRadius: 16, background: "linear-gradient(180deg,#dfe9ff,#eaf2ff)", boxShadow: "0 4px 24px #0001", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
-				@supports(height: 100dvh){ .app-root{ height: 100dvh; } }
+				@supports (height: 100dvh){ .app-root{ height: 100dvh; } }
 					@keyframes blink-border {
 						0% { box-shadow: 0 0 0 0 #43a047, 0 2px 8px #0001; }
 						50% { box-shadow: 0 0 0 10px #43a04733, 0 2px 8px #0001; }
@@ -709,9 +713,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			.graph-card { background:#fff; border-radius:12px; box-shadow:0 6px 24px #0002; padding:1px 4px 1px; margin:1px 0; max-width:560px; width:100%; box-sizing:border-box; }
 			.graph-card-mobile { margin: 0 auto 0; padding: 0 1px 0; }
 			@media (max-width: 768px) {
-				.app-root { padding: 12px !important; paddingTop: calc(16px + env(safe-area-inset-top, 0px)) !important; paddingBottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
+				.app-root { padding: 12px !important; padding-top: calc(16px + env(safe-area-inset-top, 0px)) !important; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important; }
 				.graph-card-mobile { margin: 0 auto 0; padding: 0 0 0; border-radius: 8px; }
-			}
 			}
 			.hambtn-grid { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
 			.hambtn-inline { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 8px 10px; font-size: 20px; box-shadow: 0 2px 8px #0003; cursor: pointer; }
@@ -1121,6 +1124,7 @@ const App: React.FC = () => {
 	const [user, setUser] = useState<SupabaseUser | null>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [currentPage, setCurrentPage] = useState<'training' | 'editor' | 'treadmill'>('training');
+	const [schemaVersion, setSchemaVersion] = useState(0);
 	const editorScrollRef = React.useRef<HTMLDivElement>(null);
 
 	// Scroll to top when switching to editor page
@@ -1206,7 +1210,7 @@ const App: React.FC = () => {
 							{user && (
 								<div className="menu-section">
 									<h3>🎯 Trainingsschema's</h3>
-									<SchemaSelector userId={user.id} />
+									<SchemaSelector userId={user.id} onSchemaActivated={() => setSchemaVersion(v => v + 1)} />
 									
 									{/* Schema Beheer knoppen direct onder selectie */}
 									<div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f0f2f5' }}>
@@ -1311,7 +1315,7 @@ const App: React.FC = () => {
 					<TreadmillPage onBack={() => setCurrentPage('training')} />
 				</div>
 			) : currentPage === 'training' ? (
-				<TrainingProgramDay setMenuOpen={setMenuOpen} user={user} />
+				<TrainingProgramDay setMenuOpen={setMenuOpen} user={user} schemaVersion={schemaVersion} />
 			) : (
 				<div ref={editorScrollRef} style={{ 
 					flex: 1,
