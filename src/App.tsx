@@ -968,10 +968,11 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 		0,
 		...steps.map(s => (s.duration_sec && s.duration_sec > 0 ? (s.start_sec + s.duration_sec) : s.start_sec))
 	);
-	const speeds = steps.map(s => s.speed_kmh ?? 0);
+	const speeds = steps.map(s => s.speed_kmh ?? 0).filter(v => v > 0);
 	const maxSpeedRaw = Math.max(0, ...speeds);
-	const minSpeed = 4; // Minimum y-axis value set to 4 km/u
-	const maxSpeed = Math.max(minSpeed + 1, Math.ceil(maxSpeedRaw)); // top of graph = max step speed
+	const minSpeedRaw = Math.min(...speeds);
+	const minSpeed = Math.floor(minSpeedRaw); // bottom = lowest step speed in program
+	const maxSpeed = Math.ceil(maxSpeedRaw); // top = highest step speed in program
 	if (totalSec <= 0) return null;
 
 	// Build step-function points: for each step with speed and duration, add (start, speed) and (end, speed)
