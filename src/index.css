@@ -13,8 +13,12 @@ html, body, #root {
 html, body {
 	margin: 0;
 	padding: 0;
-	overflow: hidden; /* prevent page scrollbar; internal containers handle scrolling */
-	background: #eaf2ff;
+	overflow: hidden;
+	overscroll-behavior: none;
+}
+#root {
+	display: flex;
+	flex-direction: column;
 }
 
 /* Enable scrollbar visibility for webkit browsers */

@@ -702,7 +702,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			<div className="app-root" style={{ maxWidth: 720, flex: 1, margin: "0 auto", padding: 0, background: "#0f0c29", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'stretch', overflow: 'hidden' }}>
 				<style>{`
 				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); --safe-top: env(safe-area-inset-top, 0px); }
-				@supports (height: 100dvh){ .app-root{ height: 100dvh; } }
+				.app-root { height: 100%; }
 				@keyframes blink-border {
 					0% { box-shadow: 0 0 0 0 #a8ff78; }
 					50% { box-shadow: 0 0 0 10px rgba(168,255,120,0.2); }
