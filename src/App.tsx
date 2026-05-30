@@ -701,7 +701,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 		return (
 			<div className="app-root" style={{ maxWidth: 720, flex: 1, margin: "0 auto", padding: 0, background: "#0f0c29", fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'stretch', overflow: 'hidden' }}>
 				<style>{`
-				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); }
+				:root { --safe-bottom: env(safe-area-inset-bottom, 0px); --safe-top: env(safe-area-inset-top, 0px); }
 				@supports (height: 100dvh){ .app-root{ height: 100dvh; } }
 				@keyframes blink-border {
 					0% { box-shadow: 0 0 0 0 #a8ff78; }
@@ -709,8 +709,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 					100% { box-shadow: 0 0 0 0 #a8ff78; }
 				}
 				.top-sticky { position: sticky; top: 0; z-index: 20; background: #0f0c29; }
-				.c3-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px 16px 32px; }
-				.topbar { display: grid; grid-template-columns: 60px 50px 1fr 50px; align-items: center; gap: 8px; padding: 0 0 16px; }
+				.c3-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: calc(10px + var(--safe-top)) 14px 20px; }
+				.topbar { display: grid; grid-template-columns: 60px 50px 1fr 50px; align-items: center; gap: 8px; padding: 0 0 8px; }
 				.hamburger-col { justify-self: start; }
 				.prev-col { justify-self: center; }
 				.date-col { justify-self: center; }
@@ -722,8 +722,8 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 				.date-line { font-size: 17px; font-weight: 800; line-height: 1.1; color: #fff; }
 				.calories-line { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.7); margin-top: 2px; }
 				.c3-speed-section { text-align: center; padding-bottom: 4px; }
-				.c3-step-badge { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: rgba(255,255,255,0.85); margin-bottom: 8px; letter-spacing: 0.5px; }
-				.c3-speed-value { font-size: 72px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -3px; }
+				.c3-step-badge { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 3px 12px; font-size: 12px; color: rgba(255,255,255,0.85); margin-bottom: 4px; letter-spacing: 0.5px; }
+				.c3-speed-value { font-size: 60px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -3px; }
 				.c3-speed-unit { font-size: 18px; color: rgba(255,255,255,0.6); font-weight: 400; }
 				.c3-next-info { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 6px; }
 				.c3-next-info span { color: #a8ff78; font-weight: 700; }
@@ -759,9 +759,9 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 				.k-dur { width:62px; text-align:right; margin-right:8px; color:#555; font-size:13px; }
 				.k-label { flex:1; font-weight:600; min-width:0; color:#aaa; font-size:13px; }
 				.cur .k-label { color:#fff !important; }
-				@media (max-width:520px){ .c3-card-val{font-size:20px} .c3-speed-value{font-size:56px} .k-time{width:44px} .k-speed{width:60px} .k-dur{width:52px} }
-				@media (max-width: 768px) { .graph-svg { height: 90px !important; } }
-				@media (max-width: 480px) { .c3-speed-value { font-size: 48px !important; } .graph-svg { height: 80px !important; } }
+				@media (max-width:520px){ .c3-card-val{font-size:20px} .c3-speed-value{font-size:48px} .k-time{width:44px} .k-speed{width:60px} .k-dur{width:52px} }
+				@media (max-width: 768px) { .graph-svg { height: 130px !important; } }
+				@media (max-width: 480px) { .c3-speed-value { font-size: 40px !important; } .graph-svg { height: 110px !important; } }
 				`}</style>
 								<div className="top-sticky">
 									<div className="c3-hero">
@@ -1005,17 +1005,7 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	// y gridlines are computed inline below
 
 	return (
-	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="120" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
-			{/* axes */}
-			<line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
-			<line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke="#e5e7eb" strokeWidth={1} />
-
-			{/* y grid (no labels) */}
-			{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
-				<line key={i} x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#eef2f7" strokeWidth={1} />
-			))}
-
-			{/* Filled area under the curve - split at cursor */}
+	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="140" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
 			<defs>
 				<clipPath id="clip-left">
 					<rect x={0} y={0} width={cursorX} height={vbH} />
@@ -1023,19 +1013,31 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 				<clipPath id="clip-right">
 					<rect x={cursorX} y={0} width={vbW - cursorX} height={vbH} />
 				</clipPath>
+				<linearGradient id="c3-done" x1="0" y1="0" x2="0" y2="1">
+					<stop offset="0%" stopColor="#a8ff78" stopOpacity={0.35} />
+					<stop offset="100%" stopColor="#a8ff78" stopOpacity={0} />
+				</linearGradient>
+				<linearGradient id="c3-future" x1="0" y1="0" x2="0" y2="1">
+					<stop offset="0%" stopColor="#c084fc" stopOpacity={0.3} />
+					<stop offset="100%" stopColor="#c084fc" stopOpacity={0} />
+				</linearGradient>
 			</defs>
-			
-			{/* Completed area (green) */}
-			<polyline fill="none" stroke="#4ade80" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} clipPath="url(#clip-left)" />
-			<polygon fill="#4ade8033" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} clipPath="url(#clip-left)" />
-			
-			{/* Remaining area (blue) */}
-			<polyline fill="none" stroke="#2563eb" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} clipPath="url(#clip-right)" />
-			<polygon fill="#2563eb33" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} clipPath="url(#clip-right)" />
 
-			{/* red origin marker and current time cursor */}
-			<circle cx={padL} cy={padT + plotH} r={4} fill="#ef4444" />
-			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ef4444" strokeWidth={2} strokeDasharray="2 4" strokeLinecap="round" />
+			{/* y grid */}
+			{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
+				<line key={i} x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#2a2750" strokeWidth={1} />
+			))}
+
+			{/* Completed area (neon green) */}
+			<polygon fill="url(#c3-done)" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} clipPath="url(#clip-left)" />
+			<polyline fill="none" stroke="#a8ff78" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} clipPath="url(#clip-left)" />
+
+			{/* Remaining area (purple) */}
+			<polygon fill="url(#c3-future)" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} clipPath="url(#clip-right)" />
+			<polyline fill="none" stroke="#c084fc" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} clipPath="url(#clip-right)" />
+
+			{/* current time cursor */}
+			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ff6b9d" strokeWidth={1.5} strokeDasharray="4 3" strokeLinecap="round" />
 		</svg>
 	);
 };
