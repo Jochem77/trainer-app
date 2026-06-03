@@ -30,6 +30,7 @@ export interface SimpleStep {
 		duration_min: number;
 		speed_increase_kmh?: number;
 		incline_pct?: number;
+		incline_increase_pct?: number;
 	};
 	rest?: {
 		label: string;
@@ -37,6 +38,7 @@ export interface SimpleStep {
 		duration_min: number;
 		speed_increase_kmh?: number;
 		incline_pct?: number;
+		incline_increase_pct?: number;
 	};
 }
 
@@ -60,6 +62,7 @@ interface LoadedStep {
 		label?: string;
 		speed_increase_kmh?: number;
 		incline_pct?: number;
+		incline_increase_pct?: number;
 	};
 	rest?: {
 		duration_min?: number;
@@ -67,6 +70,7 @@ interface LoadedStep {
 		label?: string;
 		speed_increase_kmh?: number;
 		incline_pct?: number;
+		incline_increase_pct?: number;
 	};
 	tijd?: number;
 	beschrijving?: string;
@@ -193,14 +197,16 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										speed_kmh: step.hard.speed_kmh || 10,
 										duration_min: step.hard.duration_min || 1,
 										speed_increase_kmh: step.hard.speed_increase_kmh || 0,
-										incline_pct: step.hard.incline_pct ?? 0
+										incline_pct: step.hard.incline_pct ?? 0,
+										incline_increase_pct: step.hard.incline_increase_pct ?? 0
 									},
 									rest: {
 										label: step.rest.label || 'Rest',
 										speed_kmh: step.rest.speed_kmh || 6,
 										duration_min: step.rest.duration_min || 1,
 										speed_increase_kmh: step.rest.speed_increase_kmh || 0,
-										incline_pct: step.rest.incline_pct ?? 0
+										incline_pct: step.rest.incline_pct ?? 0,
+										incline_increase_pct: step.rest.incline_increase_pct ?? 0
 									},
 									repeats: step.repeats || 1
 								};
@@ -827,128 +833,120 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 
 				{/* Steady type fields */}
 				{step.type === 'steady' && (
-				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
+				<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '8px', width: '100%' }}>
 					<div>
-						<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '16px' }}>
-							<div>
-								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-									Label
-								</label>
-								<input
-									type="text"
-									value={step.label || ''}
-									onChange={(e) => updateStep(index, { ...step, label: e.target.value })}
-									style={{ 
-										width: 'auto',
-										maxWidth: '200px', 
-										padding: '12px 8px 12px 4px', 
-										border: '2px solid #dee2e6', 
-										borderRadius: '8px',
-										fontSize: '14px',
-										fontWeight: '500'
-									}}
-								/>
-							</div>
-							<div>
-								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-									km/u
-								</label>
-								<input
-									type="text"
-									value={step.speed_kmh?.toString().replace('.', ',') || ''}
-									onChange={e => {
-										const filtered = filterNumericInput(e.target.value);
-										updateStep(index, { ...step, speed_kmh: parseNumberInput(filtered) });
-									}}
-									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
-										border: '2px solid #dee2e6', 
-										borderRadius: '8px',
-										fontSize: '14px',
-										fontWeight: '500',
-										appearance: 'textfield',
-										MozAppearance: 'textfield',
-										WebkitAppearance: 'none'
-									}}
-								/>
-							</div>
-							<div>
-								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-									min
-								</label>
-								<input
-									type="text"
-									value={step.duration_min?.toString().replace('.', ',') || ''}
-									onChange={e => {
-										const filtered = filterNumericInput(e.target.value);
-										updateStep(index, {
-											...step,
-											duration_min: parseNumberInput(filtered),
-											// km wordt automatisch berekend
-										});
-									}}
-									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left', 
-										border: '2px solid #dee2e6', 
-										borderRadius: '8px',
-										fontSize: '14px',
-										fontWeight: '500',
-										appearance: 'textfield',
-										MozAppearance: 'textfield',
-										WebkitAppearance: 'none'
-									}}
-								/>
-							</div>
-							<div>
-								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-									km
-								</label>
-								<input
-									type="text"
-									value={minToKm(step.duration_min || 0, step.speed_kmh || 0).toFixed(3).replace('.', ',')}
-									onChange={e => {
-										const filtered = filterNumericInput(e.target.value);
-										updateStep(index, {
-											...step,
-											duration_min: kmToMin(parseNumberInput(filtered), step.speed_kmh || 0),
-										});
-									}}
-									style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
-										border: '2px solid #dee2e6',
-										borderRadius: '8px',
-										fontSize: '14px',
-										fontWeight: '500',
-										appearance: 'textfield',
-										MozAppearance: 'textfield',
-										WebkitAppearance: 'none'
-									}}
-								/>
-							</div>
-							<div>
-								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-									%
-								</label>
-								<input
-									type="text"
-									value={step.incline_pct?.toString().replace('.', ',') ?? '0'}
-									onChange={e => {
-										const filtered = filterNumericInput(e.target.value);
-										updateStep(index, { ...step, incline_pct: parseNumberInput(filtered) });
-									}}
-									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-										border: '2px solid #dee2e6',
-										borderRadius: '8px',
-										fontSize: '14px',
-										fontWeight: '500',
-										appearance: 'textfield',
-										MozAppearance: 'textfield',
-										WebkitAppearance: 'none'
-									}}
-								/>
-							</div>
-						</div>
+						<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+							Label
+						</label>
+						<input
+							type="text"
+							value={step.label || ''}
+							onChange={(e) => updateStep(index, { ...step, label: e.target.value })}
+							style={{ 
+								width: 'auto',
+								maxWidth: '200px', 
+								padding: '12px 8px 12px 4px', 
+								border: '2px solid #dee2e6', 
+								borderRadius: '8px',
+								fontSize: '14px',
+								fontWeight: '500'
+							}}
+						/>
+					</div>
+					<div>
+						<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+							tijd
+						</label>
+						<input
+							type="text"
+							key={`${selectedWeek}-${index}-sdur`}
+							defaultValue={minToMmss(step.duration_min || 0)}
+							placeholder="0:00"
+							onBlur={e => {
+								updateStep(index, {
+									...step,
+									duration_min: mmssToMin(e.target.value),
+								});
+							}}
+							style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+								border: '2px solid #dee2e6',
+								borderRadius: '8px',
+								fontSize: '14px',
+								fontWeight: '500'
+							}}
+						/>
+					</div>
+					<div>
+						<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+							km/u
+						</label>
+						<input
+							type="text"
+							value={step.speed_kmh?.toString().replace('.', ',') || ''}
+							onChange={e => {
+								const filtered = filterNumericInput(e.target.value);
+								updateStep(index, { ...step, speed_kmh: parseNumberInput(filtered) });
+							}}
+							style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+								border: '2px solid #dee2e6',
+								borderRadius: '8px',
+								fontSize: '14px',
+								fontWeight: '500',
+								appearance: 'textfield',
+								MozAppearance: 'textfield',
+								WebkitAppearance: 'none'
+							}}
+						/>
+					</div>
+					<div>
+						<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+							km
+						</label>
+						<input
+							type="text"
+							value={minToKm(step.duration_min || 0, step.speed_kmh || 0).toFixed(3).replace('.', ',')}
+							onChange={e => {
+								const filtered = filterNumericInput(e.target.value);
+								updateStep(index, {
+									...step,
+									duration_min: kmToMin(parseNumberInput(filtered), step.speed_kmh || 0),
+								});
+							}}
+							style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
+								border: '2px solid #dee2e6',
+								borderRadius: '8px',
+								fontSize: '14px',
+								fontWeight: '500',
+								appearance: 'textfield',
+								MozAppearance: 'textfield',
+								WebkitAppearance: 'none'
+							}}
+						/>
+					</div>
+					<div>
+						<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+							%
+						</label>
+						<input
+							type="text"
+							value={step.incline_pct?.toString().replace('.', ',') ?? '0'}
+							onChange={e => {
+								const filtered = filterNumericInput(e.target.value);
+								updateStep(index, { ...step, incline_pct: parseNumberInput(filtered) });
+							}}
+							style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+								border: '2px solid #dee2e6',
+								borderRadius: '8px',
+								fontSize: '14px',
+								fontWeight: '500',
+								appearance: 'textfield',
+								MozAppearance: 'textfield',
+								WebkitAppearance: 'none'
+							}}
+						/>
 					</div>
 				</div>
 				)}
-
 				{/* Interval pair type fields */}
 				{step.type === 'interval_pair' && step.hard && step.rest && (
 					<div style={{ width: '100%' }}>
@@ -957,18 +955,15 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 								🔥 Hard
 							</label>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
+							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px' }}>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 										Label
 									</label>
 									<input
 										type="text"
-										value={step.hard.label || ''}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											hard: { ...step.hard!, label: e.target.value }
-										})}
+										value={step.hard!.label || ''}
+										onChange={(e) => updateStep(index, { ...step, hard: { ...step.hard!, label: e.target.value } })}
 										style={{ 
 											width: 'auto',
 											maxWidth: '200px', 
@@ -981,65 +976,37 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									/>
 								</div>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
+										tijd
+									</label>
+									<input
+										type="text"
+										key={`${selectedWeek}-${index}-hdur`}
+										defaultValue={minToMmss(step.hard!.duration_min || 0)}
+										placeholder="0:00"
+										onBlur={e => {
+											updateStep(index, { ...step, hard: { ...step.hard!, duration_min: mmssToMin(e.target.value) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500'
+										}}
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 										km/u
 									</label>
 									<input
 										type="text"
-										value={step.hard.speed_kmh?.toString().replace('.', ',') || ''}
+										value={step.hard!.speed_kmh?.toString().replace('.', ',') || ''}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { 
-												...step, 
-												hard: { ...step.hard!, speed_kmh: parseNumberInput(filtered) || 0 }
-											});
+											updateStep(index, { ...step, hard: { ...step.hard!, speed_kmh: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										min
-									</label>
-									<input
-										type="text"
-										value={step.hard.duration_min?.toString().replace('.', ',') || ''}
-										onChange={e => {
-											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { 
-												...step, 
-												hard: { ...step.hard!, duration_min: parseNumberInput(filtered) || 0 }
-											});
-										}}
-										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										km
-									</label>
-									<input
-										type="text"
-										value={step.hard ? minToKm(step.hard.duration_min || 0, step.hard.speed_kmh || 0).toFixed(3).replace('.', ',') : ''}
-										onChange={e => {
-											if (!step.hard) return;
-											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { 
-												...step, 
-												hard: { ...step.hard, duration_min: kmToMin(parseNumberInput(filtered), step.hard.speed_kmh || 0) }
-											});
-										}}
-										style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6',
 											borderRadius: '8px',
 											fontSize: '14px',
@@ -1051,63 +1018,87 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									/>
 								</div>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 										+km/u
 									</label>
-									<div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-										<input
-											type="number"
-											step="0.1"
-											value={step.hard.speed_increase_kmh || 0}
-											onChange={(e) => updateStep(index, { 
-												...step, 
-												hard: { ...step.hard!, speed_increase_kmh: parseFloat(e.target.value) || 0 }
-											})}
-											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-												border: '2px solid #dee2e6', 
-												borderRadius: '8px',
-												fontSize: '14px',
-												fontWeight: '500'
-											}}
-										/>
-									</div>
+									<input
+										type="text"
+										value={step.hard!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { ...step, hard: { ...step.hard!, speed_increase_kmh: parseNumberInput(filtered) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
+										}}
+									/>
 								</div>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
+										+%
+									</label>
+									<input
+										type="text"
+										value={step.hard!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { ...step, hard: { ...step.hard!, incline_increase_pct: parseNumberInput(filtered) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
+										}}
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 										%
 									</label>
 									<input
 										type="text"
-										value={step.hard.incline_pct?.toString().replace('.', ',') ?? '0'}
+										value={step.hard!.incline_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { ...step, hard: { ...step.hard!, incline_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-											border: '2px solid #dee2e6', borderRadius: '8px', fontSize: '14px', fontWeight: '500',
-											appearance: 'textfield', MozAppearance: 'textfield', WebkitAppearance: 'none'
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
 										}}
 									/>
 								</div>
 							</div>
 						</div>
-						{/* Rest section direct onder hard */}
-						<div style={{ marginTop: '24px' }}>
+												{/* Rest section direct onder hard */}
+						<div style={{ marginTop: '16px' }}>
 							<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 								💤 Rust
 							</label>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
+							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px' }}>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 										Label
 									</label>
 									<input
 										type="text"
-										value={step.rest.label || ''}
-										onChange={(e) => updateStep(index, { 
-											...step, 
-											rest: { ...step.rest!, label: e.target.value }
-										})}
+										value={step.rest!.label || ''}
+										onChange={(e) => updateStep(index, { ...step, rest: { ...step.rest!, label: e.target.value } })}
 										style={{ 
 											width: 'auto',
 											maxWidth: '200px', 
@@ -1120,65 +1111,37 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									/>
 								</div>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
+										tijd
+									</label>
+									<input
+										type="text"
+										key={`${selectedWeek}-${index}-rdur`}
+										defaultValue={minToMmss(step.rest!.duration_min || 0)}
+										placeholder="0:00"
+										onBlur={e => {
+											updateStep(index, { ...step, rest: { ...step.rest!, duration_min: mmssToMin(e.target.value) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500'
+										}}
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 										km/u
 									</label>
 									<input
 										type="text"
-										value={step.rest.speed_kmh?.toString().replace('.', ',') || ''}
+										value={step.rest!.speed_kmh?.toString().replace('.', ',') || ''}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { 
-												...step, 
-												rest: { ...step.rest!, speed_kmh: parseNumberInput(filtered) || 0 }
-											});
+											updateStep(index, { ...step, rest: { ...step.rest!, speed_kmh: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										min
-									</label>
-									<input
-										type="text"
-										value={step.rest.duration_min?.toString().replace('.', ',') || ''}
-										onChange={e => {
-											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { 
-												...step, 
-												rest: { ...step.rest!, duration_min: parseNumberInput(filtered) || 0 }
-											});
-										}}
-										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-											border: '2px solid #dee2e6', 
-											borderRadius: '8px',
-											fontSize: '14px',
-											fontWeight: '500'
-										}}
-									/>
-								</div>
-								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
-										km
-									</label>
-									<input
-										type="text"
-										value={step.rest ? minToKm(step.rest.duration_min || 0, step.rest.speed_kmh || 0).toFixed(3).replace('.', ',') : ''}
-										onChange={e => {
-											if (!step.rest) return;
-											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { 
-												...step, 
-												rest: { ...step.rest, duration_min: kmToMin(parseNumberInput(filtered), step.rest.speed_kmh || 0) }
-											});
-										}}
-										style={{ width: '60px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6',
 											borderRadius: '8px',
 											fontSize: '14px',
@@ -1190,41 +1153,68 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									/>
 								</div>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 										+km/u
 									</label>
-									<div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-										<input
-											type="number"
-											step="0.1"
-											value={step.rest.speed_increase_kmh || 0}
-											onChange={(e) => updateStep(index, { 
-												...step, 
-												rest: { ...step.rest!, speed_increase_kmh: parseFloat(e.target.value) || 0 }
-											})}
-											style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-												border: '2px solid #dee2e6', 
-												borderRadius: '8px',
-												fontSize: '14px',
-												fontWeight: '500'
-											}}
-										/>
-									</div>
+									<input
+										type="text"
+										value={step.rest!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { ...step, rest: { ...step.rest!, speed_increase_kmh: parseNumberInput(filtered) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
+										}}
+									/>
 								</div>
 								<div>
-									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
+										+%
+									</label>
+									<input
+										type="text"
+										value={step.rest!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { ...step, rest: { ...step.rest!, incline_increase_pct: parseNumberInput(filtered) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
+										}}
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 										%
 									</label>
 									<input
 										type="text"
-										value={step.rest.incline_pct?.toString().replace('.', ',') ?? '0'}
+										value={step.rest!.incline_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { ...step, rest: { ...step.rest!, incline_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-											border: '2px solid #dee2e6', borderRadius: '8px', fontSize: '14px', fontWeight: '500',
-											appearance: 'textfield', MozAppearance: 'textfield', WebkitAppearance: 'none'
+											border: '2px solid #dee2e6',
+											borderRadius: '8px',
+											fontSize: '14px',
+											fontWeight: '500',
+											appearance: 'textfield',
+											MozAppearance: 'textfield',
+											WebkitAppearance: 'none'
 										}}
 									/>
 								</div>
@@ -1816,6 +1806,23 @@ export default SchemaEditor;
 function kmToMin(km: number, speed: number) {
   if (!speed) return 0;
   return (km / speed) * 60;
+}
+// Helper: min naar mm:ss string
+function minToMmss(min: number): string {
+  const totalSec = Math.round(min * 60);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+// Helper: mm:ss string naar min
+function mmssToMin(val: string): number {
+  const parts = val.split(':');
+  if (parts.length === 2) {
+    const m = parseInt(parts[0]) || 0;
+    const s = parseInt(parts[1]) || 0;
+    return m + s / 60;
+  }
+  return parseFloat(val.replace(',', '.')) || 0;
 }
 // Helper: min naar km
 function minToKm(min: number, speed: number) {
