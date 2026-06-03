@@ -835,16 +835,6 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 							const fmt = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 							const totalDurationSec = flatSteps.length ? Math.round(flatSteps[flatSteps.length - 1].start_min * 60) : 0;
 							const totalTimeLeft = Math.max(0, totalDurationSec - timer);
-							const speedKmh = currentStep.speed_kmh;
-							let totalRemainingKm = 0;
-							for (let i = currentIdx; i < flatSteps.length; i++) {
-								const st = flatSteps[i];
-								if (i === currentIdx) {
-									totalRemainingKm += (stepTimeLeft / 3600) * (st.speed_kmh || 0);
-								} else {
-									totalRemainingKm += st.speed_kmh ? (st.duration_min * st.speed_kmh) / 60 : 0;
-								}
-							}
 							return (
 								<div className="c3-cards-row">
 									<div className="c3-card">
