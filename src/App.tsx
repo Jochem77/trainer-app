@@ -836,7 +836,6 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 							const totalDurationSec = flatSteps.length ? Math.round(flatSteps[flatSteps.length - 1].start_min * 60) : 0;
 							const totalTimeLeft = Math.max(0, totalDurationSec - timer);
 							const speedKmh = currentStep.speed_kmh;
-							const currentStepRemainingKm = speedKmh ? (stepTimeLeft / 3600) * speedKmh : 0;
 							let totalRemainingKm = 0;
 							for (let i = currentIdx; i < flatSteps.length; i++) {
 								const st = flatSteps[i];
