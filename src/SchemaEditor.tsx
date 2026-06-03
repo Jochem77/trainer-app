@@ -1018,14 +1018,14 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								</div>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
-										+%
+										%
 									</label>
 									<input
 										type="text"
-										value={step.hard!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
+										value={step.hard!.incline_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { ...step, hard: { ...step.hard!, incline_increase_pct: parseNumberInput(filtered) } });
+											updateStep(index, { ...step, hard: { ...step.hard!, incline_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6',
@@ -1040,14 +1040,14 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								</div>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
-										%
+										+%
 									</label>
 									<input
 										type="text"
-										value={step.hard!.incline_pct?.toString().replace('.', ',') ?? '0'}
+										value={step.hard!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { ...step, hard: { ...step.hard!, incline_pct: parseNumberInput(filtered) } });
+											updateStep(index, { ...step, hard: { ...step.hard!, incline_increase_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6',
@@ -1153,14 +1153,14 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								</div>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
-										+%
+										%
 									</label>
 									<input
 										type="text"
-										value={step.rest!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
+										value={step.rest!.incline_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { ...step, rest: { ...step.rest!, incline_increase_pct: parseNumberInput(filtered) } });
+											updateStep(index, { ...step, rest: { ...step.rest!, incline_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6',
@@ -1175,14 +1175,14 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 								</div>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
-										%
+										+%
 									</label>
 									<input
 										type="text"
-										value={step.rest!.incline_pct?.toString().replace('.', ',') ?? '0'}
+										value={step.rest!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
 											const filtered = filterNumericInput(e.target.value);
-											updateStep(index, { ...step, rest: { ...step.rest!, incline_pct: parseNumberInput(filtered) } });
+											updateStep(index, { ...step, rest: { ...step.rest!, incline_increase_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
 											border: '2px solid #dee2e6',
