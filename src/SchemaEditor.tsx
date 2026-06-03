@@ -859,8 +859,9 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						</label>
 						<input
 							type="text"
-							value={step.speed_kmh?.toString().replace('.', ',') || ''}
-							onChange={e => {
+							key={`${selectedWeek}-${index}-sspeed`}
+							defaultValue={step.speed_kmh?.toString().replace('.', ',') || ''}
+							onBlur={e => {
 								const filtered = filterNumericInput(e.target.value);
 								updateStep(index, { ...step, speed_kmh: parseNumberInput(filtered) });
 							}}
@@ -978,8 +979,9 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									</label>
 									<input
 										type="text"
-										value={step.hard!.speed_kmh?.toString().replace('.', ',') || ''}
-										onChange={e => {
+										key={`${selectedWeek}-${index}-hspeed`}
+										defaultValue={step.hard!.speed_kmh?.toString().replace('.', ',') || ''}
+										onBlur={e => {
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { ...step, hard: { ...step.hard!, speed_kmh: parseNumberInput(filtered) } });
 										}}
@@ -1000,8 +1002,9 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									</label>
 									<input
 										type="text"
-										value={step.hard!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
-										onChange={e => {
+										key={`${selectedWeek}-${index}-hspeedinc`}
+										defaultValue={step.hard!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
+										onBlur={e => {
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { ...step, hard: { ...step.hard!, speed_increase_kmh: parseNumberInput(filtered) } });
 										}}
@@ -1113,8 +1116,9 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									</label>
 									<input
 										type="text"
-										value={step.rest!.speed_kmh?.toString().replace('.', ',') || ''}
-										onChange={e => {
+										key={`${selectedWeek}-${index}-rspeed`}
+										defaultValue={step.rest!.speed_kmh?.toString().replace('.', ',') || ''}
+										onBlur={e => {
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { ...step, rest: { ...step.rest!, speed_kmh: parseNumberInput(filtered) } });
 										}}
@@ -1135,8 +1139,9 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									</label>
 									<input
 										type="text"
-										value={step.rest!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
-										onChange={e => {
+										key={`${selectedWeek}-${index}-rspeedinc`}
+										defaultValue={step.rest!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
+										onBlur={e => {
 											const filtered = filterNumericInput(e.target.value);
 											updateStep(index, { ...step, rest: { ...step.rest!, speed_increase_kmh: parseNumberInput(filtered) } });
 										}}
