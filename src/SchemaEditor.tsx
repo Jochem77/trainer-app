@@ -11,6 +11,7 @@ type FlattenedStep = {
 	start_sec: number;
 	type: string;
 	repIndex?: number;
+	incline_pct?: number;
 };
 
 export interface SimpleStep {
@@ -21,18 +22,21 @@ export interface SimpleStep {
 	speed_kmh?: number;
 	duration_min?: number;
 	speed_increase_kmh?: number;
+	incline_pct?: number;
 	// Voor interval_pair type
 	hard?: {
 		label: string;
 		speed_kmh: number;
 		duration_min: number;
 		speed_increase_kmh?: number;
+		incline_pct?: number;
 	};
 	rest?: {
 		label: string;
 		speed_kmh: number;
 		duration_min: number;
 		speed_increase_kmh?: number;
+		incline_pct?: number;
 	};
 }
 
@@ -48,18 +52,21 @@ interface LoadedStep {
 	duration_min?: number;
 	speed_kmh?: number;
 	speed_increase_kmh?: number;
+	incline_pct?: number;
 	repeats?: number;
 	hard?: {
 		duration_min?: number;
 		speed_kmh?: number;
 		label?: string;
 		speed_increase_kmh?: number;
+		incline_pct?: number;
 	};
 	rest?: {
 		duration_min?: number;
 		speed_kmh?: number;
 		label?: string;
 		speed_increase_kmh?: number;
+		incline_pct?: number;
 	};
 	tijd?: number;
 	beschrijving?: string;
@@ -185,13 +192,15 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										label: step.hard.label || 'Hard',
 										speed_kmh: step.hard.speed_kmh || 10,
 										duration_min: step.hard.duration_min || 1,
-										speed_increase_kmh: step.hard.speed_increase_kmh || 0
+										speed_increase_kmh: step.hard.speed_increase_kmh || 0,
+										incline_pct: step.hard.incline_pct ?? 0
 									},
 									rest: {
 										label: step.rest.label || 'Rest',
 										speed_kmh: step.rest.speed_kmh || 6,
 										duration_min: step.rest.duration_min || 1,
-										speed_increase_kmh: step.rest.speed_increase_kmh || 0
+										speed_increase_kmh: step.rest.speed_increase_kmh || 0,
+										incline_pct: step.rest.incline_pct ?? 0
 									},
 									repeats: step.repeats || 1
 								};
@@ -204,6 +213,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									speed_kmh: step.speed_kmh || 10,
 									duration_min: step.duration_min || 30,
 									speed_increase_kmh: step.speed_increase_kmh || 0,
+									incline_pct: step.incline_pct ?? 0,
 									repeats: step.repeats || 1
 								};
 							}
@@ -486,6 +496,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						start_min: currentSec / 60,
 						start_sec: currentSec,
 						type: "steady",
+						incline_pct: step.incline_pct ?? 0,
 					});
 					currentSec += durSec;
 				}
@@ -504,6 +515,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						start_sec: currentSec,
 						type: "interval_hard",
 						repIndex,
+						incline_pct: step.hard.incline_pct ?? 0,
 					});
 					currentSec += hardSec;
 					const restSec = toSec(step.rest.duration_min || 0);
@@ -517,6 +529,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						start_sec: currentSec,
 						type: "interval_rest",
 						repIndex,
+						incline_pct: step.rest.incline_pct ?? 0,
 					});
 					currentSec += restSec;
 				}
@@ -816,7 +829,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				{step.type === 'steady' && (
 				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
 					<div>
-						<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '16px' }}>
+						<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '16px' }}>
 							<div>
 								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 									Label
@@ -909,6 +922,28 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 									}}
 								/>
 							</div>
+							<div>
+								<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+									%
+								</label>
+								<input
+									type="text"
+									value={step.incline_pct?.toString().replace('.', ',') ?? '0'}
+									onChange={e => {
+										const filtered = filterNumericInput(e.target.value);
+										updateStep(index, { ...step, incline_pct: parseNumberInput(filtered) });
+									}}
+									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+										border: '2px solid #dee2e6',
+										borderRadius: '8px',
+										fontSize: '14px',
+										fontWeight: '500',
+										appearance: 'textfield',
+										MozAppearance: 'textfield',
+										WebkitAppearance: 'none'
+									}}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -922,7 +957,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#856404' }}>
 								🔥 Hard
 							</label>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
+							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 										Label
@@ -1037,6 +1072,23 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										/>
 									</div>
 								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+										%
+									</label>
+									<input
+										type="text"
+										value={step.hard.incline_pct?.toString().replace('.', ',') ?? '0'}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { ...step, hard: { ...step.hard!, incline_pct: parseNumberInput(filtered) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6', borderRadius: '8px', fontSize: '14px', fontWeight: '500',
+											appearance: 'textfield', MozAppearance: 'textfield', WebkitAppearance: 'none'
+										}}
+									/>
+								</div>
 							</div>
 						</div>
 						{/* Rest section direct onder hard */}
@@ -1044,7 +1096,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#0c5460' }}>
 								💤 Rust
 							</label>
-							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
+							<div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '0px' }}>
 								<div>
 									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
 										Label
@@ -1158,6 +1210,23 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 											}}
 										/>
 									</div>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+										%
+									</label>
+									<input
+										type="text"
+										value={step.rest.incline_pct?.toString().replace('.', ',') ?? '0'}
+										onChange={e => {
+											const filtered = filterNumericInput(e.target.value);
+											updateStep(index, { ...step, rest: { ...step.rest!, incline_pct: parseNumberInput(filtered) } });
+										}}
+										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
+											border: '2px solid #dee2e6', borderRadius: '8px', fontSize: '14px', fontWeight: '500',
+											appearance: 'textfield', MozAppearance: 'textfield', WebkitAppearance: 'none'
+										}}
+									/>
 								</div>
 							</div>
 						</div>

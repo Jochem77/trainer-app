@@ -287,11 +287,12 @@ type Step =
 			label: string;
 			repeats: number;
 			speed_increase_kmh?: number;
+			incline_pct?: number;
 		}
 	| {
 			type: "interval_pair";
-			hard: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number };
-			rest: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number };
+			hard: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number; incline_pct?: number };
+			rest: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number; incline_pct?: number };
 			repeats: number;
 		};
 
@@ -359,6 +360,7 @@ function flattenSteps(steps: Step[]) {
 		start_sec: number; // exacte start in seconden
 		type: string;
 		repIndex?: number; // 1-based nummer van herhaling voor interval stappen
+		incline_pct?: number;
 	}> = [];
 	let currentSec = 0;
 	const toSec = (min: number) => Math.round(min * 60);
@@ -377,6 +379,7 @@ function flattenSteps(steps: Step[]) {
 					start_min: currentSec / 60,
 					start_sec: currentSec,
 					type: "steady",
+					incline_pct: step.incline_pct ?? 0,
 				});
 				currentSec += durSec;
 			}
@@ -399,6 +402,7 @@ function flattenSteps(steps: Step[]) {
 					start_sec: currentSec,
 					type: "interval_hard",
 					repIndex,
+					incline_pct: step.hard.incline_pct ?? 0,
 				});
 				currentSec += hardSec;
 				const restSec = toSec(step.rest.duration_min);
@@ -412,6 +416,7 @@ function flattenSteps(steps: Step[]) {
 					start_sec: currentSec,
 					type: "interval_rest",
 					repIndex,
+					incline_pct: step.rest.incline_pct ?? 0,
 				});
 				currentSec += restSec;
 			}
@@ -730,7 +735,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 				.c3-cards-row { display: flex; gap: 10px; padding: 0 14px; margin-top: -20px; margin-bottom: 10px; }
 				.c3-card { flex: 1; background: #1a1835; border-radius: 14px; padding: 12px 8px; text-align: center; border: 1px solid #2a2750; }
 				.c3-card-lbl { font-size: 9px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; font-weight: 600; }
-				.c3-card-val { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+				.c3-card-val { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
 				.c3-card-val.green { color: #a8ff78; }
 				.c3-card-val.purple { color: #c084fc; }
 				.c3-card-val.amber { color: #fbbf24; }
@@ -759,7 +764,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 				.k-dur { width:62px; text-align:right; margin-right:8px; color:#555; font-size:13px; }
 				.k-label { flex:1; font-weight:600; min-width:0; color:#aaa; font-size:13px; }
 				.cur .k-label { color:#fff !important; }
-				@media (max-width:520px){ .c3-card-val{font-size:20px} .c3-speed-value{font-size:48px} .k-time{width:44px} .k-speed{width:60px} .k-dur{width:52px} }
+				@media (max-width:520px){ .c3-card-val{font-size:26px} .c3-speed-value{font-size:48px} .k-time{width:44px} .k-speed{width:60px} .k-dur{width:52px} }
 				@media (max-width: 768px) { .graph-svg { height: 130px !important; } }
 				@media (max-width: 480px) { .c3-speed-value { font-size: 40px !important; } .graph-svg { height: 110px !important; } }
 				`}</style>
@@ -808,14 +813,14 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 							const speedKmh = currentStep.speed_kmh;
 							const nextStepItem = flatSteps[currentIdx + 1];
 							const nextSpeedVal = nextStepItem?.speed_kmh ?? null;
-							const currentLabel = currentStep.label + (currentStep.repIndex ? `  ${currentStep.repIndex}` : '');
+							const inclinePct = currentStep.incline_pct ?? 0;
 							return (
 								<>
 									<div className="c3-speed-section">
-										<div className="c3-step-badge">{currentLabel || 'Training'}</div>
 										<div>
 											<span className="c3-speed-value">{speedKmh != null ? `${speedKmh}` : '\u2014'}</span>
 											{speedKmh != null && <span className="c3-speed-unit"> km/u</span>}
+											<span className="c3-speed-unit" style={{ marginLeft: 20 }}>{inclinePct}%</span>
 										</div>
 										{nextSpeedVal != null && (
 											<div className="c3-next-info">Volgende: <span>{nextSpeedVal} km/u</span></div>
@@ -846,17 +851,14 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 									<div className="c3-card">
 										<div className="c3-card-lbl">Stap</div>
 										<div className="c3-card-val green">{fmt(stepTimeLeft)}</div>
-										<div className="c3-card-sub">{currentStepRemainingKm.toFixed(3).replace('.', ',')} km</div>
 									</div>
 									<div className="c3-card">
 										<div className="c3-card-lbl">Totaal</div>
 										<div className="c3-card-val purple">{fmt(totalTimeLeft)}</div>
-										<div className="c3-card-sub">{totalRemainingKm.toFixed(3).replace('.', ',')} km</div>
 									</div>
 									<div className="c3-card">
-										<div className="c3-card-lbl">Cal</div>
-										<div className="c3-card-val amber">±{program.cal ?? '?'}</div>
-										<div className="c3-card-sub">kcal</div>
+										<div className="c3-card-lbl">Verstreken</div>
+										<div className="c3-card-val amber">{fmt(timer)}</div>
 									</div>
 								</div>
 							);
@@ -939,16 +941,25 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 										onDoubleClick={handleDoubleClick}
 										style={{ cursor: 'pointer' }}
 									>
-										<div className="k-time">
-											{String(Math.floor((step.start_sec ?? Math.round(step.start_min * 60)) / 60)).padStart(2, '0')}:{String(((step.start_sec ?? Math.round(step.start_min * 60)) % 60)).padStart(2, '0')}
-										</div>
-										<div className="k-speed">
-											{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
-										</div>
-										<div className="k-dur">
-											{step.duration_min > 0 ? `${formatMin(step.duration_min)} min` : ''}
-										</div>
-										  <div className="k-label">{step.label}{step.repIndex ? ` ${step.repIndex}` : ''}</div>
+										{(() => {
+											const stepColor = isCurrent ? '#fff'
+												: step.type === 'steady' ? '#a8ff78'
+												: step.type === 'interval_hard' ? '#ff6b9d'
+												: step.type === 'interval_rest' ? '#78ffd6'
+												: '#888';
+											const colStyle: React.CSSProperties = { color: stepColor, fontWeight: 700, fontSize: 15, fontVariantNumeric: 'tabular-nums' };
+											return (<>
+												<div style={{ ...colStyle, flex: '0 0 60px' }}>
+													{step.duration_min > 0 ? `${formatMin(step.duration_min)}m` : ''}
+												</div>
+												<div style={{ ...colStyle, flex: '0 0 80px', textAlign: 'right', marginRight: 8 }}>
+													{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
+												</div>
+												<div style={{ ...colStyle, flex: '0 0 44px', textAlign: 'right' }}>
+													{(step.incline_pct ?? 0)}%
+												</div>
+											</>);
+										})()}
 									</div>
 					);
 				})}
