@@ -769,29 +769,6 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							<option value="steady">Steady</option>
 							<option value="interval_pair">Interval</option>
 						</select>
-						{step.type === 'steady' && (
-							<div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-								<label style={{ fontSize: '14px', fontWeight: '600', color: '#495057', margin: 0 }}>
-									🔄 Herh
-								</label>
-								<input
-									type="number"
-									inputMode="decimal"
-									pattern="[0-9]*"
-									value={step.repeats || 1}
-									onChange={(e) => updateStep(index, { ...step, repeats: parseInt(e.target.value) || 1 })}
-									style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
-										border: '2px solid #dee2e6', 
-										borderRadius: '8px',
-										fontSize: '14px',
-										fontWeight: '500',
-										appearance: 'textfield',
-										MozAppearance: 'textfield',
-										WebkitAppearance: 'none'
-									}}
-								/>
-							</div>
-						)}
 						{step.type === 'interval_pair' && (
 							<div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
 								<label style={{ fontSize: '14px', fontWeight: '600', color: '#495057', margin: 0 }}>
