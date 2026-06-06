@@ -980,26 +980,36 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	const speeds = steps.map(s => s.speed_kmh ?? 0).filter(v => v > 0);
 	const maxSpeedRaw = Math.max(0, ...speeds);
 	const minSpeedRaw = Math.min(...speeds);
-	const minSpeed = Math.floor(minSpeedRaw); // bottom = lowest step speed in program
-	const maxSpeed = Math.ceil(maxSpeedRaw); // top = highest step speed in program
+	const minSpeed = Math.floor(minSpeedRaw);
+	const maxSpeed = Math.ceil(maxSpeedRaw);
 	if (totalSec <= 0) return null;
 
-	// Build step-function points: for each step with speed and duration, add (start, speed) and (end, speed)
+	// Build speed step-function segments
 	const segments: Array<{ t: number; v: number }> = [];
 	for (const s of steps) {
 		if (s.speed_kmh == null || !s.duration_sec || s.duration_sec <= 0) continue;
-		const start = s.start_sec;
-		const end = s.start_sec + s.duration_sec;
-		segments.push({ t: start, v: s.speed_kmh });
-		segments.push({ t: end, v: s.speed_kmh });
+		segments.push({ t: s.start_sec, v: s.speed_kmh });
+		segments.push({ t: s.start_sec + s.duration_sec, v: s.speed_kmh });
 	}
 	if (segments.length === 0) return null;
+
+	// Build incline step-function segments
+	const inclSegments: Array<{ t: number; v: number }> = [];
+	for (const s of steps) {
+		if (!s.duration_sec || s.duration_sec <= 0) continue;
+		inclSegments.push({ t: s.start_sec, v: s.incline_pct ?? 0 });
+		inclSegments.push({ t: s.start_sec + s.duration_sec, v: s.incline_pct ?? 0 });
+	}
+	const inclValues = steps.filter(s => s.duration_sec && s.duration_sec > 0).map(s => s.incline_pct ?? 0);
+	const hasIncline = inclValues.some(v => v !== 0);
+	const maxIncl = Math.max(1, ...inclValues);
+	const minIncl = Math.min(0, ...inclValues);
 
 	// SVG coordinate system
 	const vbW = 1000;
 	const vbH = 200;
 	const padL = 34;
-	const padR = 12;
+	const padR = hasIncline ? 36 : 12;
 	const padT = 2;
 	const padB = 8;
 	const plotW = vbW - padL - padR;
@@ -1007,15 +1017,15 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 
 	const x = (t: number) => padL + (t / totalSec) * plotW;
 	const y = (v: number) => padT + (1 - (Math.max(minSpeed, Math.min(v, maxSpeed)) - minSpeed) / (maxSpeed - minSpeed)) * plotH;
+	const yIncl = (v: number) => padT + (1 - (Math.max(minIncl, Math.min(v, maxIncl)) - minIncl) / (maxIncl - minIncl)) * plotH;
 
 	const pointsAttr = segments.map(p => `${x(p.t).toFixed(2)},${y(p.v).toFixed(2)}`).join(' ');
+	const inclPointsAttr = inclSegments.map(p => `${x(p.t).toFixed(2)},${yIncl(p.v).toFixed(2)}`).join(' ');
 	const cursorT = Math.max(0, Math.min(currentSec, totalSec));
 	const cursorX = x(cursorT);
 
-	// y gridlines are computed inline below
-
 	return (
-	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="140" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
+	<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="140" className="graph-svg" role="img" aria-label="Programma snelheid en helling grafiek" style={{ display: 'block' }}>
 			<defs>
 				<clipPath id="clip-left">
 					<rect x={0} y={0} width={cursorX} height={vbH} />
@@ -1033,8 +1043,8 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 				</linearGradient>
 			</defs>
 
-			{/* y grid + labels */}
-			{([minSpeed, Math.ceil((minSpeed + maxSpeed)/2), maxSpeed] as number[]).map((v, i) => (
+			{/* Left y-axis: speed grid + labels */}
+			{([minSpeed, Math.ceil((minSpeed + maxSpeed) / 2), maxSpeed] as number[]).map((v, i) => (
 				<g key={i}>
 					<line x1={padL} y1={y(v)} x2={padL + plotW} y2={y(v)} stroke="#2a2750" strokeWidth={1} />
 					<text x={padL - 4} y={y(v) + (i === 2 ? -3 : 5)} textAnchor="end" fontSize={18} fill="#4a4870" fontFamily="system-ui">{v}</text>
@@ -1048,6 +1058,17 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 			{/* Remaining area (purple) */}
 			<polygon fill="url(#c3-future)" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} clipPath="url(#clip-right)" />
 			<polyline fill="none" stroke="#c084fc" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} clipPath="url(#clip-right)" />
+
+			{/* Incline overlay line (amber, dashed) — only when at least one step has non-zero incline */}
+			{hasIncline && (
+				<>
+					<polyline fill="none" stroke="#fbbf24" strokeWidth={2.5} strokeDasharray="8 5" strokeLinejoin="miter" strokeLinecap="butt" points={inclPointsAttr} opacity={0.85} />
+					{/* Right y-axis: incline labels */}
+					{([minIncl, Math.round((minIncl + maxIncl) / 2), maxIncl] as number[]).map((v, i) => (
+						<text key={i} x={padL + plotW + 4} y={yIncl(v) + (i === 2 ? -3 : 5)} textAnchor="start" fontSize={18} fill="#92610a" fontFamily="system-ui">{v}%</text>
+					))}
+				</>
+			)}
 
 			{/* current time cursor */}
 			<line x1={cursorX} y1={padT} x2={cursorX} y2={padT + plotH} stroke="#ff6b9d" strokeWidth={1.5} strokeDasharray="4 3" strokeLinecap="round" />
