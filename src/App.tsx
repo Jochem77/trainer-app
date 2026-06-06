@@ -1002,7 +1002,7 @@ const ProgramGraph: React.FC<{ steps: FlattenedStep[]; currentSec: number }> = (
 	}
 	const inclValues = steps.filter(s => s.duration_sec && s.duration_sec > 0).map(s => s.incline_pct ?? 0);
 	const hasIncline = inclValues.some(v => v !== 0);
-	const maxIncl = Math.max(1, ...inclValues);
+	const maxIncl = 12;
 	const minIncl = Math.min(0, ...inclValues);
 
 	// SVG coordinate system
