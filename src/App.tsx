@@ -451,7 +451,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	const [schemaLoading, setSchemaLoading] = useState(false);
 
 	// Bluetooth loopband koppeling
-	const { btStatus, btDeviceName, connect: btConnect, disconnect: btDisconnect, sendSpeed, start: btStart, pause: btPause } = useTreadmill();
+	const { btStatus, btDeviceName, connect: btConnect, disconnect: btDisconnect, sendSpeed, sendInclination, start: btStart, pause: btPause } = useTreadmill();
 
 	// Load user schema from cloud
 	useEffect(() => {
@@ -583,16 +583,18 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 			prevLeftRef.current = { idx: currentIdx, left: stepTimeLeft };
 		}, [stepTimeLeft, running, currentIdx]);
 
-	// Auto-stuur snelheid naar loopband bij stapwissel en bij start/verbinding
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// Auto-stuur snelheid en helling naar loopband bij stapwissel en bij start/verbinding
 	useEffect(() => {
 		if (!running || btStatus !== 'connected') return;
 		if (currentStep.type === 'end') {
 			btPause(); // training klaar: loopband geleidelijk afremmen naar 0
-		} else if (currentStep.speed_kmh != null) {
-			sendSpeed(currentStep.speed_kmh);
+		} else {
+			if (currentStep.speed_kmh != null) sendSpeed(currentStep.speed_kmh);
+			sendInclination(currentStep.incline_pct ?? 0);
 		}
-	}, [currentIdx, running, btStatus]);
+	// currentStep-waarden veranderen al wanneer currentIdx verandert; btPause/sendSpeed/sendInclination zijn stable useCallback refs
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentIdx, running, btStatus, btPause, sendSpeed, sendInclination]);
 		useEffect(() => {
 			let isMounted = true;
 			let wakeLockRef: WakeLockSentinel | null = null;
@@ -732,7 +734,7 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 				.c3-speed-section { text-align: center; padding-bottom: 4px; }
 				.c3-step-badge { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 3px 12px; font-size: 12px; color: rgba(255,255,255,0.85); margin-bottom: 4px; letter-spacing: 0.5px; }
 				.c3-speed-value { font-size: 60px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -3px; }
-				.c3-speed-unit { font-size: 18px; color: rgba(255,255,255,0.6); font-weight: 400; }
+				.c3-speed-unit { font-size: 50px; color: rgba(255,255,255,0.6); font-weight: 900; }
 				.c3-next-info { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 6px; }
 				.c3-next-info span { color: #a8ff78; font-weight: 700; }
 				.c3-cards-row { display: flex; gap: 10px; padding: 0 14px; margin-top: -20px; margin-bottom: 10px; }
@@ -858,13 +860,17 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 															{/* Actions directly under status card */}
 															<div className="actions-row">
 																<button
-																	onClick={() => {
+																	onClick={async () => {
 																		if (running) {
 																			setRunning(false);
 																			if (btStatus === 'connected') btPause();
 																		} else {
 																			setRunning(true);
-																			if (btStatus === 'connected') btStart();
+																			if (btStatus === 'connected') {
+																				if (currentStep.speed_kmh != null) await sendSpeed(currentStep.speed_kmh);
+																				await sendInclination(currentStep.incline_pct ?? 0);
+																				await btStart();
+																			}
 																		}
 																	}}
 																	className={`btn ${running ? 'btn-pause' : 'btn-start'}`}
