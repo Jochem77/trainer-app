@@ -586,12 +586,15 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 	// Auto-stuur snelheid en helling naar loopband bij stapwissel en bij start/verbinding
 	useEffect(() => {
 		if (!running || btStatus !== 'connected') return;
-		if (currentStep.type === 'end') {
-			btPause(); // training klaar: loopband geleidelijk afremmen naar 0
-		} else {
-			if (currentStep.speed_kmh != null) sendSpeed(currentStep.speed_kmh);
-			sendInclination(currentStep.incline_pct ?? 0);
-		}
+		// Gebruik async IIFE zodat BLE-writes sequentieel worden uitgevoerd (niet parallel)
+		(async () => {
+			if (currentStep.type === 'end') {
+				btPause(); // training klaar: loopband geleidelijk afremmen naar 0
+			} else {
+				if (currentStep.speed_kmh != null) await sendSpeed(currentStep.speed_kmh);
+				await sendInclination(currentStep.incline_pct ?? 0);
+			}
+		})();
 	// currentStep-waarden veranderen al wanneer currentIdx verandert; btPause/sendSpeed/sendInclination zijn stable useCallback refs
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentIdx, running, btStatus, btPause, sendSpeed, sendInclination]);
