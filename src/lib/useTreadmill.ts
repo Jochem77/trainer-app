@@ -22,8 +22,15 @@ export function useTreadmill() {
     const cp = cpRef.current;
     if (!cp) return;
     try {
-      try { await cp.writeValueWithResponse(new Uint8Array(bytes)); }
-      catch { await cp.writeValueWithoutResponse(new Uint8Array(bytes)); }
+      // Try writeValueWithResponse first; it ensures the write is delivered
+      try {
+        await cp.writeValueWithResponse(new Uint8Array(bytes));
+      } catch {
+        // Fallback to writeValueWithoutResponse, but add a small delay
+        // to ensure the device has time to process
+        await cp.writeValueWithoutResponse(new Uint8Array(bytes));
+        await new Promise(r => setTimeout(r, 50));
+      }
     } catch { /* ignore write errors */ }
   }, []);
 
