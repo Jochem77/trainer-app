@@ -1007,7 +1007,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										key={`${selectedWeek}-${index}-hspeedinc`}
 										defaultValue={step.hard!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
 										onBlur={e => {
-											const filtered = filterNumericInput(e.target.value);
+											const filtered = filterSignedNumericInput(e.target.value);
 											updateStep(index, { ...step, hard: { ...step.hard!, speed_increase_kmh: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
@@ -1051,7 +1051,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										type="text"
 										value={step.hard!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
-											const filtered = filterNumericInput(e.target.value);
+											const filtered = filterSignedNumericInput(e.target.value);
 											updateStep(index, { ...step, hard: { ...step.hard!, incline_increase_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
@@ -1144,7 +1144,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										key={`${selectedWeek}-${index}-rspeedinc`}
 										defaultValue={step.rest!.speed_increase_kmh?.toString().replace('.', ',') ?? '0'}
 										onBlur={e => {
-											const filtered = filterNumericInput(e.target.value);
+											const filtered = filterSignedNumericInput(e.target.value);
 											updateStep(index, { ...step, rest: { ...step.rest!, speed_increase_kmh: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
@@ -1188,7 +1188,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 										type="text"
 										value={step.rest!.incline_increase_pct?.toString().replace('.', ',') ?? '0'}
 										onChange={e => {
-											const filtered = filterNumericInput(e.target.value);
+											const filtered = filterSignedNumericInput(e.target.value);
 											updateStep(index, { ...step, rest: { ...step.rest!, incline_increase_pct: parseNumberInput(filtered) } });
 										}}
 										style={{ width: '50px', padding: '12px 8px 12px 4px', textAlign: 'left',
@@ -1818,6 +1818,9 @@ function minToKm(min: number, speed: number) {
 // Helper: alleen getallen, punt of komma
 function filterNumericInput(value: string) {
   return value.replace(/[^0-9.,]/g, '');
+}
+function filterSignedNumericInput(value: string) {
+  return value.replace(/[^0-9.,-]/g, '').replace(/(?!^)-/g, '');
 }
 function parseNumberInput(value: string) {
   return parseFloat(value.replace(',', '.')) || 0;
