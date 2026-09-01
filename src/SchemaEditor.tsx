@@ -612,11 +612,23 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		}
 		if (segments.length === 0) return null;
 
+		// Build incline step-function points (same approach as the training view's graph)
+		const inclSegments: Array<{ t: number; v: number }> = [];
+		for (const s of steps) {
+			if (!s.duration_sec || s.duration_sec <= 0) continue;
+			inclSegments.push({ t: s.start_sec, v: s.incline_pct ?? 0 });
+			inclSegments.push({ t: s.start_sec + s.duration_sec, v: s.incline_pct ?? 0 });
+		}
+		const inclValues = steps.filter(s => s.duration_sec && s.duration_sec > 0).map(s => s.incline_pct ?? 0);
+		const hasIncline = inclValues.some(v => v !== 0);
+		const maxIncl = 12;
+		const minIncl = Math.min(0, ...inclValues);
+
 		// SVG coordinate system
 		const vbW = 1000;
 		const vbH = 200;
 		const padL = 34;
-		const padR = 12;
+		const padR = hasIncline ? 36 : 12;
 		const padT = 2;
 		const padB = 8;
 		const plotW = vbW - padL - padR;
@@ -624,11 +636,13 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 
 		const x = (t: number) => padL + (t / totalSec) * plotW;
 		const y = (v: number) => padT + (1 - (Math.max(minSpeed, Math.min(v, maxSpeed)) - minSpeed) / (maxSpeed - minSpeed)) * plotH;
+		const yIncl = (v: number) => padT + (1 - (Math.max(minIncl, Math.min(v, maxIncl)) - minIncl) / (maxIncl - minIncl)) * plotH;
 
 		const pointsAttr = segments.map(p => `${x(p.t).toFixed(2)},${y(p.v).toFixed(2)}`).join(' ');
+		const inclPointsAttr = inclSegments.map(p => `${x(p.t).toFixed(2)},${yIncl(p.v).toFixed(2)}`).join(' ');
 
 		return (
-			<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="130" className="graph-svg" role="img" aria-label="Programma snelheid grafiek" style={{ display: 'block' }}>
+			<svg viewBox={`0 0 ${vbW} ${vbH}`} width="100%" height="130" className="graph-svg" role="img" aria-label="Programma snelheid en helling grafiek" style={{ display: 'block' }}>
 				<defs>
 					<linearGradient id="se-c3-full" x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0%" stopColor="#a8ff78" stopOpacity={0.35} />
@@ -645,6 +659,16 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				{/* filled area + curve */}
 				<polygon fill="url(#se-c3-full)" points={`${padL},${padT + plotH} ${pointsAttr} ${padL + plotW},${padT + plotH}`} />
 				<polyline fill="none" stroke="#a8ff78" strokeWidth={3} strokeLinejoin="miter" strokeLinecap="butt" points={pointsAttr} />
+				{/* Incline overlay line (amber, dashed) — only when at least one step has non-zero incline */}
+				{hasIncline && (
+					<>
+						<polyline fill="none" stroke="#fbbf24" strokeWidth={2.5} strokeDasharray="8 5" strokeLinejoin="miter" strokeLinecap="butt" points={inclPointsAttr} opacity={0.85} />
+						{/* Right y-axis: incline labels */}
+						{([minIncl, Math.round((minIncl + maxIncl) / 2), maxIncl] as number[]).map((v, i) => (
+							<text key={i} x={padL + plotW + 4} y={yIncl(v) + (i === 2 ? -3 : 5)} textAnchor="start" fontSize={18} fill="#92610a" fontFamily="system-ui">{v}%</text>
+						))}
+					</>
+				)}
 			</svg>
 		);
 	};
