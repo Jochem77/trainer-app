@@ -294,8 +294,8 @@ type Step =
 		}
 	| {
 			type: "interval_pair";
-			hard: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number; incline_pct?: number };
-			rest: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number; incline_pct?: number };
+			hard: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number; incline_pct?: number; incline_increase_pct?: number };
+			rest: { duration_min: number; speed_kmh: number; label: string; speed_increase_kmh?: number; incline_pct?: number; incline_increase_pct?: number };
 			repeats: number;
 		};
 
@@ -390,8 +390,12 @@ function flattenSteps(steps: Step[]) {
 			const showRep = step.repeats > 1;
 			const hardBaseSpeed = step.hard.speed_kmh || 0;
 			const hardSpeedIncrease = step.hard.speed_increase_kmh || 0;
+			const hardBaseIncline = step.hard.incline_pct ?? 0;
+			const hardInclineIncrease = step.hard.incline_increase_pct || 0;
 			const restBaseSpeed = step.rest.speed_kmh || 0;
 			const restSpeedIncrease = step.rest.speed_increase_kmh || 0;
+			const restBaseIncline = step.rest.incline_pct ?? 0;
+			const restInclineIncrease = step.rest.incline_increase_pct || 0;
 			for (let i = 0; i < step.repeats; i++) {
 				const repIndex = showRep ? i + 1 : undefined;
 				const hardSec = toSec(step.hard.duration_min);
@@ -405,7 +409,7 @@ function flattenSteps(steps: Step[]) {
 					start_sec: currentSec,
 					type: "interval_hard",
 					repIndex,
-					incline_pct: step.hard.incline_pct ?? 0,
+					incline_pct: hardBaseIncline + (hardInclineIncrease * i),
 				});
 				currentSec += hardSec;
 				const restSec = toSec(step.rest.duration_min);
@@ -419,7 +423,7 @@ function flattenSteps(steps: Step[]) {
 					start_sec: currentSec,
 					type: "interval_rest",
 					repIndex,
-					incline_pct: step.rest.incline_pct ?? 0,
+					incline_pct: restBaseIncline + (restInclineIncrease * i),
 				});
 				currentSec += restSec;
 			}

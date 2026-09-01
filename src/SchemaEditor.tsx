@@ -512,6 +512,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					const repIndex = showRep ? i + 1 : undefined;
 					const hardSec = toSec(step.hard.duration_min || 0);
 					const hardSpeedIncrease = (step.hard.speed_increase_kmh || 0) * i;
+					const hardInclineIncrease = (step.hard.incline_increase_pct || 0) * i;
 					result.push({
 						label: step.hard.label || 'Hard',
 						duration_min: step.hard.duration_min || 0,
@@ -521,11 +522,12 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						start_sec: currentSec,
 						type: "interval_hard",
 						repIndex,
-						incline_pct: step.hard.incline_pct ?? 0,
+						incline_pct: (step.hard.incline_pct ?? 0) + hardInclineIncrease,
 					});
 					currentSec += hardSec;
 					const restSec = toSec(step.rest.duration_min || 0);
 					const restSpeedIncrease = (step.rest.speed_increase_kmh || 0) * i;
+					const restInclineIncrease = (step.rest.incline_increase_pct || 0) * i;
 					result.push({
 						label: step.rest.label || 'Rest',
 						duration_min: step.rest.duration_min || 0,
@@ -535,7 +537,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						start_sec: currentSec,
 						type: "interval_rest",
 						repIndex,
-						incline_pct: step.rest.incline_pct ?? 0,
+						incline_pct: (step.rest.incline_pct ?? 0) + restInclineIncrease,
 					});
 					currentSec += restSec;
 				}
