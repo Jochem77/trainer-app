@@ -19,6 +19,8 @@ npm run preview          # Preview production build
 
 **Key paths:** `/src` (React components), `/database` (SQL migrations), `/scripts` (utilities)
 
+**Deploy policy:** After every code change (once type-check/lint pass), commit and push to `main` immediately, without waiting to be asked. GitHub Pages (`.github/workflows/pages.yml`) auto-builds and deploys on every push to `main` — the user wants changes live right away. Only skip this when the user explicitly says to hold off, or when a change depends on a manual step they still need to do (e.g. a database migration they must run themselves — see `/database`).
+
 ---
 
 ## Project Architecture
