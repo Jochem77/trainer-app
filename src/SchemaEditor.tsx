@@ -124,6 +124,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 	const [selectedWeek, setSelectedWeek] = useState<number>(1);
 	const [schemaName, setSchemaName] = useState<string>('Mijn Trainingsschema');
 	const [startDate, setStartDate] = useState<string>('2025-08-31');
+	const [weightKg, setWeightKg] = useState<number>(75);
 	const [hasChanges, setHasChanges] = useState(false);
 	const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | ''>('');
 	const [saveError, setSaveError] = useState<string>('');
@@ -141,10 +142,23 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 				// First try to get the active schema with new columns
 				let { data, error } = await supabase
 					.from('user_schemas')
-					.select('schema_data, schema_name, start_date')
+					.select('schema_data, schema_name, start_date, weight_kg')
 					.eq('user_id', userId)
 					.eq('is_active', true)
 					.single();
+
+				// If weight_kg column doesn't exist yet, retry without it
+				if (error && (error.message.includes('weight_kg') || error.code === '42703')) {
+					console.warn('weight_kg column not found, retrying without it');
+					const retryResult = await supabase
+						.from('user_schemas')
+						.select('schema_data, schema_name, start_date')
+						.eq('user_id', userId)
+						.eq('is_active', true)
+						.single();
+					data = retryResult.data ? { ...retryResult.data, weight_kg: null } : null;
+					error = retryResult.error;
+				}
 
 				// If is_active column doesn't exist, fall back to old approach
 				if (error && (error.message.includes('is_active') || error.message.includes('column') || error.code === '42703')) {
@@ -156,7 +170,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						.eq('user_id', userId)
 						.single();
 					
-					data = fallbackResult.data;
+					data = fallbackResult.data ? { ...fallbackResult.data, weight_kg: null } : null;
 					error = fallbackResult.error;
 				}
 
@@ -168,8 +182,8 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						.select('schema_data')
 						.eq('user_id', userId)
 						.single();
-					
-					data = oldFormatResult.data ? { ...oldFormatResult.data, schema_name: 'Mijn Trainingsschema', start_date: '2025-08-31' } : null;
+
+					data = oldFormatResult.data ? { ...oldFormatResult.data, schema_name: 'Mijn Trainingsschema', start_date: '2025-08-31', weight_kg: null } : null;
 					error = oldFormatResult.error;
 				}
 
@@ -255,6 +269,10 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					if (data.start_date) {
 						setStartDate(data.start_date);
 					}
+					// Set body weight from database column (used for calorie estimates)
+					if (data.weight_kg) {
+						setWeightKg(data.weight_kg);
+					}
 				}
 			} catch (err) {
 				console.error('Error in loadUserSchema:', err);
@@ -311,7 +329,8 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 					schema_data: weekPrograms,
 					schema_name: schemaName,
 					is_active: true,
-					start_date: startDate
+					start_date: startDate,
+					weight_kg: weightKg
 				}, {
 					onConflict: 'user_id,schema_name'
 				});
@@ -326,7 +345,8 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 						schema_data: weekPrograms,
 						schema_name: schemaName,
 						is_active: true,
-						start_date: startDate
+						start_date: startDate,
+						weight_kg: weightKg
 					}, {
 						onConflict: 'user_id'
 					});
@@ -353,6 +373,7 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							schema_data: weekPrograms,
 							schema_name: schemaName,
 							start_date: startDate,
+							weight_kg: weightKg,
 							updated_at: new Date().toISOString()
 						})
 						.eq('user_id', userId);
@@ -400,7 +421,25 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 		setHasChanges(true);
 	};
 
-	// Functie om calorieën te berekenen op basis van training intensiteit  
+	// Geschat energieverbruik (kcal/min) op basis van de ACSM-metabole vergelijkingen.
+	// Deze houden — anders dan de oude vaste-snelheidsformule — rekening met zowel
+	// de helling als het lichaamsgewicht van de gebruiker.
+	const metabolicKcalPerMin = (speedKmh: number, inclinePct: number) => {
+		if (speedKmh <= 0) return 0;
+		const speedMPerMin = speedKmh * 1000 / 60;
+		const grade = inclinePct / 100;
+		// ACSM-omslagpunt tussen wandelen en rennen ligt rond 6,5 km/u
+		const isRunning = speedKmh >= 6.5;
+		const vo2 = isRunning
+			? 0.2 * speedMPerMin + 0.9 * speedMPerMin * grade + 3.5
+			: 0.1 * speedMPerMin + 1.8 * speedMPerMin * grade + 3.5;
+		// Nooit onder het ruststofwisselingsniveau (1 MET ≈ 3.5 ml/kg/min)
+		const vo2Clamped = Math.max(3.5, vo2);
+		// ~5 kcal per liter verbruikte zuurstof
+		return (vo2Clamped * weightKg / 1000) * 5;
+	};
+
+	// Functie om calorieën te berekenen op basis van training intensiteit
 	const calculateExpectedCalories = () => {
 		const currentProgram = weekPrograms.find(p => p.week === selectedWeek);
 		if (!currentProgram) return 0;
@@ -409,33 +448,23 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 
 		currentProgram.steps.forEach(step => {
 			if (step.type === 'steady') {
-				// Licht verhoogd om precies op 800 uit te komen
 				const duration = step.duration_min || 0;
 				const speed = step.speed_kmh || 0;
+				const incline = step.incline_pct || 0;
 				const repeats = step.repeats || 1;
-				
-				// Iets hoger: 6 km/u = ~10 kcal/min, 10 km/u = ~14.4 kcal/min
-				const caloriesPerMin = 4 + (speed * 1.15);
-				const stepCalories = caloriesPerMin * duration * repeats;
-				totalCalories += stepCalories;
+				totalCalories += metabolicKcalPerMin(speed, incline) * duration * repeats;
 			} else if (step.type === 'interval_pair') {
-				// Voor intervals: licht verhoogd
 				const hardDuration = step.hard?.duration_min || 0;
 				const hardSpeed = step.hard?.speed_kmh || 0;
+				const hardIncline = step.hard?.incline_pct || 0;
 				const restDuration = step.rest?.duration_min || 0;
 				const restSpeed = step.rest?.speed_kmh || 0;
+				const restIncline = step.rest?.incline_pct || 0;
 				const repeats = step.repeats || 1;
-				
-				// Hard fase: ~17.5-22.5 kcal per minuut
-				const hardCaloriesPerMin = 6 + (hardSpeed * 1.2);
-				const hardCalories = hardCaloriesPerMin * hardDuration;
-				
-				// Rest fase: licht hoger
-				const restCaloriesPerMin = 4 + (restSpeed * 0.8);
-				const restCalories = restCaloriesPerMin * restDuration;
-				
-				const intervalCalories = (hardCalories + restCalories) * repeats;
-				totalCalories += intervalCalories;
+
+				const hardCalories = metabolicKcalPerMin(hardSpeed, hardIncline) * hardDuration;
+				const restCalories = metabolicKcalPerMin(restSpeed, restIncline) * restDuration;
+				totalCalories += (hardCalories + restCalories) * repeats;
 			}
 		});
 
@@ -1365,15 +1394,42 @@ const SchemaEditor = ({ userId, onBack }: SchemaEditorProps) => {
 							setStartDate(e.target.value);
 							setHasChanges(true);
 						}}
-						style={{ 
-							width: '100%', 
-							padding: '12px 8px 12px 4px', 
-							border: '2px solid #dee2e6', 
+						style={{
+							width: '100%',
+							padding: '12px 8px 12px 4px',
+							border: '2px solid #dee2e6',
 							borderRadius: '8px',
 							fontSize: '16px',
 							fontWeight: '500'
 						}}
 					/>
+				</div>
+
+				<div style={{ flex: '0 0 140px' }}>
+					<label style={{ display: 'block', marginBottom: '8px', fontSize: '16px', fontWeight: '600', color: '#495057' }}>
+						Lichaamsgewicht (kg)
+					</label>
+					<input
+						type="text"
+						defaultValue={weightKg.toString().replace('.', ',')}
+						onBlur={(e) => {
+							const filtered = filterNumericInput(e.target.value);
+							const parsed = parseNumberInput(filtered);
+							setWeightKg(parsed > 0 ? parsed : 75);
+							setHasChanges(true);
+						}}
+						style={{
+							width: '100%',
+							padding: '12px 8px 12px 4px',
+							border: '2px solid #dee2e6',
+							borderRadius: '8px',
+							fontSize: '16px',
+							fontWeight: '500'
+						}}
+					/>
+					<p style={{ margin: '6px 0 0 0', fontSize: '12px', color: '#7070a0' }}>
+						Gebruikt voor de calorieschatting
+					</p>
 				</div>
 			</div>
 
