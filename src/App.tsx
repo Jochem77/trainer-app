@@ -831,9 +831,9 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 								<>
 									<div className="c3-speed-section">
 										<div>
-											<span className="c3-speed-value">{speedKmh != null ? `${speedKmh}` : '\u2014'}</span>
+											<span className="c3-speed-value" style={{ fontSize: '52px' }}>{inclinePct}%</span>
+											<span className="c3-speed-value" style={{ marginLeft: 24 }}>{speedKmh != null ? `${speedKmh}` : '\u2014'}</span>
 											{speedKmh != null && <span className="c3-speed-unit"> km/u</span>}
-											<span className="c3-speed-value" style={{ marginLeft: 24, fontSize: '52px' }}>{inclinePct}%</span>
 										</div>
 										{nextSpeedVal != null && (
 											<div className="c3-next-info">Volgende: <span>{nextSpeedVal} km/u</span></div>
@@ -958,11 +958,11 @@ const TrainingProgramDay: React.FC<{ setMenuOpen: (open: boolean) => void; user:
 												<div style={{ ...colStyle, flex: '0 0 60px' }}>
 													{step.duration_min > 0 ? formatMin(step.duration_min) : ''}
 												</div>
-												<div style={{ ...colStyle, flex: '0 0 80px', textAlign: 'right', marginRight: 8 }}>
-													{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
-												</div>
-												<div style={{ ...colStyle, flex: '0 0 44px', textAlign: 'right' }}>
+												<div style={{ ...colStyle, flex: '0 0 44px', textAlign: 'right', marginRight: 8 }}>
 													{(step.incline_pct ?? 0)}%
+												</div>
+												<div style={{ ...colStyle, flex: '0 0 80px', textAlign: 'right' }}>
+													{step.speed_kmh !== null ? `${step.speed_kmh} km/u` : ''}
 												</div>
 											</>);
 										})()}
